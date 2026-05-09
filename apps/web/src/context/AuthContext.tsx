@@ -63,7 +63,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (firebaseUser) {
         try {
           const token = await firebaseUser.getIdToken();
-          const res = await fetch("http://localhost:5000/api/users/profile", {
+          const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+          const res = await fetch(`${apiBaseUrl}/users/profile`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           if (res.ok) {
