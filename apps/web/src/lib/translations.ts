@@ -24,6 +24,8 @@ export const translations: Record<string, any> = {
       dark_mode: "Dark Mode",
       currency: "Currency",
       view_all: "View All",
+      type: "Type",
+      export: "Export",
     },
     dashboard_page: {
       title: "Dashboard",
@@ -45,6 +47,8 @@ export const translations: Record<string, any> = {
       title: "Transactions",
       subtitle: "Track and manage your daily financial activities.",
       add_new: "Add Transaction",
+      search_placeholder: "Search notes, categories...",
+      export_csv: "Export CSV",
       table: {
         date: "Date",
         category: "Category",
@@ -55,6 +59,11 @@ export const translations: Record<string, any> = {
       filters: {
         all_types: "All Types",
         all_categories: "All Categories",
+      },
+      pagination: {
+        showing: "Showing page",
+        of: "of",
+        total: "total",
       },
       no_data: "No transactions found.",
     },
@@ -158,6 +167,7 @@ export const translations: Record<string, any> = {
       currency: "Mata Uang",
       export: "Ekspor",
       view_all: "Lihat Semua",
+      type: "Tipe",
     },
     dashboard_page: {
       title: "Dasbor",
