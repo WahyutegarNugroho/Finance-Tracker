@@ -144,7 +144,7 @@ function TransactionsContent() {
       <Sidebar activePath="/transactions" />
 
       {/* Main Content Area */}
-      <main className="pt-[88px] pb-[88px] md:pb-8 md:pl-[284px] pr-4 md:pr-8 min-h-screen w-full">
+      <main className="pt-[88px] pb-[88px] md:pb-8 px-4 md:pl-[284px] md:pr-8 min-h-screen w-full">
         <div className="max-w-[1440px] mx-auto flex flex-col gap-6 h-full">
           {/* Page Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
