@@ -72,10 +72,10 @@ export default function Dashboard() {
       <Sidebar activePath="/dashboard" />
 
       {/* Main Content Canvas */}
-      <main className="pt-[88px] pb-[88px] md:pb-8 md:pl-[284px] pr-4 md:pr-8 min-h-screen">
+      <main className="pt-[88px] pb-[88px] md:pb-8 px-4 md:pl-[284px] md:pr-8 min-h-screen">
         <div className="max-w-[1440px] mx-auto">
           {/* Header Section */}
-          <div className="flex justify-between items-end mb-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8">
             <div>
               <h2 className="font-headline-lg text-headline-lg text-on-background mb-1">
                 Dashboard

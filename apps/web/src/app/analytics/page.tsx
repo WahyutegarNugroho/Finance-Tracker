@@ -131,7 +131,7 @@ export default function Analytics() {
       <Topbar />
       <Sidebar activePath="/analytics" />
 
-      <main className="pt-[88px] pb-[88px] md:pb-8 md:pl-[284px] pr-4 md:pr-8 min-h-screen w-full flex flex-col">
+      <main className="pt-[88px] pb-[88px] md:pb-8 px-4 md:pl-[284px] md:pr-8 min-h-screen w-full flex flex-col">
         <div className="max-w-[1440px] mx-auto w-full flex-1 flex flex-col gap-6 md:gap-8">
           <div className="flex justify-between items-center md:hidden mb-2">
             <h1 className="font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface">Analytics</h1>

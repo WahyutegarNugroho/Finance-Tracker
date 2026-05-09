@@ -19,7 +19,7 @@ export default function Topbar() {
   };
 
   return (
-    <header className="bg-surface/80 backdrop-blur-md fixed top-0 right-0 w-full md:w-[calc(100%-260px)] h-16 z-40 border-b border-outline-variant/20 shadow-sm flex justify-between items-center px-6">
+    <header className="bg-surface/80 backdrop-blur-md fixed top-0 right-0 w-full md:w-[calc(100%-260px)] h-16 z-40 border-b border-outline-variant/20 shadow-sm flex justify-between items-center px-4 md:px-6">
       <div className="flex items-center">
         <span className="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary md:hidden">
           FinTrack
