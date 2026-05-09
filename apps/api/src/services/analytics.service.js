@@ -92,13 +92,15 @@ const getDashboardOverview = async (userId) => {
 
   // Calculate category breakdown for current month
   const categoryMap = {};
+  const CHART_COLORS = ['#4648d4', '#6cf8bb', '#ffb95f', '#f43f5e', '#a855f7', '#06b6d4', '#f59e0b'];
+  
   currentMonthTx.forEach((tx) => {
     if (tx.type === 'expense') {
       if (!categoryMap[tx.categoryId]) {
         categoryMap[tx.categoryId] = {
           name: tx.categoryName,
           amount: 0,
-          color: tx.categoryColor || '#4648d4'
+          color: tx.categoryColor || CHART_COLORS[Object.keys(categoryMap).length % CHART_COLORS.length]
         };
       }
       categoryMap[tx.categoryId].amount += tx.amount;

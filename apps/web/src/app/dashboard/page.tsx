@@ -315,10 +315,10 @@ export default function Dashboard() {
                     >
                       {/* Inner Circle for Doughnut Effect */}
                       <div className="absolute w-28 h-28 bg-surface rounded-full flex flex-col items-center justify-center shadow-sm">
-                        <span className="font-label-caps text-label-caps text-outline text-[10px]">
+                        <span className="font-label-caps text-label-caps text-outline text-[9px] uppercase tracking-tighter">
                           {language === 'id' ? 'Total Keluar' : 'Total Exp'}
                         </span>
-                        <span className="font-body-sm text-body-sm font-bold text-on-surface mt-0.5 truncate max-w-[90px] px-2 text-center">
+                        <span className="font-numeric-data text-[13px] font-bold text-on-surface mt-0.5 px-2 text-center leading-tight">
                           {formatCurrency(data.expense)}
                         </span>
                       </div>
