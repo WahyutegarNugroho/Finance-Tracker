@@ -51,7 +51,7 @@ export default function Home() {
           </div>
 
           <div className="w-full max-w-5xl relative rounded-[2rem] p-3 bg-gradient-to-b from-primary/10 to-transparent">
-            <div className="w-full h-[500px] md:h-[600px] bg-surface/90 backdrop-blur-xl border border-outline-variant/30 rounded-3xl shadow-[0_24px_48px_-12px_rgba(70,72,212,0.15)] flex overflow-hidden">
+            <div className="w-full min-h-[500px] md:h-[600px] bg-surface/90 backdrop-blur-xl border border-outline-variant/30 rounded-3xl shadow-[0_24px_48px_-12px_rgba(70,72,212,0.15)] flex overflow-hidden">
               <div className="w-[240px] border-r border-outline-variant/15 hidden md:flex flex-col p-6 gap-2 bg-surface-container-lowest/50">
                 <div className="w-28 h-6 bg-primary/20 rounded-md mb-8"></div>
                 <div className="w-full h-11 bg-primary/10 rounded-lg flex items-center px-4 gap-3">
@@ -86,8 +86,8 @@ export default function Home() {
               <div className="flex-1 p-6 md:p-10 flex flex-col gap-8 bg-surface/40">
                 <div className="flex justify-between items-center w-full">
                   <div>
-                    <div className="w-40 h-6 bg-on-surface-variant/20 rounded-md mb-2"></div>
-                    <div className="w-64 h-3 bg-on-surface-variant/10 rounded-full"></div>
+                    <div className="w-24 sm:w-40 h-6 bg-on-surface-variant/20 rounded-md mb-2"></div>
+                    <div className="w-full max-w-[200px] sm:max-w-none sm:w-64 h-3 bg-on-surface-variant/10 rounded-full"></div>
                   </div>
                   <div className="flex gap-4 items-center">
                     <div className="w-10 h-10 bg-surface border border-outline-variant/30 shadow-sm rounded-full sm:flex items-center justify-center hidden">
@@ -138,7 +138,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="flex-1 glass-panel rounded-2xl p-6 relative overflow-hidden flex flex-col">
+                <div className="h-64 sm:flex-1 glass-panel rounded-2xl p-6 relative overflow-hidden flex flex-col">
                   <div className="w-32 h-4 bg-on-surface-variant/20 rounded-full mb-6 z-10"></div>
                   <div className="flex-1 relative">
                     <MockChart />
