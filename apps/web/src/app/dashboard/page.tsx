@@ -126,7 +126,7 @@ export default function Dashboard() {
                     {Math.abs(data.balanceChange)}%
                   </span>
                   <span className="font-label-caps text-label-caps text-outline ml-1 normal-case">
-                    vs last month
+                    {t("dashboard_page.vs_last_month")}
                   </span>
                 </div>
               </div>
@@ -136,7 +136,7 @@ export default function Dashboard() {
             <div className="glass-card rounded-xl p-5 relative overflow-hidden group">
               <div className="flex justify-between items-start mb-4">
                 <p className="font-label-caps text-label-caps text-outline">
-                  Income
+                  {t("common.income")}
                 </p>
                 <div className="p-2 bg-secondary-container text-secondary rounded-lg">
                   <span className="material-symbols-outlined text-[20px]">
@@ -163,7 +163,7 @@ export default function Dashboard() {
             <div className="glass-card rounded-xl p-5 relative overflow-hidden group">
               <div className="flex justify-between items-start mb-4">
                 <p className="font-label-caps text-label-caps text-outline">
-                  Expense
+                  {t("common.expense")}
                 </p>
                 <div className="p-2 bg-error-container text-error rounded-lg">
                   <span className="material-symbols-outlined text-[20px]">
@@ -190,7 +190,7 @@ export default function Dashboard() {
             <div className="glass-card rounded-xl p-5 relative overflow-hidden group">
               <div className="flex justify-between items-start mb-4">
                 <p className="font-label-caps text-label-caps text-outline">
-                  Budget Usage
+                  {t("dashboard_page.budget_usage")}
                 </p>
                 <div className="p-2 bg-tertiary-container/20 text-tertiary rounded-lg">
                   <span className="material-symbols-outlined text-[20px]">
@@ -204,7 +204,7 @@ export default function Dashboard() {
                     {data.budgetUsage}%
                   </h3>
                   <p className="font-body-sm text-body-sm text-outline pb-0.5">
-                    of {formatCurrency(data.budgetLimit)}
+                    {language === 'id' ? 'dari' : 'of'} {formatCurrency(data.budgetLimit)}
                   </p>
                 </div>
                 <div className="w-full bg-surface-variant rounded-full h-2 mt-3 overflow-hidden">
@@ -223,11 +223,11 @@ export default function Dashboard() {
             <div className="glass-card rounded-xl p-6 lg:col-span-2 flex flex-col">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="font-headline-md text-headline-md text-on-surface">
-                  Cash Flow
+                  {t("dashboard_page.charts.cash_flow")}
                 </h3>
                 <select className="bg-transparent border-none text-on-surface-variant font-body-sm text-body-sm focus:ring-0 cursor-pointer pr-8 outline-none">
-                  <option>Last 6 Months</option>
-                  <option>This Year</option>
+                  <option>{language === 'id' ? '6 Bulan Terakhir' : 'Last 6 Months'}</option>
+                  <option>{t("analytics_page.time_range.this_year")}</option>
                 </select>
               </div>
               {/* Chart Placeholder Layout (CSS simulated) */}
@@ -282,13 +282,13 @@ export default function Dashboard() {
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-secondary-container"></div>
                   <span className="font-label-caps text-label-caps text-on-surface-variant">
-                    Income
+                    {t("common.income")}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-error-container"></div>
                   <span className="font-label-caps text-label-caps text-on-surface-variant">
-                    Expense
+                    {t("common.expense")}
                   </span>
                 </div>
               </div>
@@ -297,7 +297,7 @@ export default function Dashboard() {
             {/* Doughnut Chart: Spending by Category */}
             <div className="glass-card rounded-xl p-6 flex flex-col">
               <h3 className="font-headline-md text-headline-md text-on-surface mb-6">
-                Spending by Category
+                {t("dashboard_page.charts.spending_by_category")}
               </h3>
               {/* CSS Doughnut visualization */}
               <div className="relative flex-1 flex items-center justify-center min-h-[200px]">
@@ -313,7 +313,7 @@ export default function Dashboard() {
                 ></div>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <span className="font-label-caps text-label-caps text-outline">
-                    Total
+                    {language === 'id' ? 'Total' : 'Total'}
                   </span>
                   <span className="font-headline-md text-headline-md text-on-surface mt-1">
                     {formatCurrency(data.expense)}
@@ -325,7 +325,7 @@ export default function Dashboard() {
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-primary"></div>
                     <span className="font-body-sm text-body-sm text-on-surface-variant">
-                      Food & Dining
+                      {language === 'id' ? 'Makanan & Minuman' : 'Food & Dining'}
                     </span>
                   </div>
                   <span className="font-numeric-data text-numeric-data text-on-surface text-sm">
@@ -336,7 +336,7 @@ export default function Dashboard() {
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-secondary-container"></div>
                     <span className="font-body-sm text-body-sm text-on-surface-variant">
-                      Transportation
+                      {language === 'id' ? 'Transportasi' : 'Transportation'}
                     </span>
                   </div>
                   <span className="font-numeric-data text-numeric-data text-on-surface text-sm">
@@ -347,7 +347,7 @@ export default function Dashboard() {
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-tertiary-fixed-dim"></div>
                     <span className="font-body-sm text-body-sm text-on-surface-variant">
-                      Groceries
+                      {language === 'id' ? 'Kebutuhan Pokok' : 'Groceries'}
                     </span>
                   </div>
                   <span className="font-numeric-data text-numeric-data text-on-surface text-sm">
@@ -362,19 +362,19 @@ export default function Dashboard() {
           <div className="glass-card rounded-xl p-6">
             <div className="flex justify-between items-center mb-6">
               <h3 className="font-headline-md text-headline-md text-on-surface">
-                Recent Transactions
+                {t("dashboard_page.recent_transactions")}
               </h3>
               <a
                 className="text-primary hover:text-primary-container font-label-caps text-label-caps transition-colors"
                 href="/transactions"
               >
-                View All
+                {t("common.view_all")}
               </a>
             </div>
             <div className="flex flex-col gap-2">
               {data.recentTransactions?.length === 0 ? (
                 <div className="text-center py-6 text-on-surface-variant">
-                  No recent transactions found.
+                  {t("dashboard_page.no_recent")}
                 </div>
               ) : (
                 data.recentTransactions?.map((tx: any) => (

@@ -23,6 +23,23 @@ export const translations: Record<string, any> = {
       language: "Language",
       dark_mode: "Dark Mode",
       currency: "Currency",
+      view_all: "View All",
+    },
+    dashboard_page: {
+      title: "Dashboard",
+      welcome: "Welcome back, here's your financial overview.",
+      total_balance: "Total Balance",
+      vs_last_month: "vs last month",
+      income: "Income",
+      expense: "Expense",
+      budget_usage: "Budget Usage",
+      recent_transactions: "Recent Transactions",
+      no_recent: "No recent transactions found.",
+      new_transaction: "New Transaction",
+      charts: {
+        cash_flow: "Cash Flow",
+        spending_by_category: "Spending by Category",
+      }
     },
     transactions_page: {
       title: "Transactions",
@@ -124,6 +141,7 @@ export const translations: Record<string, any> = {
       dark_mode: "Mode Gelap",
       currency: "Mata Uang",
       export: "Ekspor",
+      view_all: "Lihat Semua",
     },
     dashboard_page: {
       title: "Dasbor",
@@ -133,12 +151,13 @@ export const translations: Record<string, any> = {
       income: "Pemasukan",
       expense: "Pengeluaran",
       budget_usage: "Penggunaan Anggaran",
-      cash_flow: "Arus Kas",
-      spending_by_category: "Pengeluaran per Kategori",
       recent_transactions: "Transaksi Terakhir",
-      view_all: "Lihat Semua",
       no_recent: "Tidak ada transaksi terbaru.",
       new_transaction: "Transaksi Baru",
+      charts: {
+        cash_flow: "Arus Kas",
+        spending_by_category: "Pengeluaran per Kategori",
+      }
     },
     transactions_page: {
       title: "Daftar Transaksi",
