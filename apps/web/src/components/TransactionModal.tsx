@@ -35,9 +35,14 @@ export default function TransactionModal({
   // Form State
   const [type, setType] = useState<"income" | "expense">("expense");
   const [amount, setAmount] = useState("");
+  const [displayAmount, setDisplayAmount] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [date, setDate] = useState("");
   const [note, setNote] = useState("");
+
+  const formatWithDots = (val: string) => {
+    return val.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -49,7 +54,9 @@ export default function TransactionModal({
     if (isOpen) {
       if (transactionToEdit) {
         setType(transactionToEdit.type);
-        setAmount(transactionToEdit.amount.toString());
+        const amtStr = transactionToEdit.amount.toString();
+        setAmount(amtStr);
+        setDisplayAmount(formatWithDots(amtStr));
         setCategoryId(transactionToEdit.categoryId);
         setDate(new Date(transactionToEdit.date).toISOString().split("T")[0]);
         setNote(transactionToEdit.note || "");
@@ -57,12 +64,19 @@ export default function TransactionModal({
         // Reset form for new transaction
         setType("expense");
         setAmount("");
+        setDisplayAmount("");
         setCategoryId("");
         setDate(new Date().toISOString().split("T")[0]);
         setNote("");
       }
     }
   }, [isOpen, transactionToEdit]);
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\D/g, "");
+    setAmount(raw);
+    setDisplayAmount(formatWithDots(raw));
+  };
 
   const fetchCategories = async () => {
     setFetchingCats(true);
@@ -178,13 +192,13 @@ export default function TransactionModal({
                 {currencySymbol}
               </span>
               <input
-                type="number"
-                step="0.01"
+                type="text"
+                inputMode="numeric"
                 required
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                value={displayAmount}
+                onChange={handleAmountChange}
                 className="w-full pl-8 pr-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
-                placeholder="0.00"
+                placeholder="0"
               />
             </div>
           </div>
