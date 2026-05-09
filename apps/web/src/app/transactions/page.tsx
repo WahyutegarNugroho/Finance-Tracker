@@ -22,7 +22,7 @@ const formatDate = (dateString: string, lang: string) => {
 
 function TransactionsContent() {
   const { user, loading: authLoading, formatCurrency } = useAuth();
-  const { language, t } = useLanguage();
+  const { language, t, tCategory } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -269,7 +269,7 @@ function TransactionsContent() {
                               </span>
                             </div>
                             <span className="font-body-sm text-body-sm text-on-surface">
-                              {tx.categoryName}
+                              {tCategory(tx.categoryName)}
                             </span>
                           </div>
                         </td>

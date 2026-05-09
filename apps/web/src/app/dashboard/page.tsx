@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 
 export default function Dashboard() {
   const { user, loading: authLoading, formatCurrency } = useAuth();
-  const { language, t } = useLanguage();
+  const { language, t, tCategory } = useLanguage();
   const router = useRouter();
 
   // Formatter for relative time or date
@@ -325,7 +325,7 @@ export default function Dashboard() {
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-primary"></div>
                     <span className="font-body-sm text-body-sm text-on-surface-variant">
-                      {language === 'id' ? 'Makanan & Minuman' : 'Food & Dining'}
+                      {tCategory("Food & Dining")}
                     </span>
                   </div>
                   <span className="font-numeric-data text-numeric-data text-on-surface text-sm">
@@ -336,7 +336,7 @@ export default function Dashboard() {
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-secondary-container"></div>
                     <span className="font-body-sm text-body-sm text-on-surface-variant">
-                      {language === 'id' ? 'Transportasi' : 'Transportation'}
+                      {tCategory("Transportation")}
                     </span>
                   </div>
                   <span className="font-numeric-data text-numeric-data text-on-surface text-sm">
@@ -347,7 +347,7 @@ export default function Dashboard() {
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-tertiary-fixed-dim"></div>
                     <span className="font-body-sm text-body-sm text-on-surface-variant">
-                      {language === 'id' ? 'Kebutuhan Pokok' : 'Groceries'}
+                      {tCategory("Groceries")}
                     </span>
                   </div>
                   <span className="font-numeric-data text-numeric-data text-on-surface text-sm">
@@ -391,10 +391,10 @@ export default function Dashboard() {
                       </div>
                       <div>
                         <h4 className="font-body-sm text-body-sm font-semibold text-on-surface">
-                          {tx.note || tx.categoryName}
+                          {tx.note || tCategory(tx.categoryName)}
                         </h4>
                         <p className="font-label-caps text-label-caps text-outline mt-1">
-                          {tx.categoryName} • {formatDate(tx.date)}
+                          {tCategory(tx.categoryName)} • {formatDate(tx.date)}
                         </p>
                       </div>
                     </div>

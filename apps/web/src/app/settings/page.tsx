@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 export default function Settings() {
   const { user, loading: authLoading, logout, setCurrency: setGlobalCurrency } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const { language, setLanguage, t } = useLanguage();
+  const { language, setLanguage, t, tCategory } = useLanguage();
   const router = useRouter();
 
   const [profile, setProfile] = useState<any>(null);
@@ -413,7 +413,7 @@ export default function Settings() {
                           </div>
                         ) : (
                           <>
-                            <span className="font-body-sm text-body-sm font-medium text-on-surface truncate">{c.name}</span>
+                            <span className="font-body-sm text-body-sm font-medium text-on-surface truncate">{tCategory(c.name)}</span>
                             <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded shrink-0 ${c.type === 'income' ? 'bg-secondary/10 text-secondary' : 'bg-surface-variant text-on-surface-variant'}`}>{c.type}</span>
                           </>
                         )}
@@ -429,7 +429,7 @@ export default function Settings() {
                             <span className="material-symbols-outlined text-sm">edit</span>
                           </button>
                           <button 
-                            onClick={() => handleDeleteCategory(c.id, c.name)}
+                            onClick={() => handleDeleteCategory(c.id, tCategory(c.name))}
                             className="text-outline hover:text-error transition-colors p-1.5 rounded hover:bg-error/10"
                             title={t("common.delete")}
                           >

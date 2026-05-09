@@ -9,6 +9,7 @@ interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: string) => string;
+  tCategory: (name: string) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -54,8 +55,21 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     return typeof current === "string" ? current : keyPath;
   };
 
+  const tCategory = (name: string): string => {
+    const localizedName = translations[language]?.category_names?.[name];
+    if (localizedName) return localizedName;
+    
+    // Fallback to English mapping if current language is not English
+    if (language !== "en") {
+      const fallbackName = translations["en"]?.category_names?.[name];
+      if (fallbackName) return fallbackName;
+    }
+    
+    return name;
+  };
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, tCategory }}>
       {/* Prevent hydration mismatch by only rendering after mount if needed, 
           but for simplicity we just return children and handle mounting in components if necessary */}
       {children}

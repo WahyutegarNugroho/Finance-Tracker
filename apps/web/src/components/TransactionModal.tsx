@@ -27,7 +27,7 @@ export default function TransactionModal({
   transactionToEdit,
 }: TransactionModalProps) {
   const { currencySymbol } = useAuth();
-  const { language, t } = useLanguage();
+  const { language, t, tCategory } = useLanguage();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetchingCats, setFetchingCats] = useState(false);
@@ -207,7 +207,7 @@ export default function TransactionModal({
                 ) : (
                   filteredCategories.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.name}
+                      {tCategory(c.name)}
                     </option>
                   ))
                 )}

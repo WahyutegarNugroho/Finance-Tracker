@@ -11,7 +11,7 @@ import { useLanguage } from "@/context/LanguageContext";
 
 export default function Analytics() {
   const { formatCurrency } = useAuth();
-  const { language, t } = useLanguage();
+  const { language, t, tCategory } = useLanguage();
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -268,7 +268,7 @@ export default function Analytics() {
                     <div key={cat.name} className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }}></div>
-                        <span className="text-sm text-on-surface-variant truncate max-w-[120px]">{cat.name}</span>
+                        <span className="text-sm text-on-surface-variant truncate max-w-[120px]">{tCategory(cat.name)}</span>
                       </div>
                       <span className="text-sm font-medium">{cat.percentage}%</span>
                     </div>
@@ -295,7 +295,7 @@ export default function Analytics() {
                       <span className="material-symbols-outlined text-[20px]">{cat.icon}</span>
                     </div>
                     <div className="flex-1">
-                      <div className="font-medium text-on-surface">{cat.name}</div>
+                      <div className="font-medium text-on-surface">{tCategory(cat.name)}</div>
                       <div className="text-xs text-on-surface-variant">{language === 'id' ? 'Kategori utama' : 'Top category'}</div>
                     </div>
                     <div className="flex flex-col items-end">

@@ -26,7 +26,7 @@ export default function BudgetModal({
   budgetToEdit,
 }: BudgetModalProps) {
   const { currencySymbol } = useAuth();
-  const { t } = useLanguage();
+  const { t, tCategory } = useLanguage();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetchingCats, setFetchingCats] = useState(false);
@@ -133,7 +133,7 @@ export default function BudgetModal({
               ) : (
                 categories.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.name}
+                    {tCategory(c.name)}
                   </option>
                 ))
               )}

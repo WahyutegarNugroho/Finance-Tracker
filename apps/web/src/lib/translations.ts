@@ -113,6 +113,22 @@ export const translations: Record<string, any> = {
         category_name: "Category name...",
         icon_name: "Icon name (e.g. restaurant)",
         preview: "Preview",
+      },
+      category_names: {
+        "Food & Dining": "Food & Dining",
+        "Transportation": "Transportation",
+        "Groceries": "Groceries",
+        "Health & Fitness": "Health & Fitness",
+        "Entertainment": "Entertainment",
+        "Shopping": "Shopping",
+        "Utilities": "Utilities",
+        "Salary": "Salary",
+        "Investment": "Investment",
+        "Others": "Others",
+        "Healthcare": "Healthcare",
+        "Housing": "Housing",
+        "Education": "Education",
+        "Personal": "Personal",
       }
     }
   },
@@ -238,6 +254,22 @@ export const translations: Record<string, any> = {
         category_name: "Nama kategori...",
         icon_name: "Nama ikon (misal: restaurant)",
         preview: "Pratinjau",
+      },
+      category_names: {
+        "Food & Dining": "Makanan & Minuman",
+        "Transportation": "Transportasi",
+        "Groceries": "Kebutuhan Pokok",
+        "Health & Fitness": "Kesehatan & Kebugaran",
+        "Entertainment": "Hiburan",
+        "Shopping": "Belanja",
+        "Utilities": "Tagihan & Utilitas",
+        "Salary": "Gaji",
+        "Investment": "Investasi",
+        "Others": "Lainnya",
+        "Healthcare": "Kesehatan",
+        "Housing": "Tempat Tinggal",
+        "Education": "Pendidikan",
+        "Personal": "Pribadi",
       }
     }
   }

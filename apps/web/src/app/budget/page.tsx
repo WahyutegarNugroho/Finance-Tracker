@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 
 export default function Budget() {
   const { user, loading: authLoading, formatCurrency } = useAuth();
-  const { language, t } = useLanguage();
+  const { language, t, tCategory } = useLanguage();
   const router = useRouter();
 
   const [budgets, setBudgets] = useState<any[]>([]);
@@ -214,7 +214,7 @@ export default function Budget() {
                         <div className={`w-10 h-10 rounded-full ${bgContainer} ${statusColor} flex items-center justify-center`}>
                           <span className="material-symbols-outlined">{b.categoryIcon || 'category'}</span>
                         </div>
-                        <span className="font-body-lg text-body-lg font-medium text-on-surface truncate pr-8">{b.categoryName}</span>
+                        <span className="font-body-lg text-body-lg font-medium text-on-surface truncate pr-8">{tCategory(b.categoryName)}</span>
                       </div>
                     </div>
 
