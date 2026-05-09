@@ -1,0 +1,307 @@
+/**
+ * FinTrack Database Seeder
+ * Creates demo user, default categories, sample transactions, and budgets
+ * 
+ * Usage: node src/seeds/seed.js
+ */
+
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+
+const { db, auth, admin } = require('../config/firebase');
+
+const SEED_EMAIL = process.env.SEED_USER_EMAIL || 'demo@fintrack.com';
+const SEED_PASSWORD = process.env.SEED_USER_PASSWORD || 'Demo123456!';
+const SEED_NAME = 'John Doe';
+
+// Default categories
+const CATEGORIES = [
+  { name: 'Food & Dining', icon: 'restaurant', color: '#4648d4', type: 'expense' },
+  { name: 'Transportation', icon: 'directions_car', color: '#8b5cf6', type: 'expense' },
+  { name: 'Groceries', icon: 'shopping_cart', color: '#ec4899', type: 'expense' },
+  { name: 'Rent & Utilities', icon: 'home', color: '#f59e0b', type: 'expense' },
+  { name: 'Entertainment', icon: 'sports_esports', color: '#c7c4d7', type: 'expense' },
+  { name: 'Healthcare', icon: 'local_hospital', color: '#ef4444', type: 'expense' },
+  { name: 'Shopping', icon: 'shopping_bag', color: '#06b6d4', type: 'expense' },
+  { name: 'Salary', icon: 'payments', color: '#006c49', type: 'income' },
+  { name: 'Freelance', icon: 'work', color: '#10b981', type: 'income' },
+  { name: 'Investment', icon: 'trending_up', color: '#6366f1', type: 'income' },
+];
+
+// Sample transaction templates
+const EXPENSE_TRANSACTIONS = [
+  { catIndex: 0, note: 'Starbucks coffee', minAmount: 35000, maxAmount: 95000 },
+  { catIndex: 0, note: 'Nasi Padang Sederhana', minAmount: 25000, maxAmount: 55000 },
+  { catIndex: 0, note: 'Pizza Hut dinner', minAmount: 80000, maxAmount: 200000 },
+  { catIndex: 0, note: 'Kopi Kenangan', minAmount: 18000, maxAmount: 45000 },
+  { catIndex: 0, note: 'McDonalds', minAmount: 40000, maxAmount: 120000 },
+  { catIndex: 1, note: 'Grab ride to office', minAmount: 15000, maxAmount: 50000 },
+  { catIndex: 1, note: 'Pertamina fuel', minAmount: 50000, maxAmount: 200000 },
+  { catIndex: 1, note: 'Gojek ride', minAmount: 12000, maxAmount: 45000 },
+  { catIndex: 1, note: 'MRT monthly pass', minAmount: 150000, maxAmount: 150000 },
+  { catIndex: 2, note: 'Indomaret groceries', minAmount: 50000, maxAmount: 250000 },
+  { catIndex: 2, note: 'Alfamart weekly run', minAmount: 100000, maxAmount: 400000 },
+  { catIndex: 2, note: 'Superindo fresh produce', minAmount: 75000, maxAmount: 300000 },
+  { catIndex: 3, note: 'PLN electricity bill', minAmount: 200000, maxAmount: 500000 },
+  { catIndex: 3, note: 'Water bill PDAM', minAmount: 80000, maxAmount: 150000 },
+  { catIndex: 3, note: 'Internet IndiHome', minAmount: 300000, maxAmount: 400000 },
+  { catIndex: 4, note: 'Netflix subscription', minAmount: 54000, maxAmount: 186000 },
+  { catIndex: 4, note: 'Spotify Premium', minAmount: 54990, maxAmount: 54990 },
+  { catIndex: 4, note: 'Cinema XXI tickets', minAmount: 50000, maxAmount: 150000 },
+  { catIndex: 5, note: 'Pharmacy medicine', minAmount: 30000, maxAmount: 200000 },
+  { catIndex: 6, note: 'Tokopedia electronics', minAmount: 100000, maxAmount: 1500000 },
+  { catIndex: 6, note: 'Uniqlo clothes', minAmount: 150000, maxAmount: 600000 },
+];
+
+const INCOME_TRANSACTIONS = [
+  { catIndex: 7, note: 'TechCorp Inc. monthly salary', minAmount: 8000000, maxAmount: 8500000 },
+  { catIndex: 8, note: 'Freelance web development', minAmount: 1500000, maxAmount: 5000000 },
+  { catIndex: 8, note: 'UI/UX design project', minAmount: 2000000, maxAmount: 4000000 },
+  { catIndex: 9, note: 'Stock dividend', minAmount: 200000, maxAmount: 800000 },
+  { catIndex: 9, note: 'Crypto gains', minAmount: 100000, maxAmount: 1000000 },
+];
+
+function randomBetween(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function randomDate(monthsBack) {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth() - monthsBack, 1);
+  const end = now;
+  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+}
+
+async function clearCollections(userId) {
+  console.log('🧹 Clearing existing data...');
+
+  const collections = ['transactions', 'budgets', 'categories'];
+
+  for (const colName of collections) {
+    const snapshot = await db
+      .collection(colName)
+      .where('userId', '==', userId)
+      .get();
+
+    if (!snapshot.empty) {
+      const batch = db.batch();
+      snapshot.docs.forEach((doc) => batch.delete(doc.ref));
+      await batch.commit();
+      console.log(`   ✓ Cleared ${snapshot.size} docs from "${colName}"`);
+    }
+  }
+
+  // Also clear user doc
+  await db.collection('users').doc(userId).delete().catch(() => {});
+}
+
+async function seed() {
+  console.log('');
+  console.log('╔══════════════════════════════════════════╗');
+  console.log('║   🌱 FinTrack Database Seeder             ║');
+  console.log('╚══════════════════════════════════════════╝');
+  console.log('');
+
+  try {
+    // ─── Step 1: Create or get demo user ───
+    console.log('👤 Setting up demo user...');
+    let userId;
+
+    try {
+      // Try to get existing user
+      const existingUser = await auth.getUserByEmail(SEED_EMAIL);
+      userId = existingUser.uid;
+      console.log(`   ✓ Found existing user: ${SEED_EMAIL} (${userId})`);
+    } catch {
+      // Create new user
+      const newUser = await auth.createUser({
+        email: SEED_EMAIL,
+        password: SEED_PASSWORD,
+        displayName: SEED_NAME,
+        emailVerified: true,
+      });
+      userId = newUser.uid;
+      console.log(`   ✓ Created new user: ${SEED_EMAIL} (${userId})`);
+    }
+
+    // Clear existing data
+    await clearCollections(userId);
+
+    // ─── Step 2: Create user document ───
+    console.log('📝 Creating user profile...');
+    await db.collection('users').doc(userId).set({
+      displayName: SEED_NAME,
+      email: SEED_EMAIL,
+      photoURL: null,
+      currency: 'IDR',
+      darkMode: false,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+    console.log('   ✓ User profile created');
+
+    // ─── Step 3: Create categories ───
+    console.log('📂 Seeding categories...');
+    const categoryIds = [];
+
+    for (const cat of CATEGORIES) {
+      const docRef = await db.collection('categories').add({
+        ...cat,
+        userId,
+        isDefault: true,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+      categoryIds.push({ id: docRef.id, ...cat });
+    }
+    console.log(`   ✓ Created ${categoryIds.length} categories`);
+
+    // ─── Step 4: Generate transactions (last 6 months) ───
+    console.log('💰 Generating transactions...');
+    let txCount = 0;
+
+    // Generate 8-15 transactions per month for last 6 months
+    for (let monthBack = 0; monthBack < 6; monthBack++) {
+      const txPerMonth = randomBetween(8, 15);
+      const now = new Date();
+      const targetMonth = new Date(now.getFullYear(), now.getMonth() - monthBack, 1);
+
+      // Always add salary for each month
+      const salaryDate = new Date(
+        targetMonth.getFullYear(),
+        targetMonth.getMonth(),
+        randomBetween(25, 28)
+      );
+      if (salaryDate <= now) {
+        const salaryCat = categoryIds[7]; // Salary
+        await db.collection('transactions').add({
+          userId,
+          categoryId: salaryCat.id,
+          categoryName: salaryCat.name,
+          categoryIcon: salaryCat.icon,
+          type: 'income',
+          amount: randomBetween(8000000, 8500000),
+          note: 'TechCorp Inc. monthly salary',
+          date: salaryDate,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        txCount++;
+      }
+
+      // Add random expense transactions
+      for (let i = 0; i < txPerMonth; i++) {
+        const template = EXPENSE_TRANSACTIONS[randomBetween(0, EXPENSE_TRANSACTIONS.length - 1)];
+        const cat = categoryIds[template.catIndex];
+        const txDate = new Date(
+          targetMonth.getFullYear(),
+          targetMonth.getMonth(),
+          randomBetween(1, 28)
+        );
+
+        if (txDate <= now) {
+          await db.collection('transactions').add({
+            userId,
+            categoryId: cat.id,
+            categoryName: cat.name,
+            categoryIcon: cat.icon,
+            type: 'expense',
+            amount: randomBetween(template.minAmount, template.maxAmount),
+            note: template.note,
+            date: txDate,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+          txCount++;
+        }
+      }
+
+      // Randomly add 1-2 extra income transactions per month
+      const extraIncome = randomBetween(0, 2);
+      for (let i = 0; i < extraIncome; i++) {
+        const template = INCOME_TRANSACTIONS[randomBetween(1, INCOME_TRANSACTIONS.length - 1)];
+        const cat = categoryIds[template.catIndex];
+        const txDate = new Date(
+          targetMonth.getFullYear(),
+          targetMonth.getMonth(),
+          randomBetween(1, 28)
+        );
+
+        if (txDate <= now) {
+          await db.collection('transactions').add({
+            userId,
+            categoryId: cat.id,
+            categoryName: cat.name,
+            categoryIcon: cat.icon,
+            type: 'income',
+            amount: randomBetween(template.minAmount, template.maxAmount),
+            note: template.note,
+            date: txDate,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+          txCount++;
+        }
+      }
+    }
+    console.log(`   ✓ Created ${txCount} transactions (spanning 6 months)`);
+
+    // ─── Step 5: Create budgets for current month ───
+    console.log('📊 Creating budgets...');
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
+
+    const budgetData = [
+      { catIndex: 0, limit: 800000 },  // Food & Dining
+      { catIndex: 1, limit: 300000 },  // Transportation
+      { catIndex: 2, limit: 600000 },  // Groceries
+      { catIndex: 3, limit: 1000000 }, // Rent & Utilities
+      { catIndex: 4, limit: 250000 },  // Entertainment
+      { catIndex: 5, limit: 200000 },  // Healthcare
+      { catIndex: 6, limit: 500000 },  // Shopping
+    ];
+
+    for (const budget of budgetData) {
+      const cat = categoryIds[budget.catIndex];
+      await db.collection('budgets').add({
+        userId,
+        categoryId: cat.id,
+        categoryName: cat.name,
+        categoryIcon: cat.icon,
+        limitAmount: budget.limit,
+        period: 'monthly',
+        month: currentMonth,
+        year: currentYear,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+    console.log(`   ✓ Created ${budgetData.length} budgets for ${currentMonth}/${currentYear}`);
+
+    // ─── Done ───
+    console.log('');
+    console.log('═══════════════════════════════════════════');
+    console.log('✅ Seeding complete!');
+    console.log('');
+    console.log('📧 Demo Account:');
+    console.log(`   Email:    ${SEED_EMAIL}`);
+    console.log(`   Password: ${SEED_PASSWORD}`);
+    console.log('');
+    console.log(`📊 Data Summary:`);
+    console.log(`   Categories:   ${categoryIds.length}`);
+    console.log(`   Transactions: ${txCount}`);
+    console.log(`   Budgets:      ${budgetData.length}`);
+    console.log('═══════════════════════════════════════════');
+    console.log('');
+
+    process.exit(0);
+  } catch (error) {
+    console.error('');
+    console.error('❌ Seeding failed:', error.message);
+    console.error(error.stack);
+    process.exit(1);
+  }
+}
+
+seed();
