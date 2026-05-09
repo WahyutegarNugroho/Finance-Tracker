@@ -1,17 +1,19 @@
 import React from 'react';
 import Link from 'next/link';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface BottomNavProps {
   activePath: string;
 }
 
 export default function BottomNav({ activePath }: BottomNavProps) {
+  const { t } = useLanguage();
   const menuItems = [
-    { name: 'Home', icon: 'home', path: '/dashboard' },
-    { name: 'Activity', icon: 'list_alt', path: '/transactions' },
-    { name: 'Budget', icon: 'account_balance_wallet', path: '/budget' },
-    { name: 'Stats', icon: 'query_stats', path: '/analytics' },
-    { name: 'Settings', icon: 'settings', path: '/settings' },
+    { name: t("common.dashboard"), icon: 'home', path: '/dashboard' },
+    { name: t("common.transactions"), icon: 'list_alt', path: '/transactions' },
+    { name: t("common.budget"), icon: 'account_balance_wallet', path: '/budget' },
+    { name: t("common.analytics"), icon: 'query_stats', path: '/analytics' },
+    { name: t("common.settings"), icon: 'settings', path: '/settings' },
   ];
 
   return (

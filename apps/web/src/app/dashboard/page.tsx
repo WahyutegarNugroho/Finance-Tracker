@@ -7,22 +7,22 @@ import BottomNav from "@/components/BottomNav";
 import TransactionModal from "@/components/TransactionModal";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { useRouter } from "next/navigation";
-
-
-
-// Formatter for relative time or date
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-  }).format(date);
-};
 
 export default function Dashboard() {
   const { user, loading: authLoading, formatCurrency } = useAuth();
+  const { language, t } = useLanguage();
   const router = useRouter();
+
+  // Formatter for relative time or date
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat(language === 'id' ? 'id-ID' : 'en-US', {
+      month: "short",
+      day: "numeric",
+    }).format(date);
+  };
   
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -78,10 +78,10 @@ export default function Dashboard() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8">
             <div>
               <h2 className="font-headline-lg text-headline-lg text-on-background mb-1">
-                Dashboard
+                {t("dashboard_page.title")}
               </h2>
               <p className="font-body-sm text-body-sm text-on-surface-variant">
-                Welcome back, here's your financial overview.
+                {t("dashboard_page.welcome")}
               </p>
             </div>
             <button 
@@ -89,7 +89,7 @@ export default function Dashboard() {
               className="bg-primary hover:bg-primary-container text-on-primary font-body-sm text-body-sm px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:scale-[1.02] active:scale-95 flex items-center gap-2"
             >
               <span className="material-symbols-outlined text-sm">add</span>
-              New Transaction
+              {t("dashboard_page.new_transaction")}
             </button>
           </div>
 
@@ -106,7 +106,7 @@ export default function Dashboard() {
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-10 -mt-10 blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
               <div className="flex justify-between items-start mb-4 relative z-10">
                 <p className="font-label-caps text-label-caps text-outline">
-                  Total Balance
+                  {t("dashboard_page.total_balance")}
                 </p>
                 <div className="p-2 bg-primary/10 text-primary rounded-lg">
                   <span className="material-symbols-outlined text-[20px]">
@@ -246,35 +246,35 @@ export default function Dashboard() {
                   <div className="w-1/3 bg-secondary-container h-[40%] rounded-t-sm group-hover:opacity-80 transition-opacity"></div>
                   <div className="w-1/3 bg-error-container h-[20%] rounded-t-sm group-hover:opacity-80 transition-opacity"></div>
                   <span className="absolute -bottom-6 text-label-caps text-outline">
-                    Jan
+                    {language === 'id' ? 'Jan' : 'Jan'}
                   </span>
                 </div>
                 <div className="flex-1 flex justify-center items-end gap-1 relative z-10 group cursor-pointer">
                   <div className="w-1/3 bg-secondary-container h-[50%] rounded-t-sm group-hover:opacity-80 transition-opacity"></div>
                   <div className="w-1/3 bg-error-container h-[30%] rounded-t-sm group-hover:opacity-80 transition-opacity"></div>
                   <span className="absolute -bottom-6 text-label-caps text-outline">
-                    Feb
+                    {language === 'id' ? 'Feb' : 'Feb'}
                   </span>
                 </div>
                 <div className="flex-1 flex justify-center items-end gap-1 relative z-10 group cursor-pointer">
                   <div className="w-1/3 bg-secondary-container h-[70%] rounded-t-sm group-hover:opacity-80 transition-opacity"></div>
                   <div className="w-1/3 bg-error-container h-[45%] rounded-t-sm group-hover:opacity-80 transition-opacity"></div>
                   <span className="absolute -bottom-6 text-label-caps text-outline">
-                    Mar
+                    {language === 'id' ? 'Mar' : 'Mar'}
                   </span>
                 </div>
                 <div className="flex-1 flex justify-center items-end gap-1 relative z-10 group cursor-pointer">
                   <div className="w-1/3 bg-secondary-container h-[60%] rounded-t-sm group-hover:opacity-80 transition-opacity"></div>
                   <div className="w-1/3 bg-error-container h-[35%] rounded-t-sm group-hover:opacity-80 transition-opacity"></div>
                   <span className="absolute -bottom-6 text-label-caps text-outline">
-                    Apr
+                    {language === 'id' ? 'Apr' : 'Apr'}
                   </span>
                 </div>
                 <div className="flex-1 flex justify-center items-end gap-1 relative z-10 group cursor-pointer">
                   <div className="w-1/3 bg-secondary-container h-[85%] rounded-t-sm group-hover:opacity-80 transition-opacity"></div>
                   <div className="w-1/3 bg-error-container h-[50%] rounded-t-sm group-hover:opacity-80 transition-opacity"></div>
                   <span className="absolute -bottom-6 text-label-caps text-outline text-primary font-bold">
-                    May
+                    {language === 'id' ? 'Mei' : 'May'}
                   </span>
                 </div>
               </div>

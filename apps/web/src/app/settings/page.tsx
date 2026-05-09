@@ -111,12 +111,12 @@ export default function Settings() {
   };
 
   const handleDeleteCategory = async (catId: string, catName: string) => {
-    if (!confirm(`Delete category "${catName}"?`)) return;
+    if (!confirm(language === 'id' ? `Hapus kategori "${catName}"?` : `Delete category "${catName}"?`)) return;
     setCatError("");
     try {
       const res = await api.delete(`/categories/${catId}`);
       if (res.data?.success === false) {
-        setCatError(res.data.message || "Cannot delete this category.");
+        setCatError(res.data.message || (language === 'id' ? "Tidak dapat menghapus kategori ini." : "Cannot delete this category."));
         return;
       }
       await fetchCategories();
@@ -124,9 +124,11 @@ export default function Settings() {
       // The backend returns a 400 with a message if the category has transactions
       const msg = err?.data?.message || err?.message || "";
       if (msg.includes("transactions") || msg.includes("Cannot delete")) {
-        setCatError(`Cannot delete "${catName}" — it has existing transactions. Delete or reassign them first.`);
+        setCatError(language === 'id' 
+          ? `Tidak dapat menghapus "${catName}" — kategori ini memiliki transaksi. Hapus atau pindahkan transaksi terlebih dahulu.` 
+          : `Cannot delete "${catName}" — it has existing transactions. Delete or reassign them first.`);
       } else {
-        setCatError(`Failed to delete "${catName}".`);
+        setCatError(language === 'id' ? `Gagal menghapus "${catName}".` : `Failed to delete "${catName}".`);
       }
     }
   };
@@ -142,10 +144,10 @@ export default function Settings() {
       });
       // Update the global currency in AuthContext so all pages reflect the change immediately
       setGlobalCurrency(currency);
-      alert("Profile updated successfully!");
+      alert(language === 'id' ? "Profil berhasil diperbarui!" : "Profile updated successfully!");
     } catch (error) {
       console.error("Failed to update profile", error);
-      alert("Failed to update profile.");
+      alert(language === 'id' ? "Gagal memperbarui profil." : "Failed to update profile.");
     } finally {
       setSaving(false);
     }

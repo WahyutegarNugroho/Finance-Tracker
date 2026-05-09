@@ -49,7 +49,7 @@ export default function Topbar() {
             {theme === 'dark' ? 'light_mode' : 'dark_mode'}
           </span>
         </button>
-        <button onClick={() => alert("You have no new notifications.")} className="hover:text-primary transition-colors cursor-pointer p-2 rounded-full hover:bg-surface-variant/50 relative">
+        <button onClick={() => alert(t("common.language") === "Bahasa" ? "Anda tidak memiliki notifikasi baru." : "You have no new notifications.")} className="hover:text-primary transition-colors cursor-pointer p-2 rounded-full hover:bg-surface-variant/50 relative">
           <span
             className="material-symbols-outlined"
             data-icon="notifications"

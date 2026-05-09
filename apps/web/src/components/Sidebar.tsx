@@ -91,7 +91,7 @@ export default function Sidebar({ activePath }: SidebarProps) {
               {user?.displayName || "John Doe"}
             </p>
             <p className="font-label-caps text-label-caps text-outline truncate">
-              Pro Plan
+              {t("common.language") === "Bahasa" ? "Akun Pro" : "Pro Plan"}
             </p>
           </div>
         </div>

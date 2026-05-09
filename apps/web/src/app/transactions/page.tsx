@@ -95,7 +95,7 @@ function TransactionsContent() {
   }, [fetchTransactions, user]);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this transaction?")) return;
+    if (!confirm(language === 'id' ? "Apakah Anda yakin ingin menghapus transaksi ini?" : "Are you sure you want to delete this transaction?")) return;
     
     try {
       await api.delete(`/transactions/${id}`);
@@ -104,7 +104,7 @@ function TransactionsContent() {
       // trigger re-fetch by doing a dummy state update
       setTransactions(transactions.filter(t => t.id !== id));
     } catch (err) {
-      alert("Failed to delete transaction.");
+      alert(language === 'id' ? "Gagal menghapus transaksi." : "Failed to delete transaction.");
     }
   };
 
@@ -185,7 +185,7 @@ function TransactionsContent() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-sm font-body-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-on-background placeholder:text-outline"
-                placeholder="Search notes, categories..."
+                placeholder={t("transactions_page.search_placeholder")}
                 type="text"
               />
             </div>
@@ -202,9 +202,9 @@ function TransactionsContent() {
                   }}
                   className="appearance-none flex items-center gap-2 pl-3 pr-8 py-2 bg-surface border border-outline-variant/30 rounded-lg hover:bg-surface-variant/30 transition-colors font-body-sm text-body-sm text-on-surface-variant focus:outline-none"
                 >
-                  <option value="all">Type: All</option>
-                  <option value="income">Income</option>
-                  <option value="expense">Expense</option>
+                  <option value="all">{language === 'id' ? 'Tipe: Semua' : 'Type: All'}</option>
+                  <option value="income">{t("common.income")}</option>
+                  <option value="expense">{t("common.expense")}</option>
                 </select>
                 <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-[18px] pointer-events-none text-on-surface-variant">
                   expand_more
@@ -221,7 +221,7 @@ function TransactionsContent() {
                 <span className="material-symbols-outlined text-[18px]">
                   download
                 </span>
-                Export CSV
+                {t("transactions_page.export_csv")}
               </button>
             </div>
           </div>
@@ -287,7 +287,7 @@ function TransactionsContent() {
                               ? 'bg-secondary/10 text-secondary' 
                               : 'bg-surface-variant/50 text-on-surface-variant'
                           }`}>
-                            {tx.type === 'income' ? 'Credit' : 'Debit'}
+                            {tx.type === 'income' ? (language === 'id' ? 'Kredit' : 'Credit') : (language === 'id' ? 'Debit' : 'Debit')}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-outline transition-opacity relative group/menu">
@@ -304,13 +304,13 @@ function TransactionsContent() {
                               }}
                               className="text-left px-4 py-2 text-sm text-on-surface hover:bg-surface-variant/50"
                             >
-                              Edit
+                              {t("common.edit")}
                             </button>
                             <button 
                               onClick={() => handleDelete(tx.id)}
                               className="text-left px-4 py-2 text-sm text-error hover:bg-error-container/50"
                             >
-                              Delete
+                              {t("common.delete")}
                             </button>
                           </div>
                         </td>
@@ -324,7 +324,7 @@ function TransactionsContent() {
             {/* Pagination */}
             <div className="mt-auto px-6 py-4 border-t border-outline-variant/10 flex items-center justify-between bg-surface-container-lowest/50">
               <span className="font-body-sm text-body-sm text-on-surface-variant">
-                Showing page {page} of {Math.max(1, totalPages)} ({totalItems} total)
+                {t("transactions_page.pagination.showing")} {page} {t("transactions_page.pagination.of")} {Math.max(1, totalPages)} ({totalItems} {t("transactions_page.pagination.total")})
               </span>
               <div className="flex items-center gap-2">
                 <button

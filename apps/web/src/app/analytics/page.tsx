@@ -84,7 +84,10 @@ export default function Analytics() {
       }));
 
     // Generate last 5 months for trend or all months present
-    const monthOrder = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthOrder = language === 'id' 
+      ? ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]
+      : ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      
     const monthlyTrend = Object.keys(monthlyMap)
       .sort((a, b) => monthOrder.indexOf(a) - monthOrder.indexOf(b))
       .map(m => ({
@@ -151,13 +154,13 @@ export default function Analytics() {
                 {formatCurrency(stats.totalIncome)}
               </div>
               <div className="text-sm text-secondary font-medium flex items-center gap-1">
-                All time record
+                {language === 'id' ? 'Catatan sepanjang waktu' : 'All time record'}
               </div>
             </div>
 
             <div className="glass-card rounded-xl p-5 flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Total Expense</span>
+                <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">{t("analytics_page.summary.total_expense")}</span>
                 <div className="w-8 h-8 rounded-full bg-error-container/20 flex items-center justify-center text-error">
                   <span className="material-symbols-outlined text-lg">trending_down</span>
                 </div>
@@ -166,14 +169,14 @@ export default function Analytics() {
                 {formatCurrency(stats.totalExpense)}
               </div>
               <div className="text-sm text-error font-medium flex items-center gap-1">
-                Cumulative spending
+                {language === 'id' ? 'Pengeluaran kumulatif' : 'Cumulative spending'}
               </div>
             </div>
 
             <div className="glass-card rounded-xl p-5 flex flex-col gap-3 relative overflow-hidden">
               <div className="absolute right-0 top-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
               <div className="flex items-center justify-between relative z-10">
-                <span className="font-label-caps text-label-caps text-primary uppercase tracking-wider">Net Savings</span>
+                <span className="font-label-caps text-label-caps text-primary uppercase tracking-wider">{t("analytics_page.summary.total_balance")}</span>
                 <div className="w-8 h-8 rounded-full bg-primary-container/20 flex items-center justify-center text-primary">
                   <span className="material-symbols-outlined text-lg">savings</span>
                 </div>
@@ -182,22 +185,22 @@ export default function Analytics() {
                 {formatCurrency(stats.savings)}
               </div>
               <div className="text-sm text-secondary font-medium flex items-center gap-1 relative z-10">
-                Current balance
+                {language === 'id' ? 'Saldo saat ini' : 'Current balance'}
               </div>
             </div>
           </section>
 
           <section className="glass-card rounded-xl p-6 md:p-8 flex flex-col gap-6">
             <div className="flex justify-between items-center">
-              <h2 className="font-headline-md text-headline-md font-semibold text-on-surface">Income vs Expense Trend</h2>
+              <h2 className="font-headline-md text-headline-md font-semibold text-on-surface">{t("analytics_page.charts.income_vs_expense")}</h2>
               <div className="flex gap-4">
                 <div className="flex items-center gap-2 text-sm">
                   <div className="w-3 h-3 rounded-full bg-primary"></div>
-                  <span className="text-on-surface-variant">Income</span>
+                  <span className="text-on-surface-variant">{t("common.income")}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <div className="w-3 h-3 rounded-full bg-error"></div>
-                  <span className="text-on-surface-variant">Expense</span>
+                  <span className="text-on-surface-variant">{t("common.expense")}</span>
                 </div>
               </div>
             </div>
@@ -215,7 +218,7 @@ export default function Analytics() {
                 {stats.monthlyTrend.length > 0 ? (
                   stats.monthlyTrend.map(m => <span key={m.month}>{m.month}</span>)
                 ) : (
-                  <span>No data yet</span>
+                  <span>{language === 'id' ? 'Belum ada data' : 'No data yet'}</span>
                 )}
               </div>
 
@@ -239,7 +242,7 @@ export default function Analytics() {
 
           <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
             <div className="glass-card rounded-xl p-6 flex flex-col gap-6">
-              <h3 className="font-headline-md text-headline-md font-semibold text-on-surface">Category Breakdown</h3>
+              <h3 className="font-headline-md text-headline-md font-semibold text-on-surface">{t("analytics_page.charts.spending_by_category")}</h3>
               <div className="flex flex-col sm:flex-row items-center gap-8 justify-center py-4">
                 <div 
                   className="relative w-40 h-40 rounded-full flex items-center justify-center shadow-inner" 
@@ -255,7 +258,7 @@ export default function Analytics() {
                   }}
                 >
                   <div className="absolute w-28 h-28 bg-surface rounded-full flex flex-col items-center justify-center shadow-sm">
-                    <span className="text-xs text-outline font-medium uppercase tracking-wider">Total Exp</span>
+                    <span className="text-xs text-outline font-medium uppercase tracking-wider">{language === 'id' ? 'Total Keluar' : 'Total Exp'}</span>
                     <span className="font-numeric-data text-lg font-bold text-on-surface">{formatCurrency(stats.totalExpense)}</span>
                   </div>
                 </div>
@@ -271,7 +274,7 @@ export default function Analytics() {
                     </div>
                   ))}
                   {stats.categories.length === 0 && (
-                    <p className="text-sm text-outline italic">No expenses recorded</p>
+                    <p className="text-sm text-outline italic">{language === 'id' ? 'Belum ada pengeluaran' : 'No expenses recorded'}</p>
                   )}
                 </div>
               </div>
@@ -279,8 +282,8 @@ export default function Analytics() {
 
             <div className="glass-card rounded-xl p-6 flex flex-col gap-4">
               <div className="flex justify-between items-center mb-2">
-                <h3 className="font-headline-md text-headline-md font-semibold text-on-surface">Top Spending</h3>
-                <Link href="/transactions?type=expense" className="text-sm text-primary hover:underline font-medium">View All</Link>
+                <h3 className="font-headline-md text-headline-md font-semibold text-on-surface">{language === 'id' ? 'Pengeluaran Terbesar' : 'Top Spending'}</h3>
+                <Link href="/transactions?type=expense" className="text-sm text-primary hover:underline font-medium">{language === 'id' ? 'Lihat Semua' : 'View All'}</Link>
               </div>
               <div className="flex flex-col gap-3">
                 {stats.categories.slice(0, 5).map((cat) => (
@@ -293,7 +296,7 @@ export default function Analytics() {
                     </div>
                     <div className="flex-1">
                       <div className="font-medium text-on-surface">{cat.name}</div>
-                      <div className="text-xs text-on-surface-variant">Top category</div>
+                      <div className="text-xs text-on-surface-variant">{language === 'id' ? 'Kategori utama' : 'Top category'}</div>
                     </div>
                     <div className="flex flex-col items-end">
                       <span className="font-numeric-data font-semibold text-on-surface">{formatCurrency(cat.amount)}</span>
@@ -304,7 +307,7 @@ export default function Analytics() {
                 {stats.categories.length === 0 && (
                   <div className="flex flex-col items-center justify-center py-10 text-outline gap-2">
                     <span className="material-symbols-outlined text-4xl">receipt_long</span>
-                    <p>No spending data found</p>
+                    <p>{language === 'id' ? 'Tidak ada data pengeluaran' : 'No spending data found'}</p>
                   </div>
                 )}
               </div>
