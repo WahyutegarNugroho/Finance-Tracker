@@ -171,7 +171,7 @@ export const translations: Record<string, any> = {
     },
     dashboard_page: {
       title: "Dasbor",
-      welcome: "Selamat datang kembali, berikut ikhtisar keuangan Anda.",
+      welcome: "Selamat datang kembali, berikut ringkasan keuangan Anda.",
       total_balance: "Total Saldo",
       vs_last_month: "dibanding bulan lalu",
       income: "Pemasukan",
