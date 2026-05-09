@@ -211,6 +211,25 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* Footer / Watermark */}
+        <footer className="w-full max-w-5xl mt-32 pb-12 border-t border-outline-variant/10 pt-12 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <span className="material-symbols-outlined text-on-primary text-[18px]">account_balance_wallet</span>
+            </div>
+            <span className="font-display-sm text-display-sm tracking-tight text-on-surface">FinTrack</span>
+          </div>
+          
+          <div className="flex flex-col items-center md:items-end gap-2 px-4 md:px-0">
+            <p className="font-body-sm text-body-sm text-on-surface-variant">
+              © 2026 whtsn. All rights reserved.
+            </p>
+            <p className="font-label-sm text-label-sm text-primary/60">
+              Built with precision and security.
+            </p>
+          </div>
+        </footer>
       </main>
     </>
   );
