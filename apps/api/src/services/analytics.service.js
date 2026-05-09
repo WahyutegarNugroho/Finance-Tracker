@@ -90,6 +90,28 @@ const getDashboardOverview = async (userId) => {
     ? Math.round((currentExpense / totalBudgetLimit) * 100)
     : 0;
 
+  // Calculate category breakdown for current month
+  const categoryMap = {};
+  currentMonthTx.forEach((tx) => {
+    if (tx.type === 'expense') {
+      if (!categoryMap[tx.categoryId]) {
+        categoryMap[tx.categoryId] = {
+          name: tx.categoryName,
+          amount: 0,
+          color: tx.categoryColor || '#4648d4'
+        };
+      }
+      categoryMap[tx.categoryId].amount += tx.amount;
+    }
+  });
+
+  const expenseByCategory = Object.values(categoryMap)
+    .map(cat => ({
+      ...cat,
+      percentage: currentExpense > 0 ? Math.round((cat.amount / currentExpense) * 100) : 0
+    }))
+    .sort((a, b) => b.amount - a.amount);
+
   return {
     balance: currentIncome - currentExpense,
     balanceChange: parseFloat(balanceChange),
@@ -100,6 +122,7 @@ const getDashboardOverview = async (userId) => {
     budgetUsage,
     budgetLimit: totalBudgetLimit,
     recentTransactions,
+    expenseByCategory,
     month: currentMonth,
     year: currentYear,
   };
