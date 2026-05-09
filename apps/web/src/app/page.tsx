@@ -16,11 +16,11 @@ export default function Home() {
             </span>
             FinTrack
           </div>
-          <div className="flex items-center gap-4">
-            <Link href="/login" className="font-label-caps text-label-caps px-4 py-2 rounded-lg text-on-surface-variant hover:text-primary transition-colors hidden md:block">
+          <div className="flex items-center gap-2 md:gap-4">
+            <Link href="/login" className="font-label-caps text-label-caps px-3 md:px-4 py-2 rounded-lg text-on-surface-variant hover:text-primary transition-colors">
               Log In
             </Link>
-            <Link href="/login" className="font-label-caps text-label-caps bg-primary text-on-primary px-5 py-2.5 rounded-lg hover:bg-primary/90 hover:scale-[1.02] transition-all shadow-sm">
+            <Link href="/login" className="font-label-caps text-label-caps bg-primary text-on-primary px-4 md:px-5 py-2 md:py-2.5 rounded-lg hover:bg-primary/90 hover:scale-[1.02] transition-all shadow-sm">
               Get Started
             </Link>
           </div>
