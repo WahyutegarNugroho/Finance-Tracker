@@ -1,7 +1,7 @@
 import { auth } from './firebase';
 
-// Force the absolute URL to ensure it always hits the Express backend
-const API_BASE_URL = 'http://localhost:5000/api';
+// Use environment variable for API URL, fallback to localhost for development
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 /**
  * Standard API response wrapper
@@ -20,7 +20,7 @@ class ApiError extends Error {
 /**
  * Core fetch wrapper with auth token injection
  */
-const fetchWithAuth = async (endpoint: string, options: RequestInit = {}) => {
+const fetchWithAuth = async (endpoint: string, options: RequestInit = {}, params?: Record<string, string | number>) => {
   // Get Firebase ID token if user is logged in
   let token = '';
   if (auth.currentUser) {
@@ -33,7 +33,16 @@ const fetchWithAuth = async (endpoint: string, options: RequestInit = {}) => {
     ...options.headers,
   };
 
-  const url = `${API_BASE_URL}${endpoint}`;
+  // Construct URL with query parameters if provided
+  let url = `${API_BASE_URL}${endpoint}`;
+  if (params) {
+    const searchParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      searchParams.append(key, String(value));
+    });
+    url += `?${searchParams.toString()}`;
+  }
+
   console.log(`[API Fetch] Calling: ${url}`);
 
   const response = await fetch(url, {
@@ -48,7 +57,6 @@ const fetchWithAuth = async (endpoint: string, options: RequestInit = {}) => {
   if (contentType && contentType.includes("application/json")) {
     data = await response.json();
   } else {
-    // If not JSON, get text so we can see what the error actually is
     const text = await response.text();
     console.error(`[API Fetch Error] Expected JSON, got: ${contentType}\nResponse snippet: ${text.substring(0, 150)}`);
     throw new ApiError(response.status, `Server returned non-JSON response (${response.status})`, { textSnippet: text.substring(0, 100) });
@@ -65,8 +73,10 @@ const fetchWithAuth = async (endpoint: string, options: RequestInit = {}) => {
  * API service object
  */
 export const api = {
-  get: (endpoint: string, options?: RequestInit) => 
-    fetchWithAuth(endpoint, { ...options, method: 'GET' }),
+  get: (endpoint: string, options?: RequestInit & { params?: Record<string, string | number> }) => {
+    const { params, ...fetchOptions } = options || {};
+    return fetchWithAuth(endpoint, { ...fetchOptions, method: 'GET' }, params);
+  },
     
   post: (endpoint: string, body: unknown, options?: RequestInit) => 
     fetchWithAuth(endpoint, { ...options, method: 'POST', body: JSON.stringify(body) }),
