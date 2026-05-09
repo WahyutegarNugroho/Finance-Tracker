@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 type Category = {
   id: string;
@@ -26,6 +27,7 @@ export default function TransactionModal({
   transactionToEdit,
 }: TransactionModalProps) {
   const { currencySymbol } = useAuth();
+  const { language, t } = useLanguage();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetchingCats, setFetchingCats] = useState(false);
@@ -129,7 +131,7 @@ export default function TransactionModal({
       <div className="bg-surface w-full max-w-md rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 border border-outline-variant/20">
         <div className="flex justify-between items-center p-6 border-b border-outline-variant/10">
           <h2 className="font-headline-md text-headline-md font-bold text-on-background">
-            {transactionToEdit ? "Edit Transaction" : "New Transaction"}
+            {transactionToEdit ? t("common.edit") : t("transactions_page.add_new")}
           </h2>
           <button
             onClick={onClose}
@@ -151,7 +153,7 @@ export default function TransactionModal({
                   : "text-on-surface-variant hover:text-on-surface"
               }`}
             >
-              Expense
+              {t("common.expense")}
             </button>
             <button
               type="button"
@@ -162,14 +164,14 @@ export default function TransactionModal({
                   : "text-on-surface-variant hover:text-on-surface"
               }`}
             >
-              Income
+              {t("common.income")}
             </button>
           </div>
 
           {/* Amount */}
           <div>
             <label className="block text-sm font-medium text-on-surface-variant mb-1">
-              Amount
+              {t("transactions_page.table.amount")}
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant font-medium">
@@ -191,7 +193,7 @@ export default function TransactionModal({
             {/* Category */}
             <div>
               <label className="block text-sm font-medium text-on-surface-variant mb-1">
-                Category
+                {t("transactions_page.table.category")}
               </label>
               <select
                 required
@@ -201,7 +203,7 @@ export default function TransactionModal({
                 className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none appearance-none"
               >
                 {fetchingCats ? (
-                  <option>Loading...</option>
+                  <option>{t("common.loading")}</option>
                 ) : (
                   filteredCategories.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -215,7 +217,7 @@ export default function TransactionModal({
             {/* Date */}
             <div>
               <label className="block text-sm font-medium text-on-surface-variant mb-1">
-                Date
+                {t("transactions_page.table.date")}
               </label>
               <input
                 type="date"
@@ -230,7 +232,7 @@ export default function TransactionModal({
           {/* Note */}
           <div>
             <label className="block text-sm font-medium text-on-surface-variant mb-1">
-              Note (Optional)
+              {t("transactions_page.table.note")} ({language === 'id' ? 'Opsional' : 'Optional'})
             </label>
             <input
               type="text"
@@ -252,9 +254,9 @@ export default function TransactionModal({
                   progress_activity
                 </span>
               ) : transactionToEdit ? (
-                "Save Changes"
+                t("common.save")
               ) : (
-                "Add Transaction"
+                t("transactions_page.add_new")
               )}
             </button>
           </div>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 type Category = {
   id: string;
@@ -25,6 +26,7 @@ export default function BudgetModal({
   budgetToEdit,
 }: BudgetModalProps) {
   const { currencySymbol } = useAuth();
+  const { t } = useLanguage();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetchingCats, setFetchingCats] = useState(false);
@@ -104,7 +106,7 @@ export default function BudgetModal({
       <div className="bg-surface w-full max-w-md rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 border border-outline-variant/20">
         <div className="flex justify-between items-center p-6 border-b border-outline-variant/10">
           <h2 className="font-headline-md text-headline-md font-bold text-on-background">
-            {budgetToEdit ? "Edit Budget" : "Create Budget"}
+            {budgetToEdit ? t("common.edit") : t("budget_page.create_new")}
           </h2>
           <button
             onClick={onClose}
@@ -117,7 +119,7 @@ export default function BudgetModal({
         <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5">
           <div>
             <label className="block text-sm font-medium text-on-surface-variant mb-1">
-              Category
+              {t("transactions_page.table.category")}
             </label>
             <select
               required
@@ -127,7 +129,7 @@ export default function BudgetModal({
               className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none appearance-none disabled:opacity-50"
             >
               {fetchingCats ? (
-                <option>Loading...</option>
+                <option>{t("common.loading")}</option>
               ) : (
                 categories.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -140,7 +142,7 @@ export default function BudgetModal({
 
           <div>
             <label className="block text-sm font-medium text-on-surface-variant mb-1">
-              Monthly Limit
+              {t("budget_page.title")}
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant font-medium">
@@ -169,9 +171,9 @@ export default function BudgetModal({
                   progress_activity
                 </span>
               ) : budgetToEdit ? (
-                "Save Changes"
+                t("common.save")
               ) : (
-                "Create Budget"
+                t("budget_page.create_new")
               )}
             </button>
           </div>

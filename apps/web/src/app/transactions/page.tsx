@@ -7,14 +7,13 @@ import BottomNav from "@/components/BottomNav";
 import TransactionModal from "@/components/TransactionModal";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { useRouter, useSearchParams } from "next/navigation";
 
-
-
 // Formatter for date
-const formatDate = (dateString: string) => {
+const formatDate = (dateString: string, lang: string) => {
   const date = new Date(dateString);
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(lang === "id" ? "id-ID" : "en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -23,6 +22,7 @@ const formatDate = (dateString: string) => {
 
 function TransactionsContent() {
   const { user, loading: authLoading, formatCurrency } = useAuth();
+  const { language, t } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -150,10 +150,10 @@ function TransactionsContent() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
               <h2 className="font-headline-lg text-headline-lg font-bold text-on-background">
-                Transactions
+                {t("transactions_page.title")}
               </h2>
               <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">
-                Review and manage your financial history.
+                {t("transactions_page.subtitle")}
               </p>
             </div>
             <button 
@@ -164,7 +164,7 @@ function TransactionsContent() {
               className="bg-primary hover:bg-primary-container text-on-primary font-body-sm text-body-sm px-4 py-2.5 rounded-lg transition-all duration-200 shadow-sm hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 w-full md:w-auto"
             >
               <span className="material-symbols-outlined text-sm">add</span>
-              Add Transaction
+              {t("transactions_page.add_new")}
             </button>
           </div>
 
@@ -232,11 +232,11 @@ function TransactionsContent() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-outline-variant/20 bg-surface-container-low/50">
-                    <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider">Date</th>
-                    <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider">Category</th>
-                    <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider">Note</th>
-                    <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider text-right">Amount</th>
-                    <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider text-center">Type</th>
+                    <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider">{t("transactions_page.table.date")}</th>
+                    <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider">{t("transactions_page.table.category")}</th>
+                    <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider">{t("transactions_page.table.note")}</th>
+                    <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider text-right">{t("transactions_page.table.amount")}</th>
+                    <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider text-center">{t("common.type")}</th>
                     <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider w-16"></th>
                   </tr>
                 </thead>
@@ -250,14 +250,14 @@ function TransactionsContent() {
                   ) : transactions.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="px-6 py-12 text-center text-on-surface-variant">
-                        No transactions found.
+                        {t("transactions_page.no_data")}
                       </td>
                     </tr>
                   ) : (
                     transactions.map((tx) => (
                       <tr key={tx.id} className="hover:bg-surface-variant/20 transition-colors group">
                         <td className="px-6 py-4 whitespace-nowrap font-body-sm text-body-sm text-on-surface">
-                          {formatDate(tx.date)}
+                          {formatDate(tx.date, language)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">

@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface SidebarProps {
   activePath: string;
@@ -10,11 +11,12 @@ interface SidebarProps {
 
 export default function Sidebar({ activePath }: SidebarProps) {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const menuItems = [
-    { name: 'Dashboard', icon: 'dashboard', path: '/dashboard' },
-    { name: 'Transactions', icon: 'receipt_long', path: '/transactions' },
-    { name: 'Budget', icon: 'account_balance_wallet', path: '/budget' },
-    { name: 'Analytics', icon: 'analytics', path: '/analytics' },
+    { name: t("common.dashboard"), icon: 'dashboard', path: '/dashboard' },
+    { name: t("common.transactions"), icon: 'receipt_long', path: '/transactions' },
+    { name: t("common.budget"), icon: 'account_balance_wallet', path: '/budget' },
+    { name: t("common.analytics"), icon: 'analytics', path: '/analytics' },
   ];
 
   return (
@@ -72,7 +74,7 @@ export default function Sidebar({ activePath }: SidebarProps) {
           }
         >
           <span className="material-symbols-outlined" style={activePath === '/settings' ? { fontVariationSettings: "'FILL' 1" } : {}}>settings</span>
-          <span className="font-body-sm text-body-sm">Settings</span>
+          <span className="font-body-sm text-body-sm">{t("common.settings")}</span>
         </Link>
 
         {/* User Profile Snippet in Sidebar */}

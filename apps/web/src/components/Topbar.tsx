@@ -4,12 +4,14 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function Topbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
@@ -36,7 +38,7 @@ export default function Topbar() {
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             className="w-full pl-10 pr-4 py-2 bg-surface-variant/30 border border-outline-variant/30 rounded-full focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none font-body-sm text-body-sm transition-all text-on-surface placeholder:text-outline"
-            placeholder="Search..."
+            placeholder={t("common.search")}
             type="text"
           />
         </div>

@@ -7,9 +7,11 @@ import Topbar from "@/components/Topbar";
 import BottomNav from "@/components/BottomNav";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Analytics() {
   const { formatCurrency } = useAuth();
+  const { language, t } = useLanguage();
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -47,7 +49,7 @@ export default function Analytics() {
     transactions.forEach((tx) => {
       const amount = Number(tx.amount);
       const date = new Date(tx.date);
-      const monthKey = date.toLocaleString('default', { month: 'short' });
+      const monthKey = date.toLocaleString(language === 'id' ? 'id-ID' : 'en-US', { month: 'short' });
 
       // Monthly Trend
       if (!monthlyMap[monthKey]) {
@@ -120,7 +122,7 @@ export default function Analytics() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <span className="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
-          <p className="text-outline animate-pulse">Analyzing your finances...</p>
+          <p className="text-outline animate-pulse">{t("common.loading")}</p>
         </div>
       </div>
     );
@@ -134,13 +136,13 @@ export default function Analytics() {
       <main className="pt-[88px] pb-[88px] md:pb-8 px-4 md:pl-[284px] md:pr-8 min-h-screen w-full flex flex-col">
         <div className="max-w-[1440px] mx-auto w-full flex-1 flex flex-col gap-6 md:gap-8">
           <div className="flex justify-between items-center md:hidden mb-2">
-            <h1 className="font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface">Analytics</h1>
+            <h1 className="font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface">{t("analytics_page.title")}</h1>
           </div>
 
           <section className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             <div className="glass-card rounded-xl p-5 flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Total Income</span>
+                <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">{t("analytics_page.summary.total_income")}</span>
                 <div className="w-8 h-8 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary">
                   <span className="material-symbols-outlined text-lg">trending_up</span>
                 </div>

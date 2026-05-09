@@ -7,12 +7,12 @@ import BottomNav from "@/components/BottomNav";
 import BudgetModal from "@/components/BudgetModal";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { useRouter } from "next/navigation";
-
-
 
 export default function Budget() {
   const { user, loading: authLoading, formatCurrency } = useAuth();
+  const { language, t } = useLanguage();
   const router = useRouter();
 
   const [budgets, setBudgets] = useState<any[]>([]);
@@ -82,8 +82,8 @@ export default function Budget() {
           {/* Page Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
             <div>
-              <h1 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">Budget Management</h1>
-              <p className="font-body-lg text-body-lg text-on-surface-variant mt-1">Track your spending limits across categories.</p>
+              <h1 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{t("budget_page.title")}</h1>
+              <p className="font-body-lg text-body-lg text-on-surface-variant mt-1">{t("budget_page.subtitle")}</p>
             </div>
             <button 
               onClick={() => {
@@ -93,7 +93,7 @@ export default function Budget() {
               className="bg-primary hover:bg-primary-container text-on-primary font-body-sm text-body-sm font-semibold px-6 py-2.5 rounded-lg flex items-center gap-2 transition-all duration-200 hover:scale-[1.02] shadow-sm self-start md:self-auto"
             >
               <span className="material-symbols-outlined text-[18px]">add</span>
-              Add Budget
+              {t("budget_page.create_new")}
             </button>
           </div>
 
@@ -109,7 +109,7 @@ export default function Budget() {
               <div className="absolute -right-20 -top-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
               <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4 relative z-10">
                 <div>
-                  <h2 className="font-label-caps text-label-caps text-on-surface-variant mb-2">Total Monthly Budget</h2>
+                  <h2 className="font-label-caps text-label-caps text-on-surface-variant mb-2">{language === 'id' ? 'Total Anggaran Bulanan' : 'Total Monthly Budget'}</h2>
                   <div className="flex items-baseline gap-2">
                     <span className="font-display text-display text-on-surface font-bold">{formatCurrency(summary.totalSpent)}</span>
                     <span className="font-body-lg text-body-lg text-outline">/ {formatCurrency(summary.totalBudget)}</span>
@@ -117,12 +117,12 @@ export default function Budget() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="flex flex-col items-end">
-                    <span className="font-label-caps text-label-caps text-on-surface-variant">Remaining</span>
+                    <span className="font-label-caps text-label-caps text-on-surface-variant">{language === 'id' ? 'Tersisa' : 'Remaining'}</span>
                     <span className="font-headline-md text-headline-md text-secondary font-semibold">{formatCurrency(summary.totalRemaining)}</span>
                   </div>
                   <div className="h-10 w-px bg-outline-variant/40"></div>
                   <div className="flex flex-col items-end">
-                    <span className="font-label-caps text-label-caps text-on-surface-variant">Spent</span>
+                    <span className="font-label-caps text-label-caps text-on-surface-variant">{language === 'id' ? 'Terpakai' : 'Spent'}</span>
                     <span className="font-headline-md text-headline-md text-on-surface font-semibold">{summary.overallPercentage}%</span>
                   </div>
                 </div>
@@ -143,13 +143,13 @@ export default function Budget() {
 
           {/* Category Breakdown Grid */}
           <div className="mb-4">
-            <h3 className="font-headline-md text-headline-md text-on-surface font-semibold">Category Breakdown</h3>
+            <h3 className="font-headline-md text-headline-md text-on-surface font-semibold">{language === 'id' ? 'Rincian Kategori' : 'Category Breakdown'}</h3>
           </div>
           
           {budgets.length === 0 ? (
             <div className="text-center py-12 bg-surface/50 rounded-xl border border-outline-variant/20">
               <span className="material-symbols-outlined text-4xl text-outline mb-2">account_balance_wallet</span>
-              <p className="text-on-surface-variant">No budgets set for this month.</p>
+              <p className="text-on-surface-variant">{language === 'id' ? 'Belum ada anggaran untuk bulan ini.' : 'No budgets set for this month.'}</p>
               <button 
                 onClick={() => {
                   setBudgetToEdit(null);
@@ -157,7 +157,7 @@ export default function Budget() {
                 }}
                 className="mt-4 text-primary font-medium hover:underline"
               >
-                Create your first budget
+                {language === 'id' ? 'Buat anggaran pertama Anda' : 'Create your first budget'}
               </button>
             </div>
           ) : (
@@ -229,7 +229,9 @@ export default function Budget() {
                         <div className={`h-full ${bgColor} rounded-full`} style={{ width: `${Math.min(100, b.percentage)}%` }}></div>
                       </div>
                       {b.status === 'critical' && (
-                        <p className="font-body-sm text-[11px] text-error mt-1.5 opacity-80">Only {formatCurrency(b.remaining)} remaining</p>
+                        <p className="font-body-sm text-[11px] text-error mt-1.5 opacity-80">
+                          {language === 'id' ? `Tersisa hanya ${formatCurrency(b.remaining)}` : `Only ${formatCurrency(b.remaining)} remaining`}
+                        </p>
                       )}
                     </div>
                   </div>

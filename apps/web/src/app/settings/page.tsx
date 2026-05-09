@@ -7,11 +7,13 @@ import BottomNav from "@/components/BottomNav";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { useRouter } from "next/navigation";
 
 export default function Settings() {
   const { user, loading: authLoading, logout, setCurrency: setGlobalCurrency } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { language, setLanguage, t } = useLanguage();
   const router = useRouter();
 
   const [profile, setProfile] = useState<any>(null);
@@ -168,8 +170,8 @@ export default function Settings() {
         <div className="max-w-[1440px] mx-auto">
           <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
             <div>
-              <h2 className="font-headline-lg text-headline-lg text-on-background">Settings</h2>
-              <p className="font-body-lg text-body-lg text-outline mt-1">Manage your account preferences and configurations.</p>
+              <h2 className="font-headline-lg text-headline-lg text-on-background">{t("settings_page.title")}</h2>
+              <p className="font-body-lg text-body-lg text-outline mt-1">{t("settings_page.subtitle")}</p>
             </div>
             
             <button 
@@ -177,7 +179,7 @@ export default function Settings() {
               className="bg-error/10 text-error hover:bg-error/20 font-label-caps text-label-caps px-4 py-2 rounded-lg transition-all flex items-center gap-2"
             >
               <span className="material-symbols-outlined text-[18px]">logout</span>
-              Log Out
+              {t("common.logout")}
             </button>
           </div>
 
@@ -189,7 +191,7 @@ export default function Settings() {
               <section className="bg-surface/80 backdrop-blur-[12px] border border-white/10 border-outline-variant/20 rounded-xl p-6 shadow-sm">
                 <h3 className="font-headline-md text-headline-md text-on-background mb-6 flex items-center gap-2">
                   <span className="material-symbols-outlined text-primary">person</span>
-                  Profile
+                  {t("settings_page.profile_section.title")}
                 </h3>
                 <div className="flex flex-col sm:flex-row gap-8 items-start sm:items-center mb-8">
                   <div className="relative">
@@ -201,7 +203,7 @@ export default function Settings() {
                   </div>
                   <div className="flex-grow w-full">
                     <div className="mb-4">
-                      <label className="block font-label-caps text-label-caps text-outline mb-1 uppercase">Full Name</label>
+                      <label className="block font-label-caps text-label-caps text-outline mb-1 uppercase">{t("settings_page.profile_section.full_name")}</label>
                       <input 
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
@@ -210,7 +212,7 @@ export default function Settings() {
                       />
                     </div>
                     <div>
-                      <label className="block font-label-caps text-label-caps text-outline mb-1 uppercase">Email Address</label>
+                      <label className="block font-label-caps text-label-caps text-outline mb-1 uppercase">{t("settings_page.profile_section.email")}</label>
                       <input 
                         value={user?.email || ""}
                         disabled
@@ -222,7 +224,7 @@ export default function Settings() {
                 </div>
 
                 <div className="border-t border-outline-variant/20 pt-6">
-                  <label className="block font-label-caps text-label-caps text-outline mb-1 uppercase">Primary Currency</label>
+                  <label className="block font-label-caps text-label-caps text-outline mb-1 uppercase">{t("settings_page.profile_section.primary_currency")}</label>
                   <div className="relative w-full sm:w-1/2">
                     <select 
                       value={currency}
@@ -248,7 +250,7 @@ export default function Settings() {
                     {saving ? (
                       <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
                     ) : (
-                      "Save Changes"
+                      t("settings_page.profile_section.save_changes")
                     )}
                   </button>
                 </div>
@@ -258,16 +260,18 @@ export default function Settings() {
               <section className="bg-surface/80 backdrop-blur-[12px] border border-white/10 border-outline-variant/20 rounded-xl p-6 shadow-sm">
                 <h3 className="font-headline-md text-headline-md text-on-background mb-6 flex items-center gap-2">
                   <span className="material-symbols-outlined text-primary">palette</span>
-                  Appearance
+                  {t("settings_page.appearance_section.title")}
                 </h3>
-                <div className="flex items-center justify-between p-4 border border-outline-variant/30 rounded-lg bg-surface-variant/20">
+                
+                {/* Dark Mode Toggle */}
+                <div className="flex items-center justify-between p-4 border border-outline-variant/30 rounded-lg bg-surface-variant/20 mb-4">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-full bg-surface-variant/50 flex items-center justify-center">
                       <span className="material-symbols-outlined text-on-surface">dark_mode</span>
                     </div>
                     <div>
-                      <h4 className="font-body-lg text-body-lg font-medium text-on-surface">Dark Mode</h4>
-                      <p className="font-body-sm text-body-sm text-outline">Toggle dark theme</p>
+                      <h4 className="font-body-lg text-body-lg font-medium text-on-surface">{t("common.dark_mode")}</h4>
+                      <p className="font-body-sm text-body-sm text-outline">{t("settings_page.appearance_section.dark_mode_desc")}</p>
                     </div>
                   </div>
                   {/* Toggle Switch */}
@@ -281,6 +285,30 @@ export default function Settings() {
                     <div className="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                   </label>
                 </div>
+
+                {/* Language Selector */}
+                <div className="flex items-center justify-between p-4 border border-outline-variant/30 rounded-lg bg-surface-variant/20">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-surface-variant/50 flex items-center justify-center">
+                      <span className="material-symbols-outlined text-on-surface">language</span>
+                    </div>
+                    <div>
+                      <h4 className="font-body-lg text-body-lg font-medium text-on-surface">{t("settings_page.appearance_section.language")}</h4>
+                      <p className="font-body-sm text-body-sm text-outline">{t("settings_page.appearance_section.language_desc")}</p>
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <select 
+                      value={language}
+                      onChange={(e) => setLanguage(e.target.value as any)}
+                      className="appearance-none bg-surface-variant/30 border border-outline-variant/30 rounded-lg px-4 py-2 font-body-sm text-body-sm text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all cursor-pointer pr-10"
+                    >
+                      <option value="en">English (US)</option>
+                      <option value="id">Bahasa Indonesia</option>
+                    </select>
+                    <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-outline text-[18px]">expand_more</span>
+                  </div>
+                </div>
               </section>
             </div>
 
@@ -290,17 +318,17 @@ export default function Settings() {
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="font-headline-md text-headline-md text-on-background flex items-center gap-2">
                     <span className="material-symbols-outlined text-primary">category</span>
-                    Categories
+                    {t("settings_page.categories_section.title")}
                   </h3>
                   <button 
                     onClick={() => { setShowAddCat(!showAddCat); setCatError(""); }}
                     className="flex items-center gap-1 text-primary font-label-caps text-label-caps hover:bg-primary/10 px-3 py-1.5 rounded-lg transition-colors"
                   >
                     <span className="material-symbols-outlined text-sm">{showAddCat ? 'close' : 'add'}</span>
-                    {showAddCat ? 'Cancel' : 'Add New'}
+                    {showAddCat ? t("common.cancel") : t("settings_page.categories_section.add_new")}
                   </button>
                 </div>
-                <p className="font-body-sm text-body-sm text-outline mb-4">Manage categories for tagging transactions and budget planning.</p>
+                <p className="font-body-sm text-body-sm text-outline mb-4">{t("settings_page.categories_section.subtitle")}</p>
 
                 {catError && (
                   <div className="mb-4 p-3 bg-error-container/50 text-error text-sm rounded-lg flex items-start gap-2">
@@ -319,7 +347,7 @@ export default function Settings() {
                       value={newCatName}
                       onChange={(e) => setNewCatName(e.target.value)}
                       className="w-full px-3 py-2 bg-surface border border-outline-variant/30 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                      placeholder="Category name..."
+                      placeholder={t("settings_page.categories_section.category_name")}
                       onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
                     />
                     <div className="flex gap-3">
@@ -327,28 +355,28 @@ export default function Settings() {
                         value={newCatIcon}
                         onChange={(e) => setNewCatIcon(e.target.value)}
                         className="flex-1 px-3 py-2 bg-surface border border-outline-variant/30 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                        placeholder="Icon name (e.g. restaurant)"
+                        placeholder={t("settings_page.categories_section.icon_name")}
                       />
                       <select
                         value={newCatType}
                         onChange={(e) => setNewCatType(e.target.value as "expense" | "income")}
                         className="px-3 py-2 bg-surface border border-outline-variant/30 rounded-lg text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none appearance-none"
                       >
-                        <option value="expense">Expense</option>
-                        <option value="income">Income</option>
+                        <option value="expense">{t("common.expense")}</option>
+                        <option value="income">{t("common.income")}</option>
                       </select>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className={`w-8 h-8 rounded-full ${newCatType === 'income' ? 'bg-secondary/10 text-secondary' : 'bg-primary/10 text-primary'} flex items-center justify-center`}>
                         <span className="material-symbols-outlined text-sm">{newCatIcon || 'category'}</span>
                       </div>
-                      <span className="text-sm text-on-surface-variant">Preview</span>
+                      <span className="text-sm text-on-surface-variant">{t("settings_page.categories_section.preview")}</span>
                       <button
                         onClick={handleAddCategory}
                         disabled={addingCat || !newCatName.trim()}
                         className="ml-auto bg-primary text-on-primary text-sm font-medium px-4 py-1.5 rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
                       >
-                        {addingCat ? "Adding..." : "Add"}
+                        {addingCat ? t("common.loading") : t("common.add")}
                       </button>
                     </div>
                   </div>
@@ -394,14 +422,14 @@ export default function Settings() {
                           <button 
                             onClick={() => { setEditingCatId(c.id); setEditCatName(c.name); setCatError(""); }}
                             className="text-outline hover:text-primary transition-colors p-1.5 rounded hover:bg-primary/10"
-                            title="Edit name"
+                            title={t("common.edit")}
                           >
                             <span className="material-symbols-outlined text-sm">edit</span>
                           </button>
                           <button 
                             onClick={() => handleDeleteCategory(c.id, c.name)}
                             className="text-outline hover:text-error transition-colors p-1.5 rounded hover:bg-error/10"
-                            title="Delete category"
+                            title={t("common.delete")}
                           >
                             <span className="material-symbols-outlined text-sm">delete</span>
                           </button>
