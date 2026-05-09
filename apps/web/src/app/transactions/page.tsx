@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense, useCallback } from "react";
 import Sidebar from "@/components/Sidebar";
 import Topbar from "@/components/Topbar";
 import BottomNav from "@/components/BottomNav";
@@ -57,42 +57,42 @@ function TransactionsContent() {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      if (!user) return;
+  const fetchTransactions = useCallback(async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      let url = `/transactions?page=${page}&limit=10`;
+      if (typeFilter !== "all") url += `&type=${typeFilter}`;
       
-      setLoading(true);
-      try {
-        let url = `/transactions?page=${page}&limit=10`;
-        if (typeFilter !== "all") url += `&type=${typeFilter}`;
-        
-        const response = await api.get(url);
-        
-        // API returns { success, data: [...transactions], pagination: {...} }
-        let filteredTx = response.data || [];
-        if (debouncedSearch) {
-          const lowerQ = debouncedSearch.toLowerCase();
-          filteredTx = filteredTx.filter((tx: any) => 
-            (tx.note && tx.note.toLowerCase().includes(lowerQ)) || 
-            (tx.categoryName && tx.categoryName.toLowerCase().includes(lowerQ))
-          );
-        }
-
-        setTransactions(filteredTx);
-        setTotalPages(response.pagination?.totalPages || 1);
-        setTotalItems(response.pagination?.totalItems || 0);
-      } catch (err: any) {
-        setError("Failed to load transactions.");
-        console.error(err);
-      } finally {
-        setLoading(false);
+      const response = await api.get(url);
+      
+      // API returns { success, data: [...transactions], pagination: {...} }
+      let filteredTx = response.data || [];
+      if (debouncedSearch) {
+        const lowerQ = debouncedSearch.toLowerCase();
+        filteredTx = filteredTx.filter((tx: any) => 
+          (tx.note && tx.note.toLowerCase().includes(lowerQ)) || 
+          (tx.categoryName && tx.categoryName.toLowerCase().includes(lowerQ))
+        );
       }
-    };
 
+      setTransactions(filteredTx);
+      setTotalPages(response.pagination?.totalPages || 1);
+      setTotalItems(response.pagination?.totalItems || 0);
+    } catch (err: any) {
+      setError("Failed to load transactions.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [user, page, typeFilter, debouncedSearch]);
+
+  useEffect(() => {
     if (user) {
       fetchTransactions();
     }
-  }, [user, page, typeFilter, debouncedSearch]);
+  }, [fetchTransactions, user]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this transaction?")) return;
@@ -371,7 +371,7 @@ function TransactionsContent() {
         onSuccess={() => {
           // Re-fetch transactions
           setPage(1);
-          setTransactions([]); // clear cache to show loading
+          fetchTransactions();
         }}
         transactionToEdit={transactionToEdit}
       />
