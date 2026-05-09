@@ -213,20 +213,20 @@ export default function Home() {
         </section>
 
         {/* Footer / Watermark */}
-        <footer className="w-full max-w-5xl mt-32 pb-12 border-t border-outline-variant/10 pt-12 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="material-symbols-outlined text-on-primary text-[18px]">account_balance_wallet</span>
+        <footer className="w-full max-w-5xl mx-auto mt-32 pb-12 border-t border-outline-variant/10 pt-12 flex flex-col items-center gap-4">
+          <div className="flex items-center gap-2 opacity-60">
+            <div className="w-6 h-6 bg-on-surface-variant/20 rounded flex items-center justify-center">
+              <span className="material-symbols-outlined text-on-surface-variant text-[14px]">account_balance_wallet</span>
             </div>
-            <span className="font-display-sm text-display-sm tracking-tight text-on-surface">FinTrack</span>
+            <span className="font-display-sm text-[16px] tracking-tight text-on-surface-variant">FinTrack</span>
           </div>
           
-          <div className="flex flex-col items-center md:items-end gap-2 px-4 md:px-0">
-            <p className="font-body-sm text-body-sm text-on-surface-variant">
+          <div className="text-center">
+            <p className="font-body-sm text-body-sm text-on-surface-variant opacity-80">
               © 2026 whtsn. All rights reserved.
             </p>
-            <p className="font-label-sm text-label-sm text-primary/60">
-              Built with precision and security.
+            <p className="font-label-sm text-[10px] uppercase tracking-[0.2em] text-primary/40 mt-1">
+              Precision Financial Instrument
             </p>
           </div>
         </footer>
