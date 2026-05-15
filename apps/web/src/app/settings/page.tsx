@@ -15,7 +15,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Category, UserProfile } from "@/types";
+import { Category, UserProfile, ApiResponse } from "@/types";
 
 export default function Settings() {
   const { user, loading: authLoading, logout, setCurrency: setGlobalCurrency } = useAuth();
@@ -35,17 +35,21 @@ export default function Settings() {
   }, [user, authLoading, router]);
 
   // Queries
-  const { data: profile, isLoading: profileLoading } = useQuery<UserProfile>({
+  const { data: profileData, isLoading: profileLoading } = useQuery<ApiResponse<UserProfile>>({
     queryKey: ["profile"],
     queryFn: () => api.get("/users/profile"),
     enabled: !!user,
   });
 
-  const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
+  const profile = profileData?.data;
+
+  const { data: categoriesData, isLoading: categoriesLoading } = useQuery<ApiResponse<Category[]>>({
     queryKey: ["categories"],
     queryFn: () => api.get("/categories"),
     enabled: !!user,
   });
+
+  const categories = categoriesData?.data || [];
 
   // Sync internal state with profile data
   useEffect(() => {
