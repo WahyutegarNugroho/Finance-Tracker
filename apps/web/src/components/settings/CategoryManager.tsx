@@ -11,6 +11,7 @@ interface CategoryManagerProps {
   onUpdateCategory: (id: string, name: string) => void;
   onDeleteCategory: (id: string) => void;
   isAdding: boolean;
+  isUpdating: boolean;
   isDeleting: boolean;
 }
 
@@ -21,6 +22,7 @@ export default function CategoryManager({
   onUpdateCategory,
   onDeleteCategory,
   isAdding,
+  isUpdating,
   isDeleting,
 }: CategoryManagerProps) {
   const { language, t, tCategory } = useLanguage();
