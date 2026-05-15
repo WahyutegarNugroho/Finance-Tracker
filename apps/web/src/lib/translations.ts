@@ -138,6 +138,10 @@ export const translations: Record<string, any> = {
         "Housing": "Housing",
         "Education": "Education",
         "Personal": "Personal",
+      },
+      danger_zone: {
+        title: "Danger Zone",
+        desc: "Warning: These actions are irreversible and may affect your account data."
       }
     }
   },
@@ -280,6 +284,10 @@ export const translations: Record<string, any> = {
         "Housing": "Tempat Tinggal",
         "Education": "Pendidikan",
         "Personal": "Pribadi",
+      },
+      danger_zone: {
+        title: "Zona Berbahaya",
+        desc: "Peringatan: Tindakan ini tidak dapat dibatalkan dan dapat mempengaruhi data akun Anda."
       }
     }
   }
