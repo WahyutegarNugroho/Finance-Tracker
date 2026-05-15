@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Category, Transaction } from "@/types";
+import { Category, Transaction, ApiResponse } from "@/types";
 
 type TransactionModalProps = {
   isOpen: boolean;
