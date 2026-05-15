@@ -91,11 +91,11 @@ export default function Settings() {
     onError: (err: any) => {
       const msg = err?.data?.message || err?.message || "";
       if (msg.includes("transactions") || msg.includes("Cannot delete")) {
-        setCatError(language === 'id' 
+        toast.error(language === 'id' 
           ? `Tidak dapat menghapus kategori ini karena memiliki transaksi.` 
           : `Cannot delete this category because it has existing transactions.`);
       } else {
-        setCatError(language === 'id' ? `Gagal menghapus kategori.` : `Failed to delete category.`);
+        toast.error(language === 'id' ? `Gagal menghapus kategori.` : `Failed to delete category.`);
       }
     }
   });
