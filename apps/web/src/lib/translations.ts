@@ -115,10 +115,11 @@ export const translations: Record<string, any> = {
         language: "Language",
         language_desc: "Select your preferred language",
       },
-      categories_section: {
+      category_section: {
         title: "Categories",
         subtitle: "Manage categories for tagging transactions.",
         add_new: "Add New",
+        name: "Category Name",
         category_name: "Category name...",
         icon_name: "Icon name (e.g. restaurant)",
         preview: "Preview",
@@ -261,10 +262,11 @@ export const translations: Record<string, any> = {
         language: "Bahasa",
         language_desc: "Pilih bahasa yang Anda gunakan",
       },
-      categories_section: {
+      category_section: {
         title: "Kategori",
         subtitle: "Kelola kategori untuk menandai transaksi Anda.",
         add_new: "Tambah Baru",
+        name: "Nama Kategori",
         category_name: "Nama kategori...",
         icon_name: "Nama ikon (misal: restaurant)",
         preview: "Pratinjau",
