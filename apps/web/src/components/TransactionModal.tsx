@@ -38,11 +38,13 @@ export default function TransactionModal({
   };
 
   // Queries
-  const { data: categories = [], isLoading: fetchingCats } = useQuery<Category[]>({
+  const { data: categoriesData, isLoading: fetchingCats } = useQuery<ApiResponse<Category[]>>({
     queryKey: ["categories"],
     queryFn: () => api.get("/categories"),
     enabled: isOpen,
   });
+
+  const categories = Array.isArray(categoriesData?.data) ? categoriesData.data : [];
 
   useEffect(() => {
     if (isOpen) {
@@ -51,13 +53,10 @@ export default function TransactionModal({
         const amtStr = transactionToEdit.amount.toString();
         setAmount(amtStr);
         setDisplayAmount(formatWithDots(amtStr));
-        // Note: The backend might return categoryId or we might need to find it from name if not available
-        // In this project it seems categories are fixed and linked by name/id
         setCategoryId((transactionToEdit as any).categoryId || ""); 
         setDate(new Date(transactionToEdit.date).toISOString().split("T")[0]);
         setNote(transactionToEdit.note || "");
       } else {
-        // Reset form for new transaction
         setType("expense");
         setAmount("");
         setDisplayAmount("");
@@ -76,7 +75,7 @@ export default function TransactionModal({
 
   // Change default category when type changes
   useEffect(() => {
-    if (!transactionToEdit && categories.length > 0) {
+    if (!transactionToEdit && Array.isArray(categories) && categories.length > 0) {
       const defaultCat = categories.find((c) => c.type === type);
       if (defaultCat) setCategoryId(defaultCat.id);
     }
@@ -108,7 +107,7 @@ export default function TransactionModal({
     e.preventDefault();
     if (!amount || !categoryId || !date) return;
 
-    const selectedCategory = categories.find((c) => c.id === categoryId);
+    const selectedCategory = Array.isArray(categories) ? categories.find((c) => c.id === categoryId) : null;
     const payload = {
       type,
       amount: parseFloat(amount),
@@ -124,7 +123,9 @@ export default function TransactionModal({
 
   if (!isOpen) return null;
 
-  const filteredCategories = categories.filter((c) => c.type === type);
+  const filteredCategories = Array.isArray(categories) 
+    ? categories.filter((c) => c.type === type)
+    : [];
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
@@ -204,13 +205,13 @@ export default function TransactionModal({
               >
                 {fetchingCats ? (
                   <option>{t("common.loading")}</option>
-                ) : (
+                ) : Array.isArray(filteredCategories) ? (
                   filteredCategories.map((c) => (
                     <option key={c.id} value={c.id}>
                       {tCategory(c.name)}
                     </option>
                   ))
-                )}
+                ) : null}
               </select>
             </div>
 

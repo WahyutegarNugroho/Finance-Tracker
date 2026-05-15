@@ -44,7 +44,7 @@ export default function TransactionTable({
                   <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
                 </td>
               </tr>
-            ) : transactions.length === 0 ? (
+            ) : (!Array.isArray(transactions) || transactions.length === 0) ? (
               <tr>
                 <td colSpan={6} className="px-6 py-12 text-center text-on-surface-variant">
                   {t("transactions_page.no_data")}

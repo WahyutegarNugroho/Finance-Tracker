@@ -29,12 +29,12 @@ export default function RecentTransactions({ transactions, formatDate }: RecentT
         </a>
       </div>
       <div className="flex flex-col gap-2">
-        {transactions?.length === 0 ? (
+        {(!Array.isArray(transactions) || transactions.length === 0) ? (
           <div className="text-center py-6 text-on-surface-variant">
             {t("dashboard_page.no_recent")}
           </div>
         ) : (
-          transactions?.map((tx: Transaction) => (
+          transactions.map((tx: Transaction) => (
             <div key={tx.id} className="flex items-center justify-between p-3 hover:bg-surface-variant/30 rounded-lg transition-colors cursor-pointer border border-transparent hover:border-outline-variant/20">
               <div className="flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${

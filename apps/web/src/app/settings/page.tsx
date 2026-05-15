@@ -49,7 +49,7 @@ export default function Settings() {
     enabled: !!user,
   });
 
-  const categories = categoriesData?.data || [];
+  const categories = Array.isArray(categoriesData?.data) ? categoriesData.data : [];
 
   // Sync internal state with profile data
   useEffect(() => {

@@ -30,7 +30,7 @@ export default function SpendingChart({ expenseByCategory, totalExpense }: Spend
               className="w-40 h-40 rounded-full flex items-center justify-center relative shadow-inner"
               style={{
                 background: `conic-gradient(${
-                  expenseByCategory.map((cat, i, arr) => {
+                  (Array.isArray(expenseByCategory) ? expenseByCategory : []).map((cat, i, arr) => {
                     const prevPercentages = arr.slice(0, i).reduce((sum, c) => sum + c.percentage, 0);
                     return `${cat.color} ${prevPercentages}% ${prevPercentages + cat.percentage}%`;
                   }).join(', ')
@@ -49,7 +49,7 @@ export default function SpendingChart({ expenseByCategory, totalExpense }: Spend
             </div>
 
             <div className="mt-8 w-full flex flex-col gap-2.5 overflow-y-auto max-h-[140px] pr-1 custom-scrollbar">
-              {expenseByCategory.slice(0, 5).map((cat) => (
+              {Array.isArray(expenseByCategory) ? expenseByCategory.slice(0, 5).map((cat) => (
                 <div key={cat.name} className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: cat.color }}></div>
@@ -61,7 +61,7 @@ export default function SpendingChart({ expenseByCategory, totalExpense }: Spend
                     {cat.percentage}%
                   </span>
                 </div>
-              ))}
+              )) : null}
             </div>
           </>
         ) : (

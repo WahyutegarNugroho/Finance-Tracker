@@ -75,12 +75,12 @@ function TransactionsContent() {
   const totalItems = pagination?.totalItems || 0;
 
   // Client-side filtering for search (if backend doesn't support search parameter yet)
-  const filteredTransactions = debouncedSearch 
+  const filteredTransactions = (debouncedSearch && Array.isArray(transactions)) 
     ? transactions.filter((tx) => 
         (tx.note && tx.note.toLowerCase().includes(debouncedSearch.toLowerCase())) || 
         (tx.categoryName && tx.categoryName.toLowerCase().includes(debouncedSearch.toLowerCase()))
       )
-    : transactions;
+    : (Array.isArray(transactions) ? transactions : []);
 
   // Mutation
   const deleteMutation = useMutation({
@@ -94,7 +94,7 @@ function TransactionsContent() {
 
       // Optimistically update to the new value
       queryClient.setQueryData(["transactions", page, typeFilter], (old: ApiResponse<Transaction[]> | undefined) => {
-        if (!old) return old;
+        if (!old || !Array.isArray(old.data)) return old;
         return {
           ...old,
           data: old.data.filter((tx: Transaction) => tx.id !== id),

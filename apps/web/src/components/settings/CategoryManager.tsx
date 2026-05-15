@@ -122,7 +122,7 @@ export default function CategoryManager({
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {categories.map((cat) => (
+          {Array.isArray(categories) && categories.map((cat) => (
             <div key={cat.id} className="flex items-center justify-between p-3 border border-outline-variant/20 rounded-lg bg-surface-variant/5 group">
               <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${cat.type === 'income' ? 'bg-secondary/10 text-secondary' : 'bg-primary/10 text-primary'}`}>

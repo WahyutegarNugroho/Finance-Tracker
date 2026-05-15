@@ -71,8 +71,10 @@ export default function BudgetModal({
     setFetchingCats(true);
     try {
       const response = await api.get("/categories");
-      // Only expense categories make sense for budgets
-      const expenseCats = (response.data || []).filter((c: any) => c.type === "expense");
+      const rawData = response?.data;
+      const expenseCats = Array.isArray(rawData) 
+        ? rawData.filter((c: any) => c.type === "expense")
+        : [];
       setCategories(expenseCats);
       if (!budgetToEdit && expenseCats.length > 0) {
         setCategoryId(expenseCats[0].id);
@@ -90,7 +92,7 @@ export default function BudgetModal({
 
     setLoading(true);
     try {
-      const selectedCategory = categories.find((c) => c.id === categoryId);
+      const selectedCategory = Array.isArray(categories) ? categories.find((c) => c.id === categoryId) : null;
       const payload = {
         limitAmount: parseFloat(limitAmount),
         categoryId,
@@ -144,13 +146,13 @@ export default function BudgetModal({
             >
               {fetchingCats ? (
                 <option>{t("common.loading")}</option>
-              ) : (
+              ) : Array.isArray(categories) ? (
                 categories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {tCategory(c.name)}
                   </option>
                 ))
-              )}
+              ) : null}
             </select>
           </div>
 
