@@ -1,14 +1,20 @@
 "use client";
 
-import React, { useState, useEffect, Suspense, useCallback } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Sidebar from "@/components/Sidebar";
 import Topbar from "@/components/Topbar";
 import BottomNav from "@/components/BottomNav";
+import FilterBar from "@/components/transactions/FilterBar";
+import TransactionTable from "@/components/transactions/TransactionTable";
 import TransactionModal from "@/components/TransactionModal";
+import TransactionsSkeleton from "@/components/transactions/TransactionsSkeleton";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Transaction, ApiResponse } from "@/types";
 
 // Formatter for date
 const formatDate = (dateString: string, lang: string) => {
@@ -25,22 +31,17 @@ function TransactionsContent() {
   const { language, t, tCategory } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
 
-  const [transactions, setTransactions] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  
   // Pagination & Filters
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
   const [typeFilter, setTypeFilter] = useState("all"); // 'all', 'income', 'expense'
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
 
   // Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [transactionToEdit, setTransactionToEdit] = useState<any>(null);
+  const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -57,64 +58,81 @@ function TransactionsContent() {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  const fetchTransactions = useCallback(async () => {
-    if (!user) return;
-    
-    setLoading(true);
-    try {
+  // Query
+  const { data: transactionsData, isLoading: transactionsLoading, isError } = useQuery<ApiResponse<Transaction[]>>({
+    queryKey: ["transactions", page, typeFilter],
+    queryFn: () => {
       let url = `/transactions?page=${page}&limit=10`;
       if (typeFilter !== "all") url += `&type=${typeFilter}`;
-      
-      const response = await api.get(url);
-      
-      // API returns { success, data: [...transactions], pagination: {...} }
-      let filteredTx = response.data || [];
-      if (debouncedSearch) {
-        const lowerQ = debouncedSearch.toLowerCase();
-        filteredTx = filteredTx.filter((tx: any) => 
-          (tx.note && tx.note.toLowerCase().includes(lowerQ)) || 
-          (tx.categoryName && tx.categoryName.toLowerCase().includes(lowerQ))
-        );
+      return api.get(url);
+    },
+    enabled: !!user,
+  });
+
+  const transactions = transactionsData?.data || [];
+  const pagination = transactionsData?.pagination;
+  const totalPages = pagination?.totalPages || 1;
+  const totalItems = pagination?.totalItems || 0;
+
+  // Client-side filtering for search (if backend doesn't support search parameter yet)
+  const filteredTransactions = debouncedSearch 
+    ? transactions.filter((tx) => 
+        (tx.note && tx.note.toLowerCase().includes(debouncedSearch.toLowerCase())) || 
+        (tx.categoryName && tx.categoryName.toLowerCase().includes(debouncedSearch.toLowerCase()))
+      )
+    : transactions;
+
+  // Mutation
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => api.delete(`/transactions/${id}`),
+    onMutate: async (id) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey: ["transactions"] });
+
+      // Snapshot the previous value
+      const previousTransactions = queryClient.getQueryData(["transactions", page, typeFilter]);
+
+      // Optimistically update to the new value
+      queryClient.setQueryData(["transactions", page, typeFilter], (old: ApiResponse<Transaction[]> | undefined) => {
+        if (!old) return old;
+        return {
+          ...old,
+          data: old.data.filter((tx: Transaction) => tx.id !== id),
+        };
+      });
+
+      // Return a context object with the snapshotted value
+      return { previousTransactions };
+    },
+    onSuccess: () => {
+      toast.success(language === 'id' ? "Transaksi dihapus!" : "Transaction deleted!");
+    },
+    onError: (err, id, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousTransactions) {
+        queryClient.setQueryData(["transactions", page, typeFilter], context.previousTransactions);
       }
+      toast.error(language === 'id' ? "Gagal menghapus transaksi." : "Failed to delete transaction.");
+    },
+    onSettled: () => {
+      // Always refetch after error or success to keep server in sync
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-overview"] });
+    },
+  });
 
-      setTransactions(filteredTx);
-      setTotalPages(response.pagination?.totalPages || 1);
-      setTotalItems(response.pagination?.totalItems || 0);
-    } catch (err: any) {
-      setError("Failed to load transactions.");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [user, page, typeFilter, debouncedSearch]);
-
-  useEffect(() => {
-    if (user) {
-      fetchTransactions();
-    }
-  }, [fetchTransactions, user]);
-
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (!confirm(language === 'id' ? "Apakah Anda yakin ingin menghapus transaksi ini?" : "Are you sure you want to delete this transaction?")) return;
-    
-    try {
-      await api.delete(`/transactions/${id}`);
-      // Refresh current page
-      setPage(p => p); 
-      // trigger re-fetch by doing a dummy state update
-      setTransactions(transactions.filter(t => t.id !== id));
-    } catch (err) {
-      alert(language === 'id' ? "Gagal menghapus transaksi." : "Failed to delete transaction.");
-    }
+    deleteMutation.mutate(id);
   };
 
   const handleExport = () => {
-    if (transactions.length === 0) return;
+    if (filteredTransactions.length === 0) return;
     
     const headers = ["Date", "Category", "Note", "Amount", "Type"];
     const csvContent = [
       headers.join(","),
-      ...transactions.map(tx => [
+      ...filteredTransactions.map(tx => [
         new Date(tx.date).toISOString().split('T')[0],
         `"${tx.categoryName}"`,
         `"${tx.note || ''}"`,
@@ -134,8 +152,17 @@ function TransactionsContent() {
     document.body.removeChild(link);
   };
 
-  if (authLoading) {
-    return <div className="bg-background min-h-screen"></div>;
+  if (authLoading || (transactionsLoading && transactions.length === 0)) {
+    return (
+      <div className="bg-background min-h-screen">
+        <Topbar />
+        <Sidebar activePath="/transactions" />
+        <main className="pt-[88px] pb-[88px] md:pb-8 px-4 md:pl-[284px] md:pr-8 min-h-screen">
+          <TransactionsSkeleton />
+        </main>
+        <BottomNav activePath="/transactions" />
+      </div>
+    );
   }
 
   return (
@@ -145,7 +172,7 @@ function TransactionsContent() {
 
       {/* Main Content Area */}
       <main className="pt-[88px] pb-[88px] md:pb-8 px-4 md:pl-[284px] md:pr-8 min-h-screen w-full">
-        <div className="max-w-[1440px] mx-auto flex flex-col gap-6 h-full">
+        <div className="max-w-[1440px] mx-auto flex flex-col gap-6 h-full animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both">
           {/* Page Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
@@ -168,185 +195,57 @@ function TransactionsContent() {
             </button>
           </div>
 
-          {error && (
+          {isError && (
             <div className="p-4 bg-error-container text-error rounded-xl">
-              {error}
+              Failed to load transactions.
             </div>
           )}
 
-          {/* Toolbar & Filters */}
-          <div className="bg-surface/80 backdrop-blur-[12px] border border-white/10 rounded-xl p-4 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-            {/* Search */}
-            <div className="relative w-full lg:w-96">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">
-                search
-              </span>
-              <input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-sm font-body-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-on-background placeholder:text-outline"
-                placeholder={t("transactions_page.search_placeholder")}
-                type="text"
-              />
-            </div>
+          <FilterBar 
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            typeFilter={typeFilter}
+            setTypeFilter={setTypeFilter}
+            onExport={handleExport}
+            setPage={setPage}
+          />
 
-            {/* Filters & Actions */}
-            <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-              {/* Type Filter */}
-              <div className="relative group">
-                <select 
-                  value={typeFilter}
-                  onChange={(e) => {
-                    setTypeFilter(e.target.value);
-                    setPage(1);
-                  }}
-                  className="appearance-none flex items-center gap-2 pl-3 pr-8 py-2 bg-surface border border-outline-variant/30 rounded-lg hover:bg-surface-variant/30 transition-colors font-body-sm text-body-sm text-on-surface-variant focus:outline-none"
-                >
-                  <option value="all">{language === 'id' ? 'Tipe: Semua' : 'Type: All'}</option>
-                  <option value="income">{t("common.income")}</option>
-                  <option value="expense">{t("common.expense")}</option>
-                </select>
-                <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-[18px] pointer-events-none text-on-surface-variant">
-                  expand_more
-                </span>
-              </div>
-              
-              <div className="w-[1px] h-6 bg-outline-variant/30 mx-1 hidden lg:block"></div>
-              
-              {/* Export */}
-              <button 
-                onClick={handleExport}
-                className="flex items-center gap-2 px-4 py-2 bg-surface border border-outline-variant/30 rounded-lg hover:bg-surface-variant/30 transition-colors font-body-sm text-body-sm text-primary font-medium ml-auto lg:ml-0"
+          <TransactionTable 
+            transactions={filteredTransactions}
+            isLoading={transactionsLoading}
+            onEdit={(tx) => {
+              setTransactionToEdit(tx);
+              setIsModalOpen(true);
+            }}
+            onDelete={handleDelete}
+            formatDate={formatDate}
+          />
+
+          {/* Pagination */}
+          <div className="mt-auto px-6 py-4 border-t border-outline-variant/10 flex items-center justify-between bg-surface-container-lowest/50 rounded-xl bg-surface/80">
+            <span className="font-body-sm text-body-sm text-on-surface-variant">
+              {t("transactions_page.pagination.showing")} {page} {t("transactions_page.pagination.of")} {Math.max(1, totalPages)} ({totalItems} {t("transactions_page.pagination.total")})
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="p-1 rounded-md hover:bg-surface-variant text-on-surface disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
               >
-                <span className="material-symbols-outlined text-[18px]">
-                  download
-                </span>
-                {t("transactions_page.export_csv")}
+                <span className="material-symbols-outlined">chevron_left</span>
               </button>
-            </div>
-          </div>
-
-          {/* Transactions Data Table */}
-          <div className="bg-surface/80 backdrop-blur-[12px] border border-white/10 rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.02)] overflow-hidden flex-1 flex flex-col min-h-[400px]">
-            <div className="overflow-x-auto flex-1">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-outline-variant/20 bg-surface-container-low/50">
-                    <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider">{t("transactions_page.table.date")}</th>
-                    <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider">{t("transactions_page.table.category")}</th>
-                    <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider">{t("transactions_page.table.note")}</th>
-                    <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider text-right">{t("transactions_page.table.amount")}</th>
-                    <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider text-center">{t("common.type")}</th>
-                    <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider w-16"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-outline-variant/10 relative">
-                  {loading ? (
-                    <tr>
-                      <td colSpan={6} className="px-6 py-12 text-center">
-                        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-                      </td>
-                    </tr>
-                  ) : transactions.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="px-6 py-12 text-center text-on-surface-variant">
-                        {t("transactions_page.no_data")}
-                      </td>
-                    </tr>
-                  ) : (
-                    transactions.map((tx) => (
-                      <tr key={tx.id} className="hover:bg-surface-variant/20 transition-colors group">
-                        <td className="px-6 py-4 whitespace-nowrap font-body-sm text-body-sm text-on-surface">
-                          {formatDate(tx.date, language)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center gap-2">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                              tx.type === 'income' ? 'bg-secondary/10 text-secondary' : 'bg-primary/10 text-primary'
-                            }`}>
-                              <span className="material-symbols-outlined text-[16px]">
-                                {tx.categoryIcon || 'category'}
-                              </span>
-                            </div>
-                            <span className="font-body-sm text-body-sm text-on-surface">
-                              {tCategory(tx.categoryName)}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 font-body-sm text-body-sm text-on-surface-variant max-w-xs truncate">
-                          {tx.note || "-"}
-                        </td>
-                        <td className={`px-6 py-4 whitespace-nowrap font-numeric-data text-numeric-data text-right font-semibold ${
-                          tx.type === 'income' ? 'text-secondary' : 'text-on-surface'
-                        }`}>
-                          {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <span className={`inline-flex items-center px-2 py-1 rounded-md font-label-caps text-label-caps text-[10px] ${
-                            tx.type === 'income' 
-                              ? 'bg-secondary/10 text-secondary' 
-                              : 'bg-surface-variant/50 text-on-surface-variant'
-                          }`}>
-                            {tx.type === 'income' ? (language === 'id' ? 'Kredit' : 'Credit') : (language === 'id' ? 'Debit' : 'Debit')}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-outline transition-opacity relative group/menu">
-                          <button className="p-1 hover:bg-surface-variant rounded-full transition-colors opacity-0 group-hover:opacity-100">
-                            <span className="material-symbols-outlined text-[20px]">more_vert</span>
-                          </button>
-                          
-                          {/* Dropdown Menu */}
-                          <div className="absolute right-6 top-1/2 -translate-y-1/2 w-32 bg-surface border border-outline-variant/20 rounded-lg shadow-lg opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all z-10 flex flex-col overflow-hidden">
-                            <button 
-                              onClick={() => {
-                                setTransactionToEdit(tx);
-                                setIsModalOpen(true);
-                              }}
-                              className="text-left px-4 py-2 text-sm text-on-surface hover:bg-surface-variant/50"
-                            >
-                              {t("common.edit")}
-                            </button>
-                            <button 
-                              onClick={() => handleDelete(tx.id)}
-                              className="text-left px-4 py-2 text-sm text-error hover:bg-error-container/50"
-                            >
-                              {t("common.delete")}
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            <div className="mt-auto px-6 py-4 border-t border-outline-variant/10 flex items-center justify-between bg-surface-container-lowest/50">
-              <span className="font-body-sm text-body-sm text-on-surface-variant">
-                {t("transactions_page.pagination.showing")} {page} {t("transactions_page.pagination.of")} {Math.max(1, totalPages)} ({totalItems} {t("transactions_page.pagination.total")})
-              </span>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="p-1 rounded-md hover:bg-surface-variant text-on-surface disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-                >
-                  <span className="material-symbols-outlined">chevron_left</span>
-                </button>
-                <div className="flex gap-1">
-                  <span className="w-8 h-8 rounded-md bg-primary text-on-primary font-body-sm text-body-sm flex items-center justify-center">
-                    {page}
-                  </span>
-                </div>
-                <button 
-                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                  disabled={page >= totalPages || totalPages === 0}
-                  className="p-1 rounded-md hover:bg-surface-variant text-on-surface disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-                >
-                  <span className="material-symbols-outlined">chevron_right</span>
-                </button>
+              <div className="flex gap-1">
+                <span className="w-8 h-8 rounded-md bg-primary text-on-primary font-body-sm text-body-sm flex items-center justify-center">
+                  {page}
+                </span>
               </div>
+              <button 
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages || totalPages === 0}
+                className="p-1 rounded-md hover:bg-surface-variant text-on-surface disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+              >
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>
             </div>
           </div>
         </div>
@@ -371,7 +270,7 @@ function TransactionsContent() {
         onSuccess={() => {
           // Re-fetch transactions
           setPage(1);
-          fetchTransactions();
+          queryClient.invalidateQueries({ queryKey: ["transactions"] });
         }}
         transactionToEdit={transactionToEdit}
       />

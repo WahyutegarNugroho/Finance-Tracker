@@ -220,7 +220,7 @@ export default function Home() {
             </div>
             <span className="font-display-sm text-[16px] tracking-tight text-on-surface-variant">FinTrack</span>
           </div>
-          
+
           <div className="text-center">
             <p className="font-body-sm text-body-sm text-on-surface-variant opacity-80">
               © 2026 whtsn. All rights reserved.

@@ -4,20 +4,15 @@ import React, { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
-
-type Category = {
-  id: string;
-  name: string;
-  icon: string;
-  color: string;
-  type: "income" | "expense";
-};
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Category, Transaction } from "@/types";
 
 type TransactionModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  transactionToEdit?: any; // If editing, pass the transaction here
+  transactionToEdit?: Transaction | null;
 };
 
 export default function TransactionModal({
@@ -28,9 +23,7 @@ export default function TransactionModal({
 }: TransactionModalProps) {
   const { currencySymbol } = useAuth();
   const { language, t, tCategory } = useLanguage();
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [fetchingCats, setFetchingCats] = useState(false);
+  const queryClient = useQueryClient();
 
   // Form State
   const [type, setType] = useState<"income" | "expense">("expense");
@@ -44,11 +37,12 @@ export default function TransactionModal({
     return val.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchCategories();
-    }
-  }, [isOpen]);
+  // Queries
+  const { data: categories = [], isLoading: fetchingCats } = useQuery<Category[]>({
+    queryKey: ["categories"],
+    queryFn: () => api.get("/categories"),
+    enabled: isOpen,
+  });
 
   useEffect(() => {
     if (isOpen) {
@@ -57,7 +51,9 @@ export default function TransactionModal({
         const amtStr = transactionToEdit.amount.toString();
         setAmount(amtStr);
         setDisplayAmount(formatWithDots(amtStr));
-        setCategoryId(transactionToEdit.categoryId);
+        // Note: The backend might return categoryId or we might need to find it from name if not available
+        // In this project it seems categories are fixed and linked by name/id
+        setCategoryId((transactionToEdit as any).categoryId || ""); 
         setDate(new Date(transactionToEdit.date).toISOString().split("T")[0]);
         setNote(transactionToEdit.note || "");
       } else {
@@ -78,62 +74,52 @@ export default function TransactionModal({
     setDisplayAmount(formatWithDots(raw));
   };
 
-  const fetchCategories = async () => {
-    setFetchingCats(true);
-    try {
-      const response = await api.get("/categories");
-      setCategories(response.data || []);
-      // Auto select first category if not editing
-      if (!transactionToEdit && response.data && response.data.length > 0) {
-        const defaultCat = response.data.find((c: any) => c.type === type);
-        if (defaultCat) setCategoryId(defaultCat.id);
-      }
-    } catch (err) {
-      console.error("Failed to fetch categories", err);
-    } finally {
-      setFetchingCats(false);
-    }
-  };
-
   // Change default category when type changes
   useEffect(() => {
     if (!transactionToEdit && categories.length > 0) {
       const defaultCat = categories.find((c) => c.type === type);
       if (defaultCat) setCategoryId(defaultCat.id);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, categories, transactionToEdit]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Mutation
+  const saveMutation = useMutation({
+    mutationFn: (payload: any) => {
+      if (transactionToEdit) {
+        return api.put(`/transactions/${transactionToEdit.id}`, payload);
+      }
+      return api.post("/transactions", payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      toast.success(transactionToEdit ? 
+        (language === 'id' ? "Transaksi diperbarui!" : "Transaction updated!") : 
+        (language === 'id' ? "Transaksi ditambahkan!" : "Transaction added!")
+      );
+      onSuccess();
+      onClose();
+    },
+    onError: () => {
+      toast.error(language === 'id' ? "Gagal menyimpan transaksi." : "Failed to save transaction.");
+    }
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!amount || !categoryId || !date) return;
 
-    setLoading(true);
-    try {
-      const selectedCategory = categories.find((c) => c.id === categoryId);
-      const payload = {
-        type,
-        amount: parseFloat(amount),
-        categoryId,
-        categoryName: selectedCategory?.name || "Unknown",
-        categoryIcon: selectedCategory?.icon || "category",
-        date: new Date(date).toISOString(),
-        note,
-      };
+    const selectedCategory = categories.find((c) => c.id === categoryId);
+    const payload = {
+      type,
+      amount: parseFloat(amount),
+      categoryId,
+      categoryName: selectedCategory?.name || "Unknown",
+      categoryIcon: selectedCategory?.icon || "category",
+      date: new Date(date).toISOString(),
+      note,
+    };
 
-      if (transactionToEdit) {
-        await api.put(`/transactions/${transactionToEdit.id}`, payload);
-      } else {
-        await api.post("/transactions", payload);
-      }
-      onSuccess();
-      onClose();
-    } catch (err) {
-      console.error("Failed to save transaction", err);
-      alert("Failed to save transaction.");
-    } finally {
-      setLoading(false);
-    }
+    saveMutation.mutate(payload);
   };
 
   if (!isOpen) return null;
@@ -260,10 +246,10 @@ export default function TransactionModal({
           <div className="pt-2">
             <button
               type="submit"
-              disabled={loading}
+              disabled={saveMutation.isPending}
               className="w-full bg-primary text-on-primary font-medium py-3 rounded-xl hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-70 flex justify-center items-center"
             >
-              {loading ? (
+              {saveMutation.isPending ? (
                 <span className="material-symbols-outlined animate-spin">
                   progress_activity
                 </span>

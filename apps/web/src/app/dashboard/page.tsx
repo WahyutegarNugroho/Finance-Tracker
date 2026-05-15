@@ -5,15 +5,22 @@ import Sidebar from "@/components/Sidebar";
 import Topbar from "@/components/Topbar";
 import BottomNav from "@/components/BottomNav";
 import TransactionModal from "@/components/TransactionModal";
+import SummaryCards from "@/components/dashboard/SummaryCards";
+import CashFlowChart from "@/components/dashboard/CashFlowChart";
+import SpendingChart from "@/components/dashboard/SpendingChart";
+import RecentTransactions from "@/components/dashboard/RecentTransactions";
+import DashboardSkeleton from "@/components/dashboard/DashboardSkeleton";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useRouter } from "next/navigation";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function Dashboard() {
   const { user, loading: authLoading, formatCurrency } = useAuth();
   const { language, t, tCategory } = useLanguage();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   // Formatter for relative time or date
   const formatDate = (dateString: string) => {
@@ -23,26 +30,8 @@ export default function Dashboard() {
       day: "numeric",
     }).format(date);
   };
-  
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchDashboardData = async () => {
-    if (!user) return;
-    
-    try {
-      setLoading(true);
-      const response = await api.get("/analytics/overview");
-      setData(response.data);
-    } catch (err: any) {
-      setError("Failed to load dashboard data.");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -50,21 +39,48 @@ export default function Dashboard() {
     }
   }, [user, authLoading, router]);
 
-  useEffect(() => {
-    if (user) {
-      fetchDashboardData();
-    }
-  }, [user]);
+  // Query
+  const { data: dashboardData, isLoading: dashboardLoading, error: queryError } = useQuery({
+    queryKey: ["dashboard-overview"],
+    queryFn: () => api.get("/analytics/overview"),
+    enabled: !!user,
+  });
 
-  if (authLoading || loading) {
+  const data = dashboardData?.data;
+
+  if (authLoading) {
     return (
-      <div className="bg-background min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      <div className="bg-background min-h-screen">
+        <Topbar />
+        <Sidebar activePath="/dashboard" />
+        <main className="pt-[88px] pb-[88px] md:pb-8 px-4 md:pl-[284px] md:pr-8 min-h-screen">
+          <DashboardSkeleton />
+        </main>
+        <BottomNav activePath="/dashboard" />
       </div>
     );
   }
 
-  if (!data) return null;
+  if (dashboardLoading) {
+    return (
+      <div className="bg-background min-h-screen">
+        <Topbar />
+        <Sidebar activePath="/dashboard" />
+        <main className="pt-[88px] pb-[88px] md:pb-8 px-4 md:pl-[284px] md:pr-8 min-h-screen">
+          <DashboardSkeleton />
+        </main>
+        <BottomNav activePath="/dashboard" />
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="bg-background min-h-screen flex items-center justify-center">
+        <p className="text-on-surface-variant">{t("dashboard_page.no_data") || "No data available."}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-background text-on-background font-body-sm min-h-screen">
@@ -73,7 +89,7 @@ export default function Dashboard() {
 
       {/* Main Content Canvas */}
       <main className="pt-[88px] pb-[88px] md:pb-8 px-4 md:pl-[284px] md:pr-8 min-h-screen">
-        <div className="max-w-[1440px] mx-auto">
+        <div className="max-w-[1440px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both">
           {/* Header Section */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8">
             <div>
@@ -93,322 +109,36 @@ export default function Dashboard() {
             </button>
           </div>
 
-          {error && (
+          {queryError && (
             <div className="mb-4 p-4 bg-error-container text-error rounded-xl">
-              {error}
+              Failed to load dashboard data.
             </div>
           )}
 
-          {/* Summary Cards (Bento Layout Top Row) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            {/* Total Balance */}
-            <div className="glass-card rounded-xl p-5 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-10 -mt-10 blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
-              <div className="flex justify-between items-start mb-4 relative z-10">
-                <p className="font-label-caps text-label-caps text-outline">
-                  {t("dashboard_page.total_balance")}
-                </p>
-                <div className="p-2 bg-primary/10 text-primary rounded-lg">
-                  <span className="material-symbols-outlined text-[20px]">
-                    account_balance_wallet
-                  </span>
-                </div>
-              </div>
-              <div className="relative z-10">
-                <h3 className="font-headline-lg text-headline-lg text-on-surface">
-                  {formatCurrency(data.balance)}
-                </h3>
-                <div className={`flex items-center gap-1 mt-2 ${data.balanceChange >= 0 ? "text-secondary" : "text-error"}`}>
-                  <span className="material-symbols-outlined text-[16px]">
-                    {data.balanceChange >= 0 ? "arrow_upward" : "arrow_downward"}
-                  </span>
-                  <span className="font-numeric-data text-numeric-data text-sm">
-                    {Math.abs(data.balanceChange)}%
-                  </span>
-                  <span className="font-label-caps text-label-caps text-outline ml-1 normal-case">
-                    {t("dashboard_page.vs_last_month")}
-                  </span>
-                </div>
-              </div>
-            </div>
+          <SummaryCards data={data} />
 
-            {/* Income */}
-            <div className="glass-card rounded-xl p-5 relative overflow-hidden group">
-              <div className="flex justify-between items-start mb-4">
-                <p className="font-label-caps text-label-caps text-outline">
-                  {t("common.income")}
-                </p>
-                <div className="p-2 bg-secondary-container text-secondary rounded-lg">
-                  <span className="material-symbols-outlined text-[20px]">
-                    south_west
-                  </span>
-                </div>
-              </div>
-              <div>
-                <h3 className="font-headline-md text-headline-md text-on-surface">
-                  {formatCurrency(data.income)}
-                </h3>
-                <div className={`flex items-center gap-1 mt-2 ${data.incomeChange >= 0 ? "text-secondary" : "text-error"}`}>
-                  <span className="material-symbols-outlined text-[16px]">
-                    {data.incomeChange >= 0 ? "arrow_upward" : "arrow_downward"}
-                  </span>
-                  <span className="font-numeric-data text-numeric-data text-sm">
-                    {Math.abs(data.incomeChange)}%
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Expense */}
-            <div className="glass-card rounded-xl p-5 relative overflow-hidden group">
-              <div className="flex justify-between items-start mb-4">
-                <p className="font-label-caps text-label-caps text-outline">
-                  {t("common.expense")}
-                </p>
-                <div className="p-2 bg-error-container text-error rounded-lg">
-                  <span className="material-symbols-outlined text-[20px]">
-                    north_east
-                  </span>
-                </div>
-              </div>
-              <div>
-                <h3 className="font-headline-md text-headline-md text-on-surface">
-                  {formatCurrency(data.expense)}
-                </h3>
-                <div className={`flex items-center gap-1 mt-2 ${data.expenseChange <= 0 ? "text-secondary" : "text-error"}`}>
-                  <span className="material-symbols-outlined text-[16px]">
-                    {data.expenseChange >= 0 ? "arrow_upward" : "arrow_downward"}
-                  </span>
-                  <span className="font-numeric-data text-numeric-data text-sm">
-                    {Math.abs(data.expenseChange)}%
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Budget Usage */}
-            <div className="glass-card rounded-xl p-5 relative overflow-hidden group">
-              <div className="flex justify-between items-start mb-4">
-                <p className="font-label-caps text-label-caps text-outline">
-                  {t("dashboard_page.budget_usage")}
-                </p>
-                <div className="p-2 bg-tertiary-container/20 text-tertiary rounded-lg">
-                  <span className="material-symbols-outlined text-[20px]">
-                    pie_chart
-                  </span>
-                </div>
-              </div>
-              <div>
-                <div className="flex items-end gap-2 mb-2">
-                  <h3 className="font-headline-md text-headline-md text-on-surface">
-                    {data.budgetUsage}%
-                  </h3>
-                  <p className="font-body-sm text-body-sm text-outline pb-0.5">
-                    {language === 'id' ? 'dari' : 'of'} {formatCurrency(data.budgetLimit)}
-                  </p>
-                </div>
-                <div className="w-full bg-surface-variant rounded-full h-2 mt-3 overflow-hidden">
-                  <div
-                    className={`${data.budgetUsage > 90 ? 'bg-error' : data.budgetUsage > 75 ? 'bg-tertiary' : 'bg-primary'} h-2 rounded-full`}
-                    style={{ width: `${Math.min(data.budgetUsage, 100)}%` }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Charts Section */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            {/* Main Chart: Income vs Expense */}
-            <div className="glass-card rounded-xl p-6 lg:col-span-2 flex flex-col">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="font-headline-md text-headline-md text-on-surface">
-                  {t("dashboard_page.charts.cash_flow")}
-                </h3>
-                <select className="bg-transparent border-none text-on-surface-variant font-body-sm text-body-sm focus:ring-0 cursor-pointer pr-8 outline-none">
-                  <option>{language === 'id' ? '6 Bulan Terakhir' : 'Last 6 Months'}</option>
-                  <option>{t("analytics_page.time_range.this_year")}</option>
-                </select>
-              </div>
-              {/* Chart Placeholder Layout (CSS simulated) */}
-              <div className="flex-1 min-h-[240px] relative flex items-end gap-4 px-2 pb-6 pt-10 border-b border-l border-outline-variant/30">
-                {/* Y Axis labels */}
-                <div className="absolute left-[-40px] h-full flex flex-col justify-between text-label-caps text-outline py-6 pb-8">
-                  <span>10M</span>
-                  <span>5M</span>
-                  <span>0</span>
-                </div>
-                {/* Grid lines */}
-                <div className="absolute left-0 top-10 w-full border-t border-dashed border-outline-variant/20"></div>
-                <div className="absolute left-0 top-[50%] w-full border-t border-dashed border-outline-variant/20"></div>
-                {/* Bar groups */}
-                <div className="flex-1 flex justify-center items-end gap-1 relative z-10 group cursor-pointer">
-                  <div className="w-1/3 bg-secondary-container h-[40%] rounded-t-sm group-hover:opacity-80 transition-opacity"></div>
-                  <div className="w-1/3 bg-error-container h-[20%] rounded-t-sm group-hover:opacity-80 transition-opacity"></div>
-                  <span className="absolute -bottom-6 text-label-caps text-outline">
-                    {language === 'id' ? 'Jan' : 'Jan'}
-                  </span>
-                </div>
-                <div className="flex-1 flex justify-center items-end gap-1 relative z-10 group cursor-pointer">
-                  <div className="w-1/3 bg-secondary-container h-[50%] rounded-t-sm group-hover:opacity-80 transition-opacity"></div>
-                  <div className="w-1/3 bg-error-container h-[30%] rounded-t-sm group-hover:opacity-80 transition-opacity"></div>
-                  <span className="absolute -bottom-6 text-label-caps text-outline">
-                    {language === 'id' ? 'Feb' : 'Feb'}
-                  </span>
-                </div>
-                <div className="flex-1 flex justify-center items-end gap-1 relative z-10 group cursor-pointer">
-                  <div className="w-1/3 bg-secondary-container h-[70%] rounded-t-sm group-hover:opacity-80 transition-opacity"></div>
-                  <div className="w-1/3 bg-error-container h-[45%] rounded-t-sm group-hover:opacity-80 transition-opacity"></div>
-                  <span className="absolute -bottom-6 text-label-caps text-outline">
-                    {language === 'id' ? 'Mar' : 'Mar'}
-                  </span>
-                </div>
-                <div className="flex-1 flex justify-center items-end gap-1 relative z-10 group cursor-pointer">
-                  <div className="w-1/3 bg-secondary-container h-[60%] rounded-t-sm group-hover:opacity-80 transition-opacity"></div>
-                  <div className="w-1/3 bg-error-container h-[35%] rounded-t-sm group-hover:opacity-80 transition-opacity"></div>
-                  <span className="absolute -bottom-6 text-label-caps text-outline">
-                    {language === 'id' ? 'Apr' : 'Apr'}
-                  </span>
-                </div>
-                <div className="flex-1 flex justify-center items-end gap-1 relative z-10 group cursor-pointer">
-                  <div className="w-1/3 bg-secondary-container h-[85%] rounded-t-sm group-hover:opacity-80 transition-opacity"></div>
-                  <div className="w-1/3 bg-error-container h-[50%] rounded-t-sm group-hover:opacity-80 transition-opacity"></div>
-                  <span className="absolute -bottom-6 text-label-caps text-outline text-primary font-bold">
-                    {language === 'id' ? 'Mei' : 'May'}
-                  </span>
-                </div>
-              </div>
-              <div className="flex justify-center gap-6 mt-6">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-secondary-container"></div>
-                  <span className="font-label-caps text-label-caps text-on-surface-variant">
-                    {t("common.income")}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-error-container"></div>
-                  <span className="font-label-caps text-label-caps text-on-surface-variant">
-                    {t("common.expense")}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="glass-card rounded-xl p-6 flex flex-col">
-              <h3 className="font-headline-md text-headline-md text-on-surface mb-6">
-                {t("dashboard_page.charts.spending_by_category")}
-              </h3>
-              
-              <div className="relative flex-1 flex flex-col items-center justify-center min-h-[220px]">
-                {data.expenseByCategory?.length > 0 ? (
-                  <>
-                    <div
-                      className="w-40 h-40 rounded-full flex items-center justify-center relative shadow-inner"
-                      style={{
-                        background: `conic-gradient(${
-                          data.expenseByCategory.map((cat: any, i: number, arr: any[]) => {
-                            const prevPercentages = arr.slice(0, i).reduce((sum, c) => sum + c.percentage, 0);
-                            return `${cat.color} ${prevPercentages}% ${prevPercentages + cat.percentage}%`;
-                          }).join(', ')
-                        })`
-                      }}
-                    >
-                      {/* Inner Circle for Doughnut Effect */}
-                      <div className="absolute w-28 h-28 bg-surface rounded-full flex flex-col items-center justify-center shadow-sm">
-                        <span className="font-label-caps text-label-caps text-outline text-[9px] uppercase tracking-tighter">
-                          {language === 'id' ? 'Total Keluar' : 'Total Exp'}
-                        </span>
-                        <span className="font-numeric-data text-[13px] font-bold text-on-surface mt-0.5 px-2 text-center leading-tight">
-                          {formatCurrency(data.expense)}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="mt-8 w-full flex flex-col gap-2.5 overflow-y-auto max-h-[140px] pr-1 custom-scrollbar">
-                      {data.expenseByCategory.slice(0, 5).map((cat: any) => (
-                        <div key={cat.name} className="flex items-center justify-between">
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: cat.color }}></div>
-                            <span className="font-body-sm text-body-sm text-on-surface-variant truncate">
-                              {tCategory(cat.name)}
-                            </span>
-                          </div>
-                          <span className="font-numeric-data text-numeric-data text-on-surface text-xs font-medium ml-2">
-                            {cat.percentage}%
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center justify-center text-outline gap-2 py-8">
-                    <span className="material-symbols-outlined text-4xl">pie_chart</span>
-                    <p className="text-xs italic">{language === 'id' ? 'Belum ada data pengeluaran' : 'No spending data yet'}</p>
-                  </div>
-                )}
-              </div>
-            </div>
+            <CashFlowChart />
+            <SpendingChart 
+              expenseByCategory={data.expenseByCategory} 
+              totalExpense={data.expense} 
+            />
           </div>
 
-          {/* Recent Transactions */}
-          <div className="glass-card rounded-xl p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="font-headline-md text-headline-md text-on-surface">
-                {t("dashboard_page.recent_transactions")}
-              </h3>
-              <a
-                className="text-primary hover:text-primary-container font-label-caps text-label-caps transition-colors"
-                href="/transactions"
-              >
-                {t("common.view_all")}
-              </a>
-            </div>
-            <div className="flex flex-col gap-2">
-              {data.recentTransactions?.length === 0 ? (
-                <div className="text-center py-6 text-on-surface-variant">
-                  {t("dashboard_page.no_recent")}
-                </div>
-              ) : (
-                data.recentTransactions?.map((tx: any) => (
-                  <div key={tx.id} className="flex items-center justify-between p-3 hover:bg-surface-variant/30 rounded-lg transition-colors cursor-pointer border border-transparent hover:border-outline-variant/20">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${
-                        tx.type === 'income' 
-                          ? 'bg-secondary-container/20 text-secondary border-secondary/20' 
-                          : 'bg-surface-container text-on-surface-variant border-outline-variant/30'
-                      }`}>
-                        <span className="material-symbols-outlined">
-                          {tx.categoryIcon || (tx.type === 'income' ? 'payments' : 'receipt')}
-                        </span>
-                      </div>
-                      <div>
-                        <h4 className="font-body-sm text-body-sm font-semibold text-on-surface">
-                          {tx.note || tCategory(tx.categoryName)}
-                        </h4>
-                        <p className="font-label-caps text-label-caps text-outline mt-1">
-                          {tCategory(tx.categoryName)} • {formatDate(tx.date)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className={`font-numeric-data text-numeric-data ${tx.type === 'income' ? 'text-secondary' : 'text-on-surface'}`}>
-                        {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
-                      </p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
+          <RecentTransactions 
+            transactions={data.recentTransactions} 
+            formatDate={formatDate} 
+          />
         </div>
       </main>
 
       <BottomNav activePath="/dashboard" />
-
       <TransactionModal 
-        isOpen={isModalOpen}
+        isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)}
-        onSuccess={() => fetchDashboardData()}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ["dashboard-overview"] });
+        }}
       />
     </div>
   );
