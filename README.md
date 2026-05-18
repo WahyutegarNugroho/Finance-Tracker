@@ -154,5 +154,5 @@ Buka browser Anda dan akses aplikasi di: **[http://localhost:3000](http://localh
 ---
 
 <div align="center">
-  <p>© 2026 whtsn. Developed with ❤️ and Precision.</p>
+  <p>© 2026 whtsn dev.</p>
 </div>
