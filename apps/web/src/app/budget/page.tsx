@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ApiResponse } from "@/types";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 export default function Budget() {
   const { user, loading: authLoading, formatCurrency } = useAuth();
@@ -22,6 +23,12 @@ export default function Budget() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [budgetToEdit, setBudgetToEdit] = useState<any>(null);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+
+  // Confirm Dialog
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [budgetToDelete, setBudgetToDelete] = useState<string | null>(null);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -29,16 +36,40 @@ export default function Budget() {
     }
   }, [user, authLoading, router]);
 
+  const handlePrevMonth = () => {
+    if (selectedMonth === 1) {
+      setSelectedMonth(12);
+      setSelectedYear((prev) => prev - 1);
+    } else {
+      setSelectedMonth((prev) => prev - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (selectedMonth === 12) {
+      setSelectedMonth(1);
+      setSelectedYear((prev) => prev + 1);
+    } else {
+      setSelectedMonth((prev) => prev + 1);
+    }
+  };
+
+  const getMonthName = (m: number) => {
+    const monthsId = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+    const monthsEn = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    return language === 'id' ? monthsId[m - 1] : monthsEn[m - 1];
+  };
+
   // Queries
   const { data: budgetsData, isLoading: budgetsLoading } = useQuery<ApiResponse<any[]>>({
-    queryKey: ["budgets"],
-    queryFn: () => api.get("/budgets"),
+    queryKey: ["budgets", selectedMonth, selectedYear],
+    queryFn: () => api.get(`/budgets?month=${selectedMonth}&year=${selectedYear}`),
     enabled: !!user,
   });
 
   const { data: summaryData, isLoading: summaryLoading } = useQuery<ApiResponse<any>>({
-    queryKey: ["budgets-summary"],
-    queryFn: () => api.get("/budgets/summary"),
+    queryKey: ["budgets-summary", selectedMonth, selectedYear],
+    queryFn: () => api.get(`/budgets/summary?month=${selectedMonth}&year=${selectedYear}`),
     enabled: !!user,
   });
 
@@ -58,10 +89,17 @@ export default function Budget() {
     }
   });
 
-  const handleDelete = (id: string) => {
-    if (confirm(language === 'id' ? "Apakah Anda yakin ingin menghapus anggaran ini?" : "Are you sure you want to delete this budget limit?")) {
-      deleteMutation.mutate(id);
+  const handleDeleteClick = (id: string) => {
+    setBudgetToDelete(id);
+    setIsConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (budgetToDelete) {
+      deleteMutation.mutate(budgetToDelete);
     }
+    setIsConfirmOpen(false);
+    setBudgetToDelete(null);
   };
 
   if (authLoading) {
@@ -94,16 +132,38 @@ export default function Budget() {
                   <h1 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{t("budget_page.title")}</h1>
                   <p className="font-body-lg text-body-lg text-on-surface-variant mt-1">{t("budget_page.subtitle")}</p>
                 </div>
-                <button 
-                  onClick={() => {
-                    setBudgetToEdit(null);
-                    setIsModalOpen(true);
-                  }}
-                  className="bg-primary hover:bg-primary/90 text-on-primary font-body-sm text-body-sm font-semibold px-6 py-2.5 rounded-lg flex items-center gap-2 transition-all duration-200 hover:scale-[1.02] shadow-sm self-start md:self-auto"
-                >
-                  <span className="material-symbols-outlined text-[18px]">add</span>
-                  {t("budget_page.create_new")}
-                </button>
+                
+                <div className="flex items-center gap-4 self-start md:self-auto flex-wrap">
+                  {/* Period Selector */}
+                  <div className="flex items-center gap-3 bg-surface-container-high/60 border border-outline-variant/30 rounded-lg p-1.5 shadow-sm">
+                    <button 
+                      onClick={handlePrevMonth}
+                      className="w-8 h-8 rounded-md flex items-center justify-center hover:bg-surface-container-highest text-on-surface-variant transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">chevron_left</span>
+                    </button>
+                    <span className="font-numeric-data font-semibold text-sm px-2 text-on-surface min-w-[90px] text-center">
+                      {getMonthName(selectedMonth)} {selectedYear}
+                    </span>
+                    <button 
+                      onClick={handleNextMonth}
+                      className="w-8 h-8 rounded-md flex items-center justify-center hover:bg-surface-container-highest text-on-surface-variant transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">chevron_right</span>
+                    </button>
+                  </div>
+
+                  <button 
+                    onClick={() => {
+                      setBudgetToEdit(null);
+                      setIsModalOpen(true);
+                    }}
+                    className="bg-primary hover:bg-primary/90 text-on-primary font-body-sm text-body-sm font-semibold px-6 py-2.5 rounded-lg flex items-center gap-2 transition-all duration-200 hover:scale-[1.02] shadow-sm"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">add</span>
+                    {t("budget_page.create_new")}
+                  </button>
+                </div>
               </div>
 
               {/* Overall Budget Summary Card */}
@@ -198,7 +258,7 @@ export default function Budget() {
                             <span className="material-symbols-outlined text-[16px]">edit</span>
                           </button>
                           <button 
-                            onClick={() => handleDelete(b.id)}
+                            onClick={() => handleDeleteClick(b.id)}
                             className="p-1.5 bg-surface rounded-md border border-outline-variant/20 hover:bg-error-container hover:text-error text-on-surface transition-colors"
                             title="Delete Budget"
                           >
@@ -247,10 +307,23 @@ export default function Budget() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSuccess={() => {
-          queryClient.invalidateQueries({ queryKey: ["budgets"] });
-          queryClient.invalidateQueries({ queryKey: ["budgets-summary"] });
+          queryClient.invalidateQueries({ queryKey: ["budgets", selectedMonth, selectedYear] });
+          queryClient.invalidateQueries({ queryKey: ["budgets-summary", selectedMonth, selectedYear] });
         }}
         budgetToEdit={budgetToEdit}
+        month={selectedMonth}
+        year={selectedYear}
+      />
+
+      <ConfirmDialog 
+        isOpen={isConfirmOpen}
+        title={language === 'id' ? "Hapus Anggaran" : "Delete Budget"}
+        message={language === 'id' ? "Apakah Anda yakin ingin menghapus batas anggaran ini? Tindakan ini tidak dapat dibatalkan." : "Are you sure you want to delete this budget limit? This action cannot be undone."}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          setIsConfirmOpen(false);
+          setBudgetToDelete(null);
+        }}
       />
     </div>
   );

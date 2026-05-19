@@ -21,7 +21,7 @@ export default function TransactionModal({
   onSuccess,
   transactionToEdit,
 }: TransactionModalProps) {
-  const { currencySymbol } = useAuth();
+  const { currencySymbol, currency } = useAuth();
   const { language, t, tCategory } = useLanguage();
   const queryClient = useQueryClient();
 
@@ -34,7 +34,22 @@ export default function TransactionModal({
   const [note, setNote] = useState("");
 
   const formatWithDots = (val: string) => {
-    return val.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    const isDecimalAllowed = currency !== "IDR" && currency !== "JPY";
+    
+    if (isDecimalAllowed) {
+      // Normalize and split integer and decimal parts
+      let cleaned = val.replace(/,/g, ".").replace(/[^0-9.]/g, "");
+      const parts = cleaned.split(".");
+      if (parts.length > 2) {
+        cleaned = parts[0] + "." + parts.slice(1).join("");
+      }
+      
+      const formattedInt = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      const formattedDec = parts[1] !== undefined ? "." + parts[1] : "";
+      return formattedInt + formattedDec;
+    } else {
+      return val.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
   };
 
   // Queries
@@ -68,9 +83,24 @@ export default function TransactionModal({
   }, [isOpen, transactionToEdit]);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value.replace(/\D/g, "");
-    setAmount(raw);
-    setDisplayAmount(formatWithDots(raw));
+    const isDecimalAllowed = currency !== "IDR" && currency !== "JPY";
+    let inputVal = e.target.value;
+    
+    if (isDecimalAllowed) {
+      inputVal = inputVal.replace(/,/g, ".");
+      let cleaned = inputVal.replace(/[^0-9.]/g, "");
+      const parts = cleaned.split(".");
+      if (parts.length > 2) {
+        cleaned = parts[0] + "." + parts.slice(1).join("");
+      }
+      
+      setAmount(cleaned);
+      setDisplayAmount(formatWithDots(cleaned));
+    } else {
+      const raw = inputVal.replace(/\D/g, "");
+      setAmount(raw);
+      setDisplayAmount(formatWithDots(raw));
+    }
   };
 
   // Change default category when type changes

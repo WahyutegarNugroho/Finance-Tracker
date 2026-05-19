@@ -3,6 +3,19 @@
 import React from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import { Doughnut } from "react-chartjs-2";
+
+ChartJS.register(
+  ArcElement,
+  Tooltip,
+  Legend
+);
 
 interface SpendingChartProps {
   expenseByCategory: Array<{
@@ -17,6 +30,40 @@ export default function SpendingChart({ expenseByCategory, totalExpense }: Spend
   const { formatCurrency } = useAuth();
   const { language, t, tCategory } = useLanguage();
 
+  const doughnutData = {
+    labels: Array.isArray(expenseByCategory) ? expenseByCategory.map((cat) => tCategory(cat.name)) : [],
+    datasets: [
+      {
+        data: Array.isArray(expenseByCategory) ? expenseByCategory.map((cat) => cat.percentage) : [],
+        backgroundColor: Array.isArray(expenseByCategory) ? expenseByCategory.map((cat) => cat.color || "#4648d4") : [],
+        borderWidth: 0,
+        hoverOffset: 4,
+      }
+    ]
+  };
+
+  const doughnutOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: "75%",
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        backgroundColor: "rgba(30, 30, 40, 0.9)",
+        titleColor: "#ffffff",
+        bodyColor: "#ffffff",
+        padding: 10,
+        callbacks: {
+          label: function(context: any) {
+            return ` ${context.label}: ${context.raw}%`;
+          }
+        }
+      }
+    }
+  };
+
   return (
     <div className="glass-card rounded-xl p-6 flex flex-col">
       <h3 className="font-headline-md text-headline-md text-on-surface mb-6">
@@ -26,19 +73,10 @@ export default function SpendingChart({ expenseByCategory, totalExpense }: Spend
       <div className="relative flex-1 flex flex-col items-center justify-center min-h-[220px]">
         {expenseByCategory?.length > 0 ? (
           <>
-            <div
-              className="w-40 h-40 rounded-full flex items-center justify-center relative shadow-inner"
-              style={{
-                background: `conic-gradient(${
-                  (Array.isArray(expenseByCategory) ? expenseByCategory : []).map((cat, i, arr) => {
-                    const prevPercentages = arr.slice(0, i).reduce((sum, c) => sum + c.percentage, 0);
-                    return `${cat.color} ${prevPercentages}% ${prevPercentages + cat.percentage}%`;
-                  }).join(', ')
-                })`
-              }}
-            >
+            <div className="relative w-40 h-40 flex items-center justify-center">
+              <Doughnut data={doughnutData} options={doughnutOptions} />
               {/* Inner Circle for Doughnut Effect */}
-              <div className="absolute w-28 h-28 bg-surface rounded-full flex flex-col items-center justify-center shadow-sm">
+              <div className="absolute w-28 h-28 bg-surface rounded-full flex flex-col items-center justify-center shadow-sm pointer-events-none">
                 <span className="font-label-caps text-label-caps text-outline text-[9px] uppercase tracking-tighter">
                   {language === 'id' ? 'Total Keluar' : 'Total Exp'}
                 </span>

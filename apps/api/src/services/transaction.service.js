@@ -29,6 +29,15 @@ const getTransactions = async (userId, queryParams) => {
     transactions = transactions.filter((tx) => tx.type === queryParams.type);
   }
 
+  // Filter by search query (in-memory)
+  if (queryParams.search) {
+    const searchLower = queryParams.search.toLowerCase();
+    transactions = transactions.filter((tx) => 
+      (tx.note && tx.note.toLowerCase().includes(searchLower)) ||
+      (tx.categoryName && tx.categoryName.toLowerCase().includes(searchLower))
+    );
+  }
+
   // Filter by category (in-memory)
   if (queryParams.categoryId) {
     transactions = transactions.filter((tx) => tx.categoryId === queryParams.categoryId);

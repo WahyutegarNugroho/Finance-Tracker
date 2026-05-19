@@ -53,4 +53,17 @@ router.put(
   }
 );
 
+/**
+ * DELETE /api/users/reset
+ * Reset all user transactions, budgets, and custom categories
+ */
+router.delete('/reset', async (req, res, next) => {
+  try {
+    await userService.resetUserData(req.user.uid);
+    return response.success(res, null, 'User data reset successfully.');
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

@@ -76,8 +76,41 @@ export default function Dashboard() {
 
   if (!data) {
     return (
-      <div className="bg-background min-h-screen flex items-center justify-center">
-        <p className="text-on-surface-variant">{t("dashboard_page.no_data") || "No data available."}</p>
+      <div className="bg-background text-on-background font-body-sm min-h-screen">
+        <Topbar />
+        <Sidebar activePath="/dashboard" />
+        <main className="pt-[88px] pb-[88px] md:pb-8 px-4 md:pl-[284px] md:pr-8 min-h-screen">
+          <div className="max-w-[1440px] mx-auto flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+              <span className="material-symbols-outlined text-4xl">account_balance_wallet</span>
+            </div>
+            <div>
+              <h2 className="font-headline-md text-headline-md text-on-background mb-2">
+                {t("dashboard_page.no_data") || "No data available."}
+              </h2>
+              <p className="font-body-sm text-body-sm text-on-surface-variant max-w-sm mx-auto">
+                {language === 'id' 
+                  ? "Anda belum memiliki data transaksi untuk bulan ini. Mari buat transaksi pertama Anda sekarang!" 
+                  : "You don't have any transactions for this month yet. Let's create your first transaction now!"}
+              </p>
+            </div>
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="bg-primary hover:bg-primary/90 text-on-primary font-body-sm text-body-sm px-6 py-3 rounded-lg transition-all duration-200 shadow-sm hover:scale-[1.02] active:scale-95 flex items-center gap-2"
+            >
+              <span className="material-symbols-outlined text-sm">add</span>
+              {t("dashboard_page.new_transaction")}
+            </button>
+          </div>
+        </main>
+        <BottomNav activePath="/dashboard" />
+        <TransactionModal 
+          isOpen={isModalOpen} 
+          onClose={() => setIsModalOpen(false)}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ["dashboard-overview"] });
+          }}
+        />
       </div>
     );
   }

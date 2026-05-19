@@ -15,6 +15,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Transaction, ApiResponse } from "@/types";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 // Formatter for date
 const formatDate = (dateString: string, lang: string) => {
@@ -43,6 +44,10 @@ function TransactionsContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null);
 
+  // Confirm Dialog
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] = useState<string | null>(null);
+
   useEffect(() => {
     if (!authLoading && !user) {
       router.push("/login");
@@ -60,10 +65,11 @@ function TransactionsContent() {
 
   // Query
   const { data: transactionsData, isLoading: transactionsLoading, isError } = useQuery<ApiResponse<Transaction[]>>({
-    queryKey: ["transactions", page, typeFilter],
+    queryKey: ["transactions", page, typeFilter, debouncedSearch],
     queryFn: () => {
       let url = `/transactions?page=${page}&limit=10`;
       if (typeFilter !== "all") url += `&type=${typeFilter}`;
+      if (debouncedSearch) url += `&search=${encodeURIComponent(debouncedSearch)}`;
       return api.get(url);
     },
     enabled: !!user,
@@ -74,13 +80,7 @@ function TransactionsContent() {
   const totalPages = pagination?.totalPages || 1;
   const totalItems = pagination?.totalItems || 0;
 
-  // Client-side filtering for search (if backend doesn't support search parameter yet)
-  const filteredTransactions = (debouncedSearch && Array.isArray(transactions)) 
-    ? transactions.filter((tx) => 
-        (tx.note && tx.note.toLowerCase().includes(debouncedSearch.toLowerCase())) || 
-        (tx.categoryName && tx.categoryName.toLowerCase().includes(debouncedSearch.toLowerCase()))
-      )
-    : (Array.isArray(transactions) ? transactions : []);
+  const filteredTransactions = Array.isArray(transactions) ? transactions : [];
 
   // Mutation
   const deleteMutation = useMutation({
@@ -121,35 +121,61 @@ function TransactionsContent() {
     },
   });
 
-  const handleDelete = (id: string) => {
-    if (!confirm(language === 'id' ? "Apakah Anda yakin ingin menghapus transaksi ini?" : "Are you sure you want to delete this transaction?")) return;
-    deleteMutation.mutate(id);
+  const handleDeleteClick = (id: string) => {
+    setTransactionToDelete(id);
+    setIsConfirmOpen(true);
   };
 
-  const handleExport = () => {
-    if (filteredTransactions.length === 0) return;
-    
-    const headers = ["Date", "Category", "Note", "Amount", "Type"];
-    const csvContent = [
-      headers.join(","),
-      ...filteredTransactions.map(tx => [
-        new Date(tx.date).toISOString().split('T')[0],
-        `"${tx.categoryName}"`,
-        `"${tx.note || ''}"`,
-        tx.amount,
-        tx.type
-      ].join(","))
-    ].join("\n");
+  const handleConfirmDelete = () => {
+    if (transactionToDelete) {
+      deleteMutation.mutate(transactionToDelete);
+    }
+    setIsConfirmOpen(false);
+    setTransactionToDelete(null);
+  };
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `transactions_export_${new Date().getTime()}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleExport = async () => {
+    try {
+      let url = `/transactions?page=1&limit=1000`;
+      if (typeFilter !== "all") url += `&type=${typeFilter}`;
+      if (debouncedSearch) url += `&search=${encodeURIComponent(debouncedSearch)}`;
+      
+      toast.loading(language === 'id' ? "Mengekspor data..." : "Exporting data...", { id: "export-csv" });
+      const res = await api.get(url);
+      const allTx = res?.data || [];
+      
+      if (allTx.length === 0) {
+        toast.error(language === 'id' ? "Tidak ada data untuk diekspor" : "No data to export", { id: "export-csv" });
+        return;
+      }
+      
+      const headers = ["Date", "Category", "Note", "Amount", "Type"];
+      const csvContent = [
+        headers.join(","),
+        ...allTx.map((tx: any) => [
+          new Date(tx.date).toISOString().split('T')[0],
+          `"${tx.categoryName}"`,
+          `"${tx.note || ''}"`,
+          tx.amount,
+          tx.type
+        ].join(","))
+      ].join("\n");
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const downloadUrl = URL.createObjectURL(blob);
+      link.setAttribute("href", downloadUrl);
+      link.setAttribute("download", `transactions_export_${new Date().getTime()}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success(language === 'id' ? "Ekspor CSV berhasil!" : "CSV Export successful!", { id: "export-csv" });
+    } catch (err) {
+      console.error("Export failed", err);
+      toast.error(language === 'id' ? "Gagal mengekspor data." : "Failed to export data.", { id: "export-csv" });
+    }
   };
 
   if (authLoading || (transactionsLoading && transactions.length === 0)) {
@@ -217,7 +243,7 @@ function TransactionsContent() {
               setTransactionToEdit(tx);
               setIsModalOpen(true);
             }}
-            onDelete={handleDelete}
+            onDelete={handleDeleteClick}
             formatDate={formatDate}
           />
 
@@ -273,6 +299,17 @@ function TransactionsContent() {
           queryClient.invalidateQueries({ queryKey: ["transactions"] });
         }}
         transactionToEdit={transactionToEdit}
+      />
+
+      <ConfirmDialog 
+        isOpen={isConfirmOpen}
+        title={language === 'id' ? "Hapus Transaksi" : "Delete Transaction"}
+        message={language === 'id' ? "Apakah Anda yakin ingin menghapus transaksi ini? Tindakan ini tidak dapat dibatalkan." : "Are you sure you want to delete this transaction? This action cannot be undone."}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          setIsConfirmOpen(false);
+          setTransactionToDelete(null);
+        }}
       />
     </div>
   );

@@ -36,4 +36,27 @@ const updateProfile = async (uid, data) => {
   return getProfile(uid);
 };
 
-module.exports = { getProfile, updateProfile };
+/**
+ * Reset all user data (transactions, budgets, custom categories)
+ */
+const resetUserData = async (uid) => {
+  // Delete transactions
+  const txSnapshot = await db.collection('transactions').where('userId', '==', uid).get();
+  const txPromises = txSnapshot.docs.map(doc => doc.ref.delete());
+
+  // Delete budgets
+  const budgetSnapshot = await db.collection('budgets').where('userId', '==', uid).get();
+  const budgetPromises = budgetSnapshot.docs.map(doc => doc.ref.delete());
+
+  // Delete custom categories (where isDefault is not true)
+  const categorySnapshot = await db.collection('categories')
+    .where('userId', '==', uid)
+    .get();
+  const categoryPromises = categorySnapshot.docs
+    .filter(doc => !doc.data().isDefault)
+    .map(doc => doc.ref.delete());
+
+  await Promise.all([...txPromises, ...budgetPromises, ...categoryPromises]);
+};
+
+module.exports = { getProfile, updateProfile, resetUserData };

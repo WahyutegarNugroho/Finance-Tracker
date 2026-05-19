@@ -17,6 +17,8 @@ type BudgetModalProps = {
   onClose: () => void;
   onSuccess: () => void;
   budgetToEdit?: any;
+  month?: number;
+  year?: number;
 };
 
 export default function BudgetModal({
@@ -24,8 +26,10 @@ export default function BudgetModal({
   onClose,
   onSuccess,
   budgetToEdit,
+  month,
+  year,
 }: BudgetModalProps) {
-  const { currencySymbol } = useAuth();
+  const { currencySymbol, currency } = useAuth();
   const { t, tCategory } = useLanguage();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
@@ -37,7 +41,22 @@ export default function BudgetModal({
   const [categoryId, setCategoryId] = useState("");
 
   const formatWithDots = (val: string) => {
-    return val.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    const isDecimalAllowed = currency !== "IDR" && currency !== "JPY";
+    
+    if (isDecimalAllowed) {
+      // Normalize and split integer and decimal parts
+      let cleaned = val.replace(/,/g, ".").replace(/[^0-9.]/g, "");
+      const parts = cleaned.split(".");
+      if (parts.length > 2) {
+        cleaned = parts[0] + "." + parts.slice(1).join("");
+      }
+      
+      const formattedInt = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      const formattedDec = parts[1] !== undefined ? "." + parts[1] : "";
+      return formattedInt + formattedDec;
+    } else {
+      return val.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
   };
 
   useEffect(() => {
@@ -62,9 +81,24 @@ export default function BudgetModal({
   }, [isOpen, budgetToEdit]);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value.replace(/\D/g, "");
-    setLimitAmount(raw);
-    setDisplayAmount(formatWithDots(raw));
+    const isDecimalAllowed = currency !== "IDR" && currency !== "JPY";
+    let inputVal = e.target.value;
+    
+    if (isDecimalAllowed) {
+      inputVal = inputVal.replace(/,/g, ".");
+      let cleaned = inputVal.replace(/[^0-9.]/g, "");
+      const parts = cleaned.split(".");
+      if (parts.length > 2) {
+        cleaned = parts[0] + "." + parts.slice(1).join("");
+      }
+      
+      setLimitAmount(cleaned);
+      setDisplayAmount(formatWithDots(cleaned));
+    } else {
+      const raw = inputVal.replace(/\D/g, "");
+      setLimitAmount(raw);
+      setDisplayAmount(formatWithDots(raw));
+    }
   };
 
   const fetchCategories = async () => {
@@ -98,6 +132,8 @@ export default function BudgetModal({
         categoryId,
         categoryName: selectedCategory?.name || "Unknown",
         categoryIcon: selectedCategory?.icon || "category",
+        month: month || new Date().getMonth() + 1,
+        year: year || new Date().getFullYear(),
       };
 
       if (budgetToEdit) {

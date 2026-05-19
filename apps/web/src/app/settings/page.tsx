@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Category, UserProfile, ApiResponse } from "@/types";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 export default function Settings() {
   const { user, loading: authLoading, logout, setCurrency: setGlobalCurrency } = useAuth();
@@ -27,6 +28,22 @@ export default function Settings() {
   // Settings state
   const [displayName, setDisplayName] = useState("");
   const [currency, setCurrency] = useState("IDR");
+
+  // Confirm Dialogs States
+  const [isCategoryConfirmOpen, setIsCategoryConfirmOpen] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
+
+  const resetDataMutation = useMutation({
+    mutationFn: () => api.delete("/users/reset"),
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+      toast.success(language === 'id' ? "Seluruh data Anda telah berhasil direset!" : "All your data has been successfully reset!");
+    },
+    onError: () => {
+      toast.error(language === 'id' ? "Gagal mereset data." : "Failed to reset data.");
+    }
+  });
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -109,6 +126,19 @@ export default function Settings() {
     updateProfileMutation.mutate({ displayName, currency });
   };
 
+  const handleConfirmDeleteCategory = () => {
+    if (categoryToDelete) {
+      deleteCategoryMutation.mutate(categoryToDelete);
+    }
+    setIsCategoryConfirmOpen(false);
+    setCategoryToDelete(null);
+  };
+
+  const handleConfirmResetData = () => {
+    resetDataMutation.mutate();
+    setIsResetConfirmOpen(false);
+  };
+
   if (authLoading || (profileLoading && !profile)) {
     return (
       <div className="bg-background min-h-screen">
@@ -157,9 +187,8 @@ export default function Settings() {
             onAddCategory={(cat) => addCategoryMutation.mutate(cat)}
             onUpdateCategory={(id, name) => updateCategoryMutation.mutate({ id, name })}
             onDeleteCategory={(id) => {
-              if (confirm(language === 'id' ? "Hapus kategori ini?" : "Delete this category?")) {
-                deleteCategoryMutation.mutate(id);
-              }
+              setCategoryToDelete(id);
+              setIsCategoryConfirmOpen(true);
             }}
             isAdding={addCategoryMutation.isPending}
             isUpdating={updateCategoryMutation.isPending}
@@ -178,10 +207,18 @@ export default function Settings() {
             <div className="flex flex-wrap gap-4">
               <button 
                 onClick={logout}
-                className="bg-error text-on-error font-label-caps text-label-caps px-6 py-2.5 rounded-lg hover:bg-error/90 transition-colors flex items-center gap-2"
+                className="bg-surface border border-outline-variant/30 text-on-surface hover:bg-surface-variant/30 font-body-sm text-body-sm font-semibold px-6 py-2.5 rounded-lg transition-colors flex items-center gap-2"
               >
                 <span className="material-symbols-outlined text-[18px]">logout</span>
                 {t("common.logout")}
+              </button>
+              <button 
+                onClick={() => setIsResetConfirmOpen(true)}
+                disabled={resetDataMutation.isPending}
+                className="bg-error text-on-error hover:bg-error/90 disabled:opacity-50 font-body-sm text-body-sm font-semibold px-6 py-2.5 rounded-lg transition-colors flex items-center gap-2 shadow-sm"
+              >
+                <span className="material-symbols-outlined text-[18px]">delete_forever</span>
+                {language === 'id' ? 'Reset Semua Data' : 'Reset All Data'}
               </button>
             </div>
           </section>
@@ -189,6 +226,26 @@ export default function Settings() {
       </main>
 
       <BottomNav activePath="/settings" />
+
+      <ConfirmDialog 
+        isOpen={isCategoryConfirmOpen}
+        title={language === 'id' ? "Hapus Kategori" : "Delete Category"}
+        message={language === 'id' ? "Apakah Anda yakin ingin menghapus kategori ini?" : "Are you sure you want to delete this category?"}
+        onConfirm={handleConfirmDeleteCategory}
+        onCancel={() => {
+          setIsCategoryConfirmOpen(false);
+          setCategoryToDelete(null);
+        }}
+      />
+
+      <ConfirmDialog 
+        isOpen={isResetConfirmOpen}
+        title={language === 'id' ? "Reset Semua Data Keuangan" : "Reset All Financial Data"}
+        message={language === 'id' ? "Apakah Anda yakin ingin menghapus seluruh data transaksi, anggaran, dan kategori kustom? Tindakan ini bersifat permanen dan tidak dapat dibatalkan." : "Are you sure you want to delete all transaction history, budgets, and custom categories? This action is permanent and cannot be undone."}
+        onConfirm={handleConfirmResetData}
+        onCancel={() => setIsResetConfirmOpen(false)}
+        confirmText={language === 'id' ? "Ya, Reset Sekarang" : "Yes, Reset Now"}
+      />
     </div>
   );
 }

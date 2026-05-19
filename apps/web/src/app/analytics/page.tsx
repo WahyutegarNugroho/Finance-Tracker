@@ -12,6 +12,33 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { ApiResponse } from "@/types";
 import Link from "next/link";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Tooltip,
+  Legend,
+  ArcElement,
+  BarElement,
+  Title,
+  Filler
+} from "chart.js";
+import { Line, Doughnut } from "react-chartjs-2";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Tooltip,
+  Legend,
+  ArcElement,
+  BarElement,
+  Title,
+  Filler
+);
 
 export default function Analytics() {
   const { user, loading: authLoading, formatCurrency } = useAuth();
@@ -48,29 +75,122 @@ export default function Analytics() {
   const breakdown = categoryData?.data;
   const categories = breakdown?.categories || [];
 
-  // Chart Logic Helpers
-  const maxVal = useMemo(() => {
-    if (!Array.isArray(cashflow) || cashflow.length === 0) return 1000;
-    return Math.max(...cashflow.map((m: any) => Math.max(m.income, m.expense)), 1000);
-  }, [cashflow]);
+  const lineChartData = useMemo(() => {
+    const labels = Array.isArray(cashflow) ? cashflow.map((m: any) => m.label) : [];
+    const incomeData = Array.isArray(cashflow) ? cashflow.map((m: any) => m.income) : [];
+    const expenseData = Array.isArray(cashflow) ? cashflow.map((m: any) => m.expense) : [];
 
-  const getPoint = (val: number, index: number, total: number) => {
-    const x = (index / (total - 1 || 1)) * 100;
-    const y = 50 - (val / maxVal) * 45; // Map to SVG viewBox 0-50
-    return `${x},${y}`;
-  };
+    return {
+      labels,
+      datasets: [
+        {
+          label: t("common.income") || "Income",
+          data: incomeData,
+          borderColor: "#4648d4",
+          backgroundColor: "rgba(70, 72, 212, 0.1)",
+          tension: 0.3,
+          borderWidth: 2.5,
+          pointBackgroundColor: "#4648d4",
+          pointHoverRadius: 6,
+          fill: true,
+        },
+        {
+          label: t("common.expense") || "Expense",
+          data: expenseData,
+          borderColor: "#ba1a1a",
+          backgroundColor: "rgba(186, 26, 26, 0.1)",
+          tension: 0.3,
+          borderWidth: 2.5,
+          pointBackgroundColor: "#ba1a1a",
+          pointHoverRadius: 6,
+          borderDash: [5, 5],
+          fill: false,
+        }
+      ]
+    };
+  }, [cashflow, t]);
 
-  const incomePath = useMemo(() => 
-    Array.isArray(cashflow) && cashflow.length > 1
-      ? `M${cashflow.map((m: any, i: number) => getPoint(m.income, i, cashflow.length)).join(' L')}`
-      : ""
-  , [cashflow, maxVal]);
+  const lineChartOptions = useMemo(() => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        backgroundColor: "rgba(30, 30, 40, 0.9)",
+        titleColor: "#ffffff",
+        bodyColor: "#ffffff",
+        padding: 10,
+        callbacks: {
+          label: function(context: any) {
+            return ` ${context.dataset.label}: ${formatCurrency(context.raw)}`;
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: {
+          display: false,
+        },
+        ticks: {
+          color: "rgba(150, 150, 150, 0.8)",
+        }
+      },
+      y: {
+        grid: {
+          color: "rgba(150, 150, 150, 0.1)",
+        },
+        ticks: {
+          color: "rgba(150, 150, 150, 0.8)",
+          callback: function(value: any) {
+            return formatCurrency(value);
+          }
+        }
+      }
+    }
+  }), [formatCurrency]);
 
-  const expensePath = useMemo(() => 
-    Array.isArray(cashflow) && cashflow.length > 1
-      ? `M${cashflow.map((m: any, i: number) => getPoint(m.expense, i, cashflow.length)).join(' L')}`
-      : ""
-  , [cashflow, maxVal]);
+  const doughnutData = useMemo(() => {
+    const labels = Array.isArray(categories) ? categories.map((cat: any) => tCategory(cat.categoryName)) : [];
+    const amounts = Array.isArray(categories) ? categories.map((cat: any) => cat.amount) : [];
+    const colors = Array.isArray(categories) ? categories.map((cat: any) => cat.color || "#4648d4") : [];
+
+    return {
+      labels,
+      datasets: [
+        {
+          data: amounts,
+          backgroundColor: colors,
+          borderWidth: 0,
+          hoverOffset: 4,
+        }
+      ]
+    };
+  }, [categories, tCategory]);
+
+  const doughnutOptions = useMemo(() => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: "75%",
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        backgroundColor: "rgba(30, 30, 40, 0.9)",
+        titleColor: "#ffffff",
+        bodyColor: "#ffffff",
+        padding: 10,
+        callbacks: {
+          label: function(context: any) {
+            return ` ${context.label}: ${formatCurrency(context.raw)}`;
+          }
+        }
+      }
+    }
+  }), [formatCurrency]);
 
   if (authLoading) {
     return (
@@ -167,37 +287,13 @@ export default function Analytics() {
                   </div>
                 </div>
 
-                <div className="w-full h-[300px] relative mt-4 border-l border-b border-outline-variant/30 pb-8 pl-4 flex items-end">
-                  {/* Y Axis */}
-                  <div className="absolute left-[-45px] top-0 h-[calc(100%-32px)] flex flex-col justify-between text-[10px] text-outline font-medium">
-                    <span>{formatCurrency(maxVal)}</span>
-                    <span>{formatCurrency(maxVal * 0.5)}</span>
-                    <span>0</span>
-                  </div>
-                  
-                  {/* X Axis Labels */}
-                  <div className="absolute bottom-[-28px] left-4 w-[calc(100%-16px)] flex justify-between text-xs text-outline font-medium pr-4">
-                    {Array.isArray(cashflow) && cashflow.length > 0 ? (
-                      cashflow.map((m: any) => <span key={m.month}>{m.label}</span>)
-                    ) : (
-                      <span className="w-full text-center italic">{language === 'id' ? 'Belum ada data' : 'No data yet'}</span>
-                    )}
-                  </div>
-
-                  {/* Trend Lines */}
-                  {Array.isArray(cashflow) && cashflow.length > 1 && (
-                    <>
-                      <div className="absolute bottom-[32px] left-4 w-[calc(100%-16px)] h-[calc(100%-32px)] z-10 flex items-end pointer-events-none">
-                        <svg className="w-full h-full preserve-aspect-ratio-none overflow-visible" viewBox="0 0 100 50" preserveAspectRatio="none">
-                          <path d={incomePath} fill="none" stroke="var(--color-primary, #4648d4)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" vectorEffect="non-scaling-stroke"></path>
-                        </svg>
-                      </div>
-                      <div className="absolute bottom-[32px] left-4 w-[calc(100%-16px)] h-[calc(100%-32px)] z-10 flex items-end pointer-events-none">
-                        <svg className="w-full h-full preserve-aspect-ratio-none overflow-visible" viewBox="0 0 100 50" preserveAspectRatio="none">
-                          <path d={expensePath} fill="none" stroke="var(--color-error, #ba1a1a)" strokeDasharray="6,6" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" vectorEffect="non-scaling-stroke"></path>
-                        </svg>
-                      </div>
-                    </>
+                <div className="w-full h-[320px] relative mt-4">
+                  {Array.isArray(cashflow) && cashflow.length > 0 ? (
+                    <Line data={lineChartData} options={lineChartOptions} />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-outline italic">
+                      {language === 'id' ? 'Belum ada data' : 'No data yet'}
+                    </div>
                   )}
                 </div>
               </section>
@@ -207,23 +303,20 @@ export default function Analytics() {
                 <div className="glass-card rounded-xl p-6 flex flex-col gap-6">
                   <h3 className="font-headline-md text-headline-md font-semibold text-on-surface">{t("analytics_page.charts.spending_by_category")}</h3>
                   <div className="flex flex-col sm:flex-row items-center gap-8 justify-center py-4">
-                    <div 
-                      className="relative w-40 h-40 rounded-full flex items-center justify-center shadow-inner" 
-                      style={{ 
-                        background: Array.isArray(categories) && categories.length > 0 
-                          ? `conic-gradient(${
-                              categories.map((cat: any, i: number, arr: any[]) => {
-                                const prevPercentages = arr.slice(0, i).reduce((sum, c) => sum + c.percentage, 0);
-                                return `${cat.color || '#4648d4'} ${prevPercentages}% ${prevPercentages + cat.percentage}%`;
-                              }).join(', ')
-                            })`
-                          : 'var(--color-surface-variant)'
-                      }}
-                    >
-                      <div className="absolute w-28 h-28 bg-surface rounded-full flex flex-col items-center justify-center shadow-sm">
-                        <span className="text-[10px] text-outline font-bold uppercase tracking-wider">{language === 'id' ? 'Total Keluar' : 'Total Exp'}</span>
-                        <span className="font-numeric-data text-lg font-bold text-on-surface">{formatCurrency(breakdown?.totalExpense || 0)}</span>
-                      </div>
+                    <div className="relative w-40 h-40 flex items-center justify-center">
+                      {Array.isArray(categories) && categories.length > 0 ? (
+                        <>
+                          <Doughnut data={doughnutData} options={doughnutOptions} />
+                          <div className="absolute w-28 h-28 bg-surface rounded-full flex flex-col items-center justify-center shadow-sm pointer-events-none">
+                            <span className="text-[10px] text-outline font-bold uppercase tracking-wider">{language === 'id' ? 'Total Keluar' : 'Total Exp'}</span>
+                            <span className="font-numeric-data text-lg font-bold text-on-surface">{formatCurrency(breakdown?.totalExpense || 0)}</span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="w-full h-full rounded-full bg-surface-variant flex items-center justify-center">
+                          <span className="text-sm text-outline italic">{language === 'id' ? 'Belum ada pengeluaran' : 'No expenses recorded'}</span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex flex-col gap-3 w-full sm:w-auto overflow-y-auto max-h-[160px] pr-2 custom-scrollbar">
