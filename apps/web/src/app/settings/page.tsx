@@ -15,7 +15,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Category, UserProfile, ApiResponse } from "@/types";
+import { Category, UserProfile, ApiResponse, FirebaseAuthError } from "@/types";
 import ConfirmDialog from "@/components/ConfirmDialog";
 
 export default function Settings() {
@@ -35,7 +35,7 @@ export default function Settings() {
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
 
   const resetDataMutation = useMutation({
-    mutationFn: () => api.delete("/users/reset"),
+    mutationFn: () => api.deleteWithBody("/users/reset", { confirm: "RESET" }),
     onSuccess: () => {
       queryClient.invalidateQueries();
       toast.success(language === 'id' ? "Seluruh data Anda telah berhasil direset!" : "All your data has been successfully reset!");
@@ -71,8 +71,11 @@ export default function Settings() {
   // Sync internal state with profile data
   useEffect(() => {
     if (profile) {
-      setDisplayName(profile.displayName || user?.displayName || "");
-      setCurrency(profile.currency || "IDR");
+      const timer = setTimeout(() => {
+        setDisplayName(profile.displayName || user?.displayName || "");
+        setCurrency(profile.currency || "IDR");
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [profile, user]);
 
@@ -109,8 +112,9 @@ export default function Settings() {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       toast.success(language === 'id' ? "Kategori dihapus!" : "Category deleted!");
     },
-    onError: (err: any) => {
-      const msg = err?.data?.message || err?.message || "";
+    onError: (err: unknown) => {
+      const fbErr = err as FirebaseAuthError;
+      const msg = fbErr?.data?.message || fbErr?.message || "";
       if (msg.includes("transactions") || msg.includes("Cannot delete")) {
         toast.error(language === 'id' 
           ? `Tidak dapat menghapus kategori ini karena memiliki transaksi.` 
@@ -218,7 +222,7 @@ export default function Settings() {
                 className="bg-error text-on-error hover:bg-error/90 disabled:opacity-50 font-body-sm text-body-sm font-semibold px-6 py-2.5 rounded-lg transition-colors flex items-center gap-2 shadow-sm"
               >
                 <span className="material-symbols-outlined text-[18px]">delete_forever</span>
-                {language === 'id' ? 'Reset Semua Data' : 'Reset All Data'}
+                {t("settings_page.danger_zone.reset_all")}
               </button>
             </div>
           </section>

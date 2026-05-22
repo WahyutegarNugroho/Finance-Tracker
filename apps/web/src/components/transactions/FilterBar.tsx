@@ -9,7 +9,7 @@ interface FilterBarProps {
   typeFilter: string;
   setTypeFilter: (val: string) => void;
   onExport: () => void;
-  setPage: (page: number) => void;
+  onResetPagination: () => void;
 }
 
 export default function FilterBar({
@@ -18,7 +18,7 @@ export default function FilterBar({
   typeFilter,
   setTypeFilter,
   onExport,
-  setPage,
+  onResetPagination,
 }: FilterBarProps) {
   const { language, t } = useLanguage();
 
@@ -46,7 +46,7 @@ export default function FilterBar({
             value={typeFilter}
             onChange={(e) => {
               setTypeFilter(e.target.value);
-              setPage(1);
+              onResetPagination();
             }}
             className="appearance-none flex items-center gap-2 pl-3 pr-8 py-2 bg-surface border border-outline-variant/30 rounded-lg hover:bg-surface-variant/30 transition-colors font-body-sm text-body-sm text-on-surface-variant focus:outline-none"
           >

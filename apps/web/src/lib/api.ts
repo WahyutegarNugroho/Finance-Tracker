@@ -18,22 +18,23 @@ class ApiError extends Error {
 }
 
 /**
- * Core fetch wrapper with auth token injection
+ * Core fetch wrapper with auth token injection and auto-refresh on 401
  */
-const fetchWithAuth = async (endpoint: string, options: RequestInit = {}, params?: Record<string, string | number>) => {
-  // Get Firebase ID token if user is logged in
+const fetchWithAuth = async (endpoint: string, options: RequestInit = {}, params?: Record<string, string | number>, isRetry = false) => {
   let token = '';
   if (auth.currentUser) {
     token = await auth.currentUser.getIdToken();
   }
 
-  const headers = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...options.headers,
   };
 
-  // Construct URL with query parameters if provided
+  if (options.headers) {
+    Object.assign(headers, options.headers);
+  }
+
   let url = `${API_BASE_URL}${endpoint}`;
   if (params) {
     const searchParams = new URLSearchParams();
@@ -43,14 +44,52 @@ const fetchWithAuth = async (endpoint: string, options: RequestInit = {}, params
     url += `?${searchParams.toString()}`;
   }
 
-  console.log(`[API Fetch] Calling: ${url}`);
-
   const response = await fetch(url, {
     ...options,
     headers,
   });
 
-  // Check if response is actually JSON before parsing
+  // Auto-refresh token on 401 and retry once
+  if (response.status === 401 && !isRetry && auth.currentUser) {
+    try {
+      const freshToken = await auth.currentUser.getIdToken(true);
+      headers['Authorization'] = `Bearer ${freshToken}`;
+      const retryResponse = await fetch(url, { ...options, headers });
+
+      if (retryResponse.ok) {
+        const retryContentType = retryResponse.headers.get("content-type");
+        if (retryContentType && retryContentType.includes("application/json")) {
+          return await retryResponse.json();
+        }
+      }
+
+      if (retryResponse.status === 401) {
+        await auth.signOut();
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
+        throw new ApiError(401, 'Session expired. Please sign in again.');
+      }
+
+      // Replace response with retry response for downstream handling
+      const contentType = retryResponse.headers.get("content-type");
+      let data;
+      if (contentType && contentType.includes("application/json")) {
+        data = await retryResponse.json();
+      } else {
+        const text = await retryResponse.text();
+        throw new ApiError(retryResponse.status, `Server returned non-JSON response (${retryResponse.status})`, { textSnippet: text.substring(0, 100) });
+      }
+      if (!retryResponse.ok) {
+        throw new ApiError(retryResponse.status, data.message || 'An error occurred', data);
+      }
+      return data;
+    } catch (refreshError) {
+      if (refreshError instanceof ApiError) throw refreshError;
+      throw new ApiError(401, 'Session expired. Please sign in again.');
+    }
+  }
+
   const contentType = response.headers.get("content-type");
   let data;
   
@@ -58,7 +97,6 @@ const fetchWithAuth = async (endpoint: string, options: RequestInit = {}, params
     data = await response.json();
   } else {
     const text = await response.text();
-    console.error(`[API Fetch Error] Expected JSON, got: ${contentType}\nResponse snippet: ${text.substring(0, 150)}`);
     throw new ApiError(response.status, `Server returned non-JSON response (${response.status})`, { textSnippet: text.substring(0, 100) });
   }
 
@@ -78,12 +116,15 @@ export const api = {
     return fetchWithAuth(endpoint, { ...fetchOptions, method: 'GET' }, params);
   },
     
-  post: (endpoint: string, body: unknown, options?: RequestInit) => 
-    fetchWithAuth(endpoint, { ...options, method: 'POST', body: JSON.stringify(body) }),
+  post: (endpoint: string, body?: unknown, options?: RequestInit) => 
+    fetchWithAuth(endpoint, { ...options, method: 'POST', body: body ? JSON.stringify(body) : undefined }),
     
   put: (endpoint: string, body: unknown, options?: RequestInit) => 
     fetchWithAuth(endpoint, { ...options, method: 'PUT', body: JSON.stringify(body) }),
     
   delete: (endpoint: string, options?: RequestInit) => 
     fetchWithAuth(endpoint, { ...options, method: 'DELETE' }),
+  
+  deleteWithBody: (endpoint: string, body: unknown, options?: RequestInit) =>
+    fetchWithAuth(endpoint, { ...options, method: 'DELETE', body: JSON.stringify(body) }),
 };

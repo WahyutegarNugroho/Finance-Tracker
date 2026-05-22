@@ -9,24 +9,11 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 const { db, auth, admin } = require('../config/firebase');
+const { DEFAULT_CATEGORIES } = require('../services/auth.service');
 
 const SEED_EMAIL = process.env.SEED_USER_EMAIL || 'demo@fintrack.com';
 const SEED_PASSWORD = process.env.SEED_USER_PASSWORD || 'Demo123456!';
 const SEED_NAME = 'John Doe';
-
-// Default categories
-const CATEGORIES = [
-  { name: 'Food & Dining', icon: 'restaurant', color: '#4648d4', type: 'expense' },
-  { name: 'Transportation', icon: 'directions_car', color: '#8b5cf6', type: 'expense' },
-  { name: 'Groceries', icon: 'shopping_cart', color: '#ec4899', type: 'expense' },
-  { name: 'Rent & Utilities', icon: 'home', color: '#f59e0b', type: 'expense' },
-  { name: 'Entertainment', icon: 'sports_esports', color: '#c7c4d7', type: 'expense' },
-  { name: 'Healthcare', icon: 'local_hospital', color: '#ef4444', type: 'expense' },
-  { name: 'Shopping', icon: 'shopping_bag', color: '#06b6d4', type: 'expense' },
-  { name: 'Salary', icon: 'payments', color: '#006c49', type: 'income' },
-  { name: 'Freelance', icon: 'work', color: '#10b981', type: 'income' },
-  { name: 'Investment', icon: 'trending_up', color: '#6366f1', type: 'income' },
-];
 
 // Sample transaction templates
 const EXPENSE_TRANSACTIONS = [
@@ -61,15 +48,10 @@ const INCOME_TRANSACTIONS = [
   { catIndex: 9, note: 'Crypto gains', minAmount: 100000, maxAmount: 1000000 },
 ];
 
+const BATCH_LIMIT = 500;
+
 function randomBetween(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function randomDate(monthsBack) {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth() - monthsBack, 1);
-  const end = now;
-  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
 
 async function clearCollections(userId) {
@@ -84,10 +66,14 @@ async function clearCollections(userId) {
       .get();
 
     if (!snapshot.empty) {
-      const batch = db.batch();
-      snapshot.docs.forEach((doc) => batch.delete(doc.ref));
-      await batch.commit();
-      console.log(`   ✓ Cleared ${snapshot.size} docs from "${colName}"`);
+      const docs = snapshot.docs;
+      for (let i = 0; i < docs.length; i += BATCH_LIMIT) {
+        const batch = db.batch();
+        const chunk = docs.slice(i, i + BATCH_LIMIT);
+        chunk.forEach((doc) => batch.delete(doc.ref));
+        await batch.commit();
+      }
+      console.log(`   ✓ Cleared ${docs.length} docs from "${colName}"`);
     }
   }
 
@@ -144,7 +130,7 @@ async function seed() {
     console.log('📂 Seeding categories...');
     const categoryIds = [];
 
-    for (const cat of CATEGORIES) {
+    for (const cat of DEFAULT_CATEGORIES) {
       const docRef = await db.collection('categories').add({
         ...cat,
         userId,

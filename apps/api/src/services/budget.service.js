@@ -7,6 +7,33 @@ const TRANSACTIONS_COLLECTION = 'transactions';
  * Get all budgets for a user in a specific month
  * Calculates spent amount from transactions in real-time
  */
+const getDateRangeForPeriod = (period, month, year) => {
+  const periodKey = period || 'monthly';
+  if (periodKey === 'yearly') {
+    return {
+      start: new Date(year, 0, 1),
+      end: new Date(year, 11, 31, 23, 59, 59, 999),
+    };
+  }
+  if (periodKey === 'weekly') {
+    const now = new Date();
+    const dayOfMonth = now.getDate();
+    const weekNumber = Math.ceil(dayOfMonth / 7);
+    const startDay = (weekNumber - 1) * 7 + 1;
+    const lastDay = new Date(year, month, 0).getDate();
+    const endDay = Math.min(weekNumber * 7, lastDay);
+    return {
+      start: new Date(year, month - 1, startDay),
+      end: new Date(year, month - 1, endDay, 23, 59, 59, 999),
+    };
+  }
+  // monthly (default)
+  return {
+    start: new Date(year, month - 1, 1),
+    end: new Date(year, month, 0, 23, 59, 59, 999),
+  };
+};
+
 const getBudgets = async (userId, month, year) => {
   // Default to current month/year
   const now = new Date();
@@ -25,44 +52,51 @@ const getBudgets = async (userId, month, year) => {
     return [];
   }
 
-  // Get all transactions for this month to calculate spent (filtered in memory to avoid composite index)
-  const startDate = new Date(y, m - 1, 1).getTime();
-  const endDate = new Date(y, m, 0, 23, 59, 59, 999).getTime();
+  // Determine the widest date range across all budgets based on their period
+  const budgetsData = budgetSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  let globalStart = new Date(y, m - 1, 1);
+  let globalEnd = new Date(y, m, 0, 23, 59, 59, 999);
+
+  budgetsData.forEach((b) => {
+    const range = getDateRangeForPeriod(b.period, m, y);
+    if (range.start < globalStart) globalStart = range.start;
+    if (range.end > globalEnd) globalEnd = range.end;
+  });
 
   const txSnapshot = await db
     .collection(TRANSACTIONS_COLLECTION)
     .where('userId', '==', userId)
+    .where('type', '==', 'expense')
+    .where('date', '>=', globalStart)
+    .where('date', '<=', globalEnd)
     .get();
 
-  // Build category-to-spent map
-  const spentByCategory = {};
-  txSnapshot.docs.forEach((doc) => {
-    const data = doc.data();
-    const dateValue = (data.date?.toDate?.() || new Date(data.date)).getTime();
-    
-    if (data.type === 'expense' && dateValue >= startDate && dateValue <= endDate) {
-      if (!spentByCategory[data.categoryId]) {
-        spentByCategory[data.categoryId] = 0;
-      }
-      spentByCategory[data.categoryId] += data.amount;
-    }
-  });
+  // Calculate spent per budget considering its period date range
+  const budgets = budgetsData.map((budget) => {
+    const range = getDateRangeForPeriod(budget.period, m, y);
+    let spent = 0;
 
-  // Combine budget data with spent amounts
-  const budgets = budgetSnapshot.docs.map((doc) => {
-    const data = doc.data();
-    const spent = spentByCategory[data.categoryId] || 0;
-    const percentage = data.limitAmount > 0 ? Math.round((spent / data.limitAmount) * 100) : 0;
+    txSnapshot.docs.forEach((doc) => {
+      const data = doc.data();
+      if (data.categoryId === budget.categoryId) {
+        const txDate = data.date?.toDate?.() || new Date(data.date);
+        if (txDate >= range.start && txDate <= range.end) {
+          spent += data.amount;
+        }
+      }
+    });
+
+    const percentage = budget.limitAmount > 0 ? Math.round((spent / budget.limitAmount) * 100) : 0;
 
     let status = 'good';
     if (percentage >= 95) status = 'critical';
     else if (percentage >= 75) status = 'warning';
 
     return {
-      id: doc.id,
-      ...data,
+      id: budget.id,
+      ...budget,
       spent,
-      remaining: Math.max(0, data.limitAmount - spent),
+      remaining: Math.max(0, budget.limitAmount - spent),
       percentage,
       status,
     };
@@ -94,45 +128,58 @@ const getBudgetSummary = async (userId, month, year) => {
 };
 
 /**
- * Create a new budget
+ * Create a new budget (atomic check+insert via Firestore transaction)
  */
 const createBudget = async (userId, data) => {
   const now = new Date();
+  const month = data.month || now.getMonth() + 1;
+  const year = data.year || now.getFullYear();
 
-  // Check if budget already exists for this category + month
-  const existing = await db
-    .collection(BUDGETS_COLLECTION)
-    .where('userId', '==', userId)
-    .where('categoryId', '==', data.categoryId)
-    .where('month', '==', data.month || now.getMonth() + 1)
-    .where('year', '==', data.year || now.getFullYear())
-    .limit(1)
-    .get();
+  try {
+    const result = await db.runTransaction(async (transaction) => {
+      const existing = await transaction.get(
+        db.collection(BUDGETS_COLLECTION)
+          .where('userId', '==', userId)
+          .where('categoryId', '==', data.categoryId)
+          .where('month', '==', month)
+          .where('year', '==', year)
+          .limit(1)
+      );
 
-  if (!existing.empty) {
-    return {
-      success: false,
-      reason: 'duplicate',
-      message: 'A budget for this category already exists this month.',
-    };
+      if (!existing.empty) {
+        throw new Error('DUPLICATE_BUDGET');
+      }
+
+      const budgetData = {
+        userId,
+        categoryId: data.categoryId,
+        categoryName: data.categoryName,
+        categoryIcon: data.categoryIcon || 'category',
+        limitAmount: Math.abs(data.limitAmount),
+        period: data.period || 'monthly',
+        month,
+        year,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      };
+
+      const docRef = db.collection(BUDGETS_COLLECTION).doc();
+      transaction.set(docRef, budgetData);
+
+      return { success: true, id: docRef.id, ...budgetData };
+    });
+
+    return result;
+  } catch (error) {
+    if (error.message === 'DUPLICATE_BUDGET') {
+      return {
+        success: false,
+        reason: 'duplicate',
+        message: 'A budget for this category already exists this month.',
+      };
+    }
+    throw error;
   }
-
-  const budgetData = {
-    userId,
-    categoryId: data.categoryId,
-    categoryName: data.categoryName,
-    categoryIcon: data.categoryIcon || 'category',
-    limitAmount: Math.abs(data.limitAmount),
-    period: data.period || 'monthly',
-    month: data.month || now.getMonth() + 1,
-    year: data.year || now.getFullYear(),
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-  };
-
-  const docRef = await db.collection(BUDGETS_COLLECTION).add(budgetData);
-
-  return { success: true, id: docRef.id, ...budgetData };
 };
 
 /**

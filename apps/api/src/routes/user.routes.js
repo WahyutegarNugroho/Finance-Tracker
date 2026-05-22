@@ -4,6 +4,7 @@ const { validate } = require('../middleware/validate');
 const { authenticate } = require('../middleware/auth');
 const userService = require('../services/user.service');
 const response = require('../utils/response');
+const { resetLimiter } = require('../middleware/rateLimiter');
 
 const router = express.Router();
 
@@ -57,13 +58,19 @@ router.put(
  * DELETE /api/users/reset
  * Reset all user transactions, budgets, and custom categories
  */
-router.delete('/reset', async (req, res, next) => {
-  try {
-    await userService.resetUserData(req.user.uid);
-    return response.success(res, null, 'User data reset successfully.');
-  } catch (error) {
-    next(error);
+router.delete('/reset',
+  resetLimiter,
+  validate([
+    body('confirm').equals('RESET').withMessage('Please send confirm="RESET" in request body to confirm data reset.'),
+  ]),
+  async (req, res, next) => {
+    try {
+      await userService.resetUserData(req.user.uid);
+      return response.success(res, null, 'User data reset successfully.');
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 module.exports = router;

@@ -4,7 +4,7 @@ import React from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { ApiResponse } from "@/types";
+import { ApiResponse, CashFlowEntry } from "@/types";
 import { useAuth } from "@/context/AuthContext";
 import {
   Chart as ChartJS,
@@ -13,6 +13,7 @@ import {
   BarElement,
   Tooltip,
   Legend,
+  TooltipItem,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
 
@@ -28,7 +29,7 @@ export default function CashFlowChart() {
   const { language, t } = useLanguage();
   const { formatCurrency } = useAuth();
 
-  const { data: cashflowData, isLoading } = useQuery<ApiResponse<any[]>>({
+  const { data: cashflowData, isLoading } = useQuery<ApiResponse<CashFlowEntry[]>>({
     queryKey: ["analytics-cashflow-dashboard"],
     queryFn: () => api.get("/analytics/cashflow", { params: { months: 6 } }),
   });
@@ -36,17 +37,17 @@ export default function CashFlowChart() {
   const cashflow = cashflowData?.data || [];
 
   const barChartData = {
-    labels: cashflow.map((m: any) => m.label),
+    labels: cashflow.map((m: CashFlowEntry) => m.label),
     datasets: [
       {
         label: t("common.income") || "Income",
-        data: cashflow.map((m: any) => m.income),
+        data: cashflow.map((m: CashFlowEntry) => m.income),
         backgroundColor: "#4648d4",
         borderRadius: 4,
       },
       {
         label: t("common.expense") || "Expense",
-        data: cashflow.map((m: any) => m.expense),
+        data: cashflow.map((m: CashFlowEntry) => m.expense),
         backgroundColor: "#ba1a1a",
         borderRadius: 4,
       }
@@ -66,8 +67,8 @@ export default function CashFlowChart() {
         bodyColor: "#ffffff",
         padding: 10,
         callbacks: {
-          label: function(context: any) {
-            return ` ${context.dataset.label}: ${formatCurrency(context.raw)}`;
+          label: function(context: TooltipItem<'bar'>) {
+            return ` ${context.dataset.label}: ${formatCurrency(context.raw as number)}`;
           }
         }
       }
@@ -87,8 +88,8 @@ export default function CashFlowChart() {
         },
         ticks: {
           color: "rgba(150, 150, 150, 0.8)",
-          callback: function(value: any) {
-            return formatCurrency(value);
+          callback: function(value: string | number) {
+            return formatCurrency(Number(value));
           }
         }
       }

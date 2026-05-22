@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const translations: Record<string, any> = {
   en: {
     common: {
@@ -37,6 +38,7 @@ export const translations: Record<string, any> = {
       budget_usage: "Budget Usage",
       recent_transactions: "Recent Transactions",
       no_recent: "No recent transactions found.",
+      no_data_desc: "You don't have any transactions for this month yet. Let's create your first transaction now!",
       new_transaction: "New Transaction",
       charts: {
         cash_flow: "Cash Flow",
@@ -142,7 +144,8 @@ export const translations: Record<string, any> = {
       },
       danger_zone: {
         title: "Danger Zone",
-        desc: "Warning: These actions are irreversible and may affect your account data."
+        desc: "Warning: These actions are irreversible and may affect your account data.",
+        reset_all: "Reset All Data"
       }
     }
   },
@@ -184,6 +187,7 @@ export const translations: Record<string, any> = {
       budget_usage: "Penggunaan Anggaran",
       recent_transactions: "Transaksi Terakhir",
       no_recent: "Tidak ada transaksi terbaru.",
+      no_data_desc: "Anda belum memiliki data transaksi untuk bulan ini. Mari buat transaksi pertama Anda sekarang!",
       new_transaction: "Transaksi Baru",
       charts: {
         cash_flow: "Arus Kas",
@@ -289,7 +293,8 @@ export const translations: Record<string, any> = {
       },
       danger_zone: {
         title: "Zona Berbahaya",
-        desc: "Peringatan: Tindakan ini tidak dapat dibatalkan dan dapat mempengaruhi data akun Anda."
+        desc: "Peringatan: Tindakan ini tidak dapat dibatalkan dan dapat mempengaruhi data akun Anda.",
+        reset_all: "Reset Semua Data"
       }
     }
   }

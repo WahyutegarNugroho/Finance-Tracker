@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { Budget } from "@/types";
 
 type Category = {
   id: string;
@@ -16,7 +17,7 @@ type BudgetModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  budgetToEdit?: any;
+  budgetToEdit?: Budget | null;
   month?: number;
   year?: number;
 };
@@ -40,7 +41,7 @@ export default function BudgetModal({
   const [displayAmount, setDisplayAmount] = useState("");
   const [categoryId, setCategoryId] = useState("");
 
-  const formatWithDots = (val: string) => {
+  const formatWithDots = useCallback((val: string) => {
     const isDecimalAllowed = currency !== "IDR" && currency !== "JPY";
     
     if (isDecimalAllowed) {
@@ -57,28 +58,53 @@ export default function BudgetModal({
     } else {
       return val.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
-  };
+  }, [currency]);
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchCategories();
-    }
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (isOpen) {
-      if (budgetToEdit) {
-        const amtStr = budgetToEdit.limitAmount.toString();
-        setLimitAmount(amtStr);
-        setDisplayAmount(formatWithDots(amtStr));
-        setCategoryId(budgetToEdit.categoryId);
-      } else {
-        setLimitAmount("");
-        setDisplayAmount("");
-        setCategoryId("");
+  const fetchCategories = useCallback(async () => {
+    setFetchingCats(true);
+    try {
+      const response = await api.get("/categories");
+      const rawData = response?.data;
+      const expenseCats = Array.isArray(rawData) 
+        ? rawData.filter((c: Category) => c.type === "expense")
+        : [];
+      setCategories(expenseCats);
+      if (!budgetToEdit && expenseCats.length > 0) {
+        setCategoryId(expenseCats[0].id);
       }
+    } catch (err) {
+      console.error("Failed to fetch categories", err);
+    } finally {
+      setFetchingCats(false);
     }
-  }, [isOpen, budgetToEdit]);
+  }, [budgetToEdit]);
+
+  useEffect(() => {
+    if (isOpen) {
+      const timer = setTimeout(() => {
+        fetchCategories();
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, fetchCategories]);
+
+  useEffect(() => {
+    if (isOpen) {
+      const timer = setTimeout(() => {
+        if (budgetToEdit) {
+          const amtStr = budgetToEdit.limitAmount.toString();
+          setLimitAmount(amtStr);
+          setDisplayAmount(formatWithDots(amtStr));
+          setCategoryId(budgetToEdit.categoryId);
+        } else {
+          setLimitAmount("");
+          setDisplayAmount("");
+          setCategoryId("");
+        }
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, budgetToEdit, formatWithDots]);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const isDecimalAllowed = currency !== "IDR" && currency !== "JPY";
@@ -98,25 +124,6 @@ export default function BudgetModal({
       const raw = inputVal.replace(/\D/g, "");
       setLimitAmount(raw);
       setDisplayAmount(formatWithDots(raw));
-    }
-  };
-
-  const fetchCategories = async () => {
-    setFetchingCats(true);
-    try {
-      const response = await api.get("/categories");
-      const rawData = response?.data;
-      const expenseCats = Array.isArray(rawData) 
-        ? rawData.filter((c: any) => c.type === "expense")
-        : [];
-      setCategories(expenseCats);
-      if (!budgetToEdit && expenseCats.length > 0) {
-        setCategoryId(expenseCats[0].id);
-      }
-    } catch (err) {
-      console.error("Failed to fetch categories", err);
-    } finally {
-      setFetchingCats(false);
     }
   };
 
@@ -143,9 +150,10 @@ export default function BudgetModal({
       }
       onSuccess();
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to save budget", err);
-      alert(err.response?.data?.message || "Failed to save budget.");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      alert((err as any).response?.data?.message || "Failed to save budget.");
     } finally {
       setLoading(false);
     }

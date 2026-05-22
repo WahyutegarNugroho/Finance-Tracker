@@ -4,6 +4,7 @@ const { validate } = require('../middleware/validate');
 const { authenticate } = require('../middleware/auth');
 const transactionService = require('../services/transaction.service');
 const response = require('../utils/response');
+const { db, admin } = require('../config/firebase');
 
 const router = express.Router();
 
@@ -15,40 +16,167 @@ router.use(authenticate);
  * Get income/expense summary for a month
  * Must be before /:id to avoid route conflict
  */
-router.get('/summary', async (req, res, next) => {
-  try {
-    const now = new Date();
-    const month = parseInt(req.query.month, 10) || now.getMonth() + 1;
-    const year = parseInt(req.query.year, 10) || now.getFullYear();
+router.get('/summary',
+  validate([
+    query('month').optional().isInt({ min: 1, max: 12 }).toInt(),
+    query('year').optional().isInt({ min: 2020, max: 2099 }).toInt(),
+  ]),
+  async (req, res, next) => {
+    try {
+      const now = new Date();
+      const month = req.query.month || now.getMonth() + 1;
+      const year = req.query.year || now.getFullYear();
 
-    const summary = await transactionService.getTransactionSummary(
-      req.user.uid,
-      month,
-      year
-    );
+      const summary = await transactionService.getTransactionSummary(
+        req.user.uid,
+        month,
+        year
+      );
 
-    return response.success(res, summary);
-  } catch (error) {
-    next(error);
+      return response.success(res, summary);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 /**
  * GET /api/transactions
  * List transactions with filtering, search, and pagination
  */
-router.get('/', async (req, res, next) => {
-  try {
-    const { transactions, pagination } = await transactionService.getTransactions(
-      req.user.uid,
-      req.query
-    );
+router.get('/',
+  validate([
+    query('type').optional().isIn(['income', 'expense']).withMessage('Type must be income or expense'),
+    query('order').optional().isIn(['asc', 'desc']).withMessage('Order must be asc or desc'),
+    query('sortBy').optional().isIn(['date', 'amount']).withMessage('sortBy must be date or amount'),
+    query('categoryId').optional().isString().notEmpty(),
+    query('startDate').optional().isISO8601().withMessage('startDate must be a valid ISO date'),
+    query('endDate').optional().isISO8601().withMessage('endDate must be a valid ISO date'),
+    query('search').optional().isString().trim(),
+    query('cursor').optional().isString(),
+  ]),
+  async (req, res, next) => {
+    try {
+      const { transactions, pagination } = await transactionService.getTransactions(
+        req.user.uid,
+        req.query
+      );
 
-    return response.paginated(res, transactions, pagination);
-  } catch (error) {
-    next(error);
+      return response.paginated(res, transactions, pagination);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
+
+/**
+ * POST /api/transactions/batch
+ * Create multiple transactions in a single batch
+ */
+router.post('/batch',
+  validate([
+    body('transactions').isArray({ min: 1, max: 100 }).withMessage('transactions must be an array (1-100 items)'),
+    body('transactions.*.categoryId').notEmpty().withMessage('Each transaction needs a categoryId'),
+    body('transactions.*.categoryName').notEmpty().trim().withMessage('Each transaction needs a categoryName'),
+    body('transactions.*.categoryIcon').optional().trim(),
+    body('transactions.*.type').isIn(['income', 'expense']).withMessage('Type must be income or expense'),
+    body('transactions.*.amount').isFloat({ min: 0.01 }).withMessage('Amount must be a positive number'),
+    body('transactions.*.currency').optional().isString().isLength({ min: 3, max: 3 }).withMessage('Currency must be a 3-letter code'),
+    body('transactions.*.isRecurring').optional().isBoolean(),
+    body('transactions.*.recurringFrequency').optional().isIn(['daily', 'weekly', 'monthly', 'yearly']),
+    body('transactions.*.recurringEndDate').optional().isISO8601(),
+    body('transactions.*.tags').optional().isArray(),
+    body('transactions.*.tags.*').isString().trim().notEmpty(),
+    body('transactions.*.attachments').optional().isArray(),
+    body('transactions.*.attachments.*.name').optional().isString().trim(),
+    body('transactions.*.attachments.*.url').optional().isString(),
+    body('transactions.*.attachments.*.type').optional().isString(),
+    body('transactions.*.note').optional().trim(),
+    body('transactions.*.date').optional().isISO8601().withMessage('Date must be a valid ISO date'),
+  ]),
+  async (req, res, next) => {
+    try {
+      // Get user currency for the batch
+      const userDoc = await admin.firestore().collection('users').doc(req.user.uid).get();
+      const userCurrency = userDoc.exists ? (userDoc.data().currency || 'IDR') : 'IDR';
+
+      const batch = db.batch();
+      const created = [];
+
+      for (const tx of req.body.transactions) {
+        const docRef = db.collection('transactions').doc();
+        const data = {
+          userId: req.user.uid,
+          categoryId: tx.categoryId,
+          categoryName: tx.categoryName,
+          categoryIcon: tx.categoryIcon || '',
+          type: tx.type,
+          amount: Math.abs(tx.amount),
+          currency: tx.currency || userCurrency,
+          note: tx.note || '',
+          date: tx.date ? new Date(tx.date) : new Date(),
+          isRecurring: tx.isRecurring || false,
+          recurringFrequency: tx.recurringFrequency || null,
+          recurringEndDate: tx.recurringEndDate ? new Date(tx.recurringEndDate) : null,
+          tags: tx.tags || [],
+          attachments: tx.attachments || [],
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        };
+        if (tx.isRecurring && tx.recurringFrequency) {
+          const baseDate = tx.date ? new Date(tx.date) : new Date();
+          data.recurringNextDate = new Date(baseDate);
+          switch (tx.recurringFrequency) {
+            case 'daily': data.recurringNextDate.setDate(data.recurringNextDate.getDate() + 1); break;
+            case 'weekly': data.recurringNextDate.setDate(data.recurringNextDate.getDate() + 7); break;
+            case 'monthly': data.recurringNextDate.setMonth(data.recurringNextDate.getMonth() + 1); break;
+            case 'yearly': data.recurringNextDate.setFullYear(data.recurringNextDate.getFullYear() + 1); break;
+          }
+        }
+        batch.set(docRef, data);
+        created.push({ id: docRef.id, ...data });
+      }
+
+      await batch.commit();
+      return response.created(res, created, `${created.length} transactions created.`);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * DELETE /api/transactions/batch
+ * Delete multiple transactions by ID (ownership verified)
+ */
+router.delete('/batch',
+  validate([
+    body('ids').isArray({ min: 1, max: 100 }).withMessage('ids must be an array (1-100 items)'),
+    body('ids.*').isString().notEmpty().withMessage('Each ID must be a valid string'),
+  ]),
+  async (req, res, next) => {
+    try {
+      const refs = req.body.ids.map(id => db.collection('transactions').doc(id));
+      const docs = await db.getAll(...refs);
+      const batch = db.batch();
+      let deletedCount = 0;
+
+      docs.forEach((doc) => {
+        if (doc.exists && doc.data().userId === req.user.uid) {
+          batch.delete(doc.ref);
+          deletedCount++;
+        }
+      });
+
+      if (deletedCount > 0) {
+        await batch.commit();
+      }
+      return response.success(res, { deleted: deletedCount }, `${deletedCount} transactions deleted.`);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 /**
  * GET /api/transactions/:id
@@ -93,6 +221,16 @@ router.post(
     body('amount')
       .isFloat({ min: 0.01 })
       .withMessage('Amount must be a positive number'),
+    body('currency').optional().isString().isLength({ min: 3, max: 3 }).withMessage('Currency must be a 3-letter code'),
+    body('isRecurring').optional().isBoolean().withMessage('isRecurring must be a boolean'),
+    body('recurringFrequency').optional().isIn(['daily', 'weekly', 'monthly', 'yearly']).withMessage('Frequency must be daily, weekly, monthly, or yearly'),
+    body('recurringEndDate').optional().isISO8601().withMessage('recurringEndDate must be a valid ISO date'),
+    body('tags').optional().isArray().withMessage('tags must be an array'),
+    body('tags.*').isString().trim().notEmpty(),
+    body('attachments').optional().isArray().withMessage('attachments must be an array'),
+    body('attachments.*.name').optional().isString().trim(),
+    body('attachments.*.url').optional().isString(),
+    body('attachments.*.type').optional().isString(),
     body('note').optional().trim(),
     body('date').optional().isISO8601().withMessage('Date must be a valid ISO date'),
   ]),
@@ -123,6 +261,16 @@ router.put(
     body('categoryIcon').optional().trim(),
     body('type').optional().isIn(['income', 'expense']),
     body('amount').optional().isFloat({ min: 0.01 }),
+    body('currency').optional().isString().isLength({ min: 3, max: 3 }).withMessage('Currency must be a 3-letter code'),
+    body('isRecurring').optional().isBoolean().withMessage('isRecurring must be a boolean'),
+    body('recurringFrequency').optional().isIn(['daily', 'weekly', 'monthly', 'yearly']).withMessage('Frequency must be daily, weekly, monthly, or yearly'),
+    body('recurringEndDate').optional().isISO8601().withMessage('recurringEndDate must be a valid ISO date'),
+    body('tags').optional().isArray().withMessage('tags must be an array'),
+    body('tags.*').isString().trim().notEmpty(),
+    body('attachments').optional().isArray().withMessage('attachments must be an array'),
+    body('attachments.*.name').optional().isString().trim(),
+    body('attachments.*.url').optional().isString(),
+    body('attachments.*.type').optional().isString(),
     body('note').optional().trim(),
     body('date').optional().isISO8601(),
   ]),

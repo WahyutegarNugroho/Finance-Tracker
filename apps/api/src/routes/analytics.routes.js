@@ -1,4 +1,6 @@
 const express = require('express');
+const { query } = require('express-validator');
+const { validate } = require('../middleware/validate');
 const { authenticate } = require('../middleware/auth');
 const analyticsService = require('../services/analytics.service');
 const response = require('../utils/response');
@@ -26,37 +28,48 @@ router.get('/overview', async (req, res, next) => {
  * Monthly income vs expense data for chart
  * Query: ?months=6 (default 6)
  */
-router.get('/cashflow', async (req, res, next) => {
-  try {
-    const months = parseInt(req.query.months, 10) || 6;
-    const cashflow = await analyticsService.getCashFlow(req.user.uid, months);
-    return response.success(res, cashflow);
-  } catch (error) {
-    next(error);
+router.get('/cashflow',
+  validate([
+    query('months').optional().isInt({ min: 1, max: 60 }).toInt(),
+  ]),
+  async (req, res, next) => {
+    try {
+      const months = req.query.months || 6;
+      const cashflow = await analyticsService.getCashFlow(req.user.uid, months);
+      return response.success(res, cashflow);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 /**
  * GET /api/analytics/categories
  * Spending breakdown by category
  * Query: ?month=5&year=2026
  */
-router.get('/categories', async (req, res, next) => {
-  try {
-    const month = parseInt(req.query.month, 10) || undefined;
-    const year = parseInt(req.query.year, 10) || undefined;
+router.get('/categories',
+  validate([
+    query('month').optional().isInt({ min: 1, max: 12 }).toInt(),
+    query('year').optional().isInt({ min: 2020, max: 2099 }).toInt(),
+  ]),
+  async (req, res, next) => {
+    try {
+      const month = req.query.month || undefined;
+      const year = req.query.year || undefined;
 
-    const breakdown = await analyticsService.getCategoryBreakdown(
-      req.user.uid,
-      month,
-      year
-    );
+      const breakdown = await analyticsService.getCategoryBreakdown(
+        req.user.uid,
+        month,
+        year
+      );
 
-    return response.success(res, breakdown);
-  } catch (error) {
-    next(error);
+      return response.success(res, breakdown);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 /**
  * GET /api/analytics/trends

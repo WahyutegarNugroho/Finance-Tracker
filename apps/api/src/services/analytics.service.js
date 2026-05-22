@@ -11,43 +11,55 @@ const getDashboardOverview = async (userId) => {
   const currentMonth = now.getMonth() + 1;
   const currentYear = now.getFullYear();
 
-  // Current month date range
-  const startOfMonth = new Date(currentYear, currentMonth - 1, 1).getTime();
-  const endOfMonth = new Date(currentYear, currentMonth, 0, 23, 59, 59, 999).getTime();
+  const startOfMonth = new Date(currentYear, currentMonth - 1, 1);
+  const endOfMonth = new Date(currentYear, currentMonth, 0, 23, 59, 59, 999);
 
-  // Previous month date range (for comparison)
-  const startOfPrevMonth = new Date(currentYear, currentMonth - 2, 1).getTime();
-  const endOfPrevMonth = new Date(currentYear, currentMonth - 1, 0, 23, 59, 59, 999).getTime();
+  const startOfPrevMonth = new Date(currentYear, currentMonth - 2, 1);
+  const endOfPrevMonth = new Date(currentYear, currentMonth - 1, 0, 23, 59, 59, 999);
 
-  // Get ALL transactions for user to filter in-memory (avoids composite index)
-  const allSnapshot = await db
+  // Fetch only current month transactions
+  const currentSnapshot = await db
     .collection(TRANSACTIONS_COLLECTION)
     .where('userId', '==', userId)
+    .where('date', '>=', startOfMonth)
+    .where('date', '<=', endOfMonth)
     .get();
 
-  const allTx = allSnapshot.docs.map(doc => {
+  const currentMonthTx = currentSnapshot.docs.map(doc => {
     const data = doc.data();
     return {
       id: doc.id,
       ...data,
-      dateValue: (data.date?.toDate?.() || new Date(data.date)).getTime(),
-      dateObj: data.date?.toDate?.() || new Date(data.date),
+      date: data.date?.toDate?.() || new Date(data.date),
     };
   });
 
-  // Calculate current month totals
+  // Fetch only previous month transactions
+  const prevSnapshot = await db
+    .collection(TRANSACTIONS_COLLECTION)
+    .where('userId', '==', userId)
+    .where('date', '>=', startOfPrevMonth)
+    .where('date', '<=', endOfPrevMonth)
+    .get();
+
+  const prevMonthTx = prevSnapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      ...data,
+      date: data.date?.toDate?.() || new Date(data.date),
+    };
+  });
+
   let currentIncome = 0;
   let currentExpense = 0;
-  const currentMonthTx = allTx.filter(tx => tx.dateValue >= startOfMonth && tx.dateValue <= endOfMonth);
   currentMonthTx.forEach((tx) => {
     if (tx.type === 'income') currentIncome += tx.amount;
     else currentExpense += tx.amount;
   });
 
-  // Calculate previous month totals
   let prevIncome = 0;
   let prevExpense = 0;
-  const prevMonthTx = allTx.filter(tx => tx.dateValue >= startOfPrevMonth && tx.dateValue <= endOfPrevMonth);
   prevMonthTx.forEach((tx) => {
     if (tx.type === 'income') prevIncome += tx.amount;
     else prevExpense += tx.amount;
@@ -67,11 +79,22 @@ const getDashboardOverview = async (userId) => {
     ? (((currentBalance - prevBalance) / Math.abs(prevBalance)) * 100).toFixed(1)
     : 0;
 
-  // Get recent transactions (last 5)
-  const recentTransactions = allTx
-    .sort((a, b) => b.dateValue - a.dateValue)
-    .slice(0, 5)
-    .map(tx => ({ ...tx, date: tx.dateObj }));
+  // Get recent transactions (last 5) — server-side limit
+  const recentSnapshot = await db
+    .collection(TRANSACTIONS_COLLECTION)
+    .where('userId', '==', userId)
+    .orderBy('date', 'desc')
+    .limit(5)
+    .get();
+
+  const recentTransactions = recentSnapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      ...data,
+      date: data.date?.toDate?.() || new Date(data.date),
+    };
+  });
 
   // Get budget summary
   const budgetSnapshot = await db
@@ -90,9 +113,19 @@ const getDashboardOverview = async (userId) => {
     ? Math.round((currentExpense / totalBudgetLimit) * 100)
     : 0;
 
+  // Load category colors from Firestore
+  const categorySnapshot = await db
+    .collection('categories')
+    .where('userId', '==', userId)
+    .get();
+  const categoryColorMap = {};
+  categorySnapshot.docs.forEach((doc) => {
+    const data = doc.data();
+    categoryColorMap[doc.id] = data.color || '#4648d4';
+  });
+
   // Calculate category breakdown for current month
   const categoryMap = {};
-  const CHART_COLORS = ['#4648d4', '#6cf8bb', '#ffb95f', '#f43f5e', '#a855f7', '#06b6d4', '#f59e0b'];
   
   currentMonthTx.forEach((tx) => {
     if (tx.type === 'expense') {
@@ -100,7 +133,7 @@ const getDashboardOverview = async (userId) => {
         categoryMap[tx.categoryId] = {
           name: tx.categoryName,
           amount: 0,
-          color: tx.categoryColor || CHART_COLORS[Object.keys(categoryMap).length % CHART_COLORS.length]
+          color: categoryColorMap[tx.categoryId] || tx.categoryColor || '#4648d4'
         };
       }
       categoryMap[tx.categoryId].amount += tx.amount;
@@ -135,14 +168,15 @@ const getDashboardOverview = async (userId) => {
  */
 const getCashFlow = async (userId, months = 6) => {
   const now = new Date();
-  const startDateValue = new Date(now.getFullYear(), now.getMonth() - months + 1, 1).getTime();
+  const startDate = new Date(now.getFullYear(), now.getMonth() - months + 1, 1);
 
   const snapshot = await db
     .collection(TRANSACTIONS_COLLECTION)
     .where('userId', '==', userId)
+    .where('date', '>=', startDate)
+    .orderBy('date', 'asc')
     .get();
 
-  // Group by month
   const monthlyData = {};
 
   for (let i = 0; i < months; i++) {
@@ -160,16 +194,13 @@ const getCashFlow = async (userId, months = 6) => {
   snapshot.docs.forEach((doc) => {
     const data = doc.data();
     const date = data.date?.toDate?.() || new Date(data.date);
-    
-    if (date.getTime() >= startDateValue) {
-      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
-      if (monthlyData[key]) {
-        if (data.type === 'income') {
-          monthlyData[key].income += data.amount;
-        } else {
-          monthlyData[key].expense += data.amount;
-        }
+    if (monthlyData[key]) {
+      if (data.type === 'income') {
+        monthlyData[key].income += data.amount;
+      } else {
+        monthlyData[key].expense += data.amount;
       }
     }
   });
@@ -185,41 +216,38 @@ const getCategoryBreakdown = async (userId, month, year) => {
   const m = month || now.getMonth() + 1;
   const y = year || now.getFullYear();
 
-  const startDateValue = new Date(y, m - 1, 1).getTime();
-  const endDateValue = new Date(y, m, 0, 23, 59, 59, 999).getTime();
+  const startDate = new Date(y, m - 1, 1);
+  const endDate = new Date(y, m, 0, 23, 59, 59, 999);
 
   const snapshot = await db
     .collection(TRANSACTIONS_COLLECTION)
     .where('userId', '==', userId)
+    .where('type', '==', 'expense')
+    .where('date', '>=', startDate)
+    .where('date', '<=', endDate)
     .get();
 
-  // Group by category
   const categoryMap = {};
   let totalExpense = 0;
 
   snapshot.docs.forEach((doc) => {
     const data = doc.data();
-    const dateValue = (data.date?.toDate?.() || new Date(data.date)).getTime();
+    totalExpense += data.amount;
 
-    if (data.type === 'expense' && dateValue >= startDateValue && dateValue <= endDateValue) {
-      totalExpense += data.amount;
-
-      if (!categoryMap[data.categoryId]) {
-        categoryMap[data.categoryId] = {
-          categoryId: data.categoryId,
-          categoryName: data.categoryName,
-          categoryIcon: data.categoryIcon,
-          amount: 0,
-          count: 0,
-        };
-      }
-
-      categoryMap[data.categoryId].amount += data.amount;
-      categoryMap[data.categoryId].count++;
+    if (!categoryMap[data.categoryId]) {
+      categoryMap[data.categoryId] = {
+        categoryId: data.categoryId,
+        categoryName: data.categoryName,
+        categoryIcon: data.categoryIcon,
+        amount: 0,
+        count: 0,
+      };
     }
+
+    categoryMap[data.categoryId].amount += data.amount;
+    categoryMap[data.categoryId].count++;
   });
 
-  // Calculate percentages and sort by amount
   const categories = Object.values(categoryMap)
     .map((cat) => ({
       ...cat,
@@ -243,12 +271,14 @@ const getTrends = async (userId) => {
   const currentYear = now.getFullYear();
   const prevYear = currentYear - 1;
 
-  const startOfPrevYearValue = new Date(prevYear, 0, 1).getTime();
-  const endOfCurrentYearValue = new Date(currentYear, 11, 31, 23, 59, 59, 999).getTime();
+  const startOfPrevYear = new Date(prevYear, 0, 1);
+  const endOfCurrentYear = new Date(currentYear, 11, 31, 23, 59, 59, 999);
 
   const snapshot = await db
     .collection(TRANSACTIONS_COLLECTION)
     .where('userId', '==', userId)
+    .where('date', '>=', startOfPrevYear)
+    .where('date', '<=', endOfCurrentYear)
     .get();
 
   let currentYearIncome = 0;
@@ -263,21 +293,17 @@ const getTrends = async (userId) => {
   snapshot.docs.forEach((doc) => {
     const data = doc.data();
     const date = data.date?.toDate?.() || new Date(data.date);
-    const dateValue = date.getTime();
-    
-    if (dateValue >= startOfPrevYearValue && dateValue <= endOfCurrentYearValue) {
-      const yr = date.getFullYear();
-      const mo = date.getMonth();
+    const yr = date.getFullYear();
+    const mo = date.getMonth();
 
-      if (yr === currentYear) {
-        monthsSeen.current.add(mo);
-        if (data.type === 'income') currentYearIncome += data.amount;
-        else currentYearExpense += data.amount;
-      } else if (yr === prevYear) {
-        monthsSeen.prev.add(mo);
-        if (data.type === 'income') prevYearIncome += data.amount;
-        else prevYearExpense += data.amount;
-      }
+    if (yr === currentYear) {
+      monthsSeen.current.add(mo);
+      if (data.type === 'income') currentYearIncome += data.amount;
+      else currentYearExpense += data.amount;
+    } else if (yr === prevYear) {
+      monthsSeen.prev.add(mo);
+      if (data.type === 'income') prevYearIncome += data.amount;
+      else prevYearExpense += data.amount;
     }
   });
 

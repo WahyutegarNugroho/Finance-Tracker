@@ -1,5 +1,5 @@
 const express = require('express');
-const { body, param } = require('express-validator');
+const { body, param, query } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate } = require('../middleware/auth');
 const budgetService = require('../services/budget.service');
@@ -15,31 +15,42 @@ router.use(authenticate);
  * Get overall budget summary
  * Must be before /:id to avoid route conflict
  */
-router.get('/summary', async (req, res, next) => {
-  try {
-    const month = parseInt(req.query.month, 10) || undefined;
-    const year = parseInt(req.query.year, 10) || undefined;
+router.get('/summary',
+  validate([
+    query('month').optional().isInt({ min: 1, max: 12 }).toInt(),
+    query('year').optional().isInt({ min: 2020, max: 2099 }).toInt(),
+  ]),
+  async (req, res, next) => {
+    try {
+      const month = req.query.month || undefined;
+      const year = req.query.year || undefined;
 
-    const summary = await budgetService.getBudgetSummary(
-      req.user.uid,
-      month,
-      year
-    );
+      const summary = await budgetService.getBudgetSummary(
+        req.user.uid,
+        month,
+        year
+      );
 
-    return response.success(res, summary);
-  } catch (error) {
-    next(error);
+      return response.success(res, summary);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 /**
  * GET /api/budgets
  * List all budgets for current or specified month
  */
-router.get('/', async (req, res, next) => {
+router.get('/',
+  validate([
+    query('month').optional().isInt({ min: 1, max: 12 }).toInt(),
+    query('year').optional().isInt({ min: 2020, max: 2099 }).toInt(),
+  ]),
+  async (req, res, next) => {
   try {
-    const month = parseInt(req.query.month, 10) || undefined;
-    const year = parseInt(req.query.year, 10) || undefined;
+    const month = req.query.month || undefined;
+    const year = req.query.year || undefined;
 
     const budgets = await budgetService.getBudgets(
       req.user.uid,

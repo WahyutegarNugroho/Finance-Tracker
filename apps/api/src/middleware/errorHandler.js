@@ -1,15 +1,11 @@
+const logger = require('../utils/logger');
+
 /**
  * Global error handler middleware
  * Catches all unhandled errors and returns standardized response
  */
 const errorHandler = (err, req, res, _next) => {
-  console.error('─── Unhandled Error ───');
-  console.error('Path:', req.method, req.originalUrl);
-  console.error('Message:', err.message);
-  if (process.env.NODE_ENV !== 'production') {
-    console.error('Stack:', err.stack);
-  }
-  console.error('───────────────────────');
+  logger.error({ err, cid: req.correlationId, path: `${req.method} ${req.originalUrl}` }, 'Unhandled error');
 
   // Firebase-specific errors
   if (err.code && typeof err.code === 'string' && err.code.startsWith('auth/')) {

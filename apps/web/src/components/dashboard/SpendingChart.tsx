@@ -8,6 +8,7 @@ import {
   ArcElement,
   Tooltip,
   Legend,
+  TooltipItem,
 } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 
@@ -56,7 +57,7 @@ export default function SpendingChart({ expenseByCategory, totalExpense }: Spend
         bodyColor: "#ffffff",
         padding: 10,
         callbacks: {
-          label: function(context: any) {
+          label: function(context: TooltipItem<'doughnut'>) {
             return ` ${context.label}: ${context.raw}%`;
           }
         }

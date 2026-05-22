@@ -3,9 +3,10 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, sendPasswordResetEmail } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase";
 import { api } from "@/lib/api";
+import type { FirebaseAuthError } from "@/types";
 
 export default function Login() {
   const router = useRouter();
@@ -13,6 +14,20 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [forgotPwdMsg, setForgotPwdMsg] = useState("");
+  const [forgotPwdLoading, setForgotPwdLoading] = useState(false);
+
+  const FIREBASE_ERRORS: Record<string, string> = {
+    'auth/user-not-found': 'Email not registered. Please sign up.',
+    'auth/wrong-password': 'Incorrect password. Please try again.',
+    'auth/invalid-credential': 'Invalid email or password.',
+    'auth/too-many-requests': 'Too many attempts. Please try again later.',
+    'auth/invalid-email': 'Please enter a valid email address.',
+    'auth/email-already-in-use': 'This email is already registered.',
+    'auth/weak-password': 'Password is too weak.',
+    'auth/user-disabled': 'This account has been disabled.',
+    'auth/network-request-failed': 'Network error. Please check your connection.',
+  };
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,10 +37,37 @@ export default function Login() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.message || "Failed to log in.");
+    } catch (err: unknown) {
+      const fbErr = err as FirebaseAuthError;
+      const code = fbErr?.code || '';
+      setError(FIREBASE_ERRORS[code] || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email.trim()) {
+      setForgotPwdMsg("Please enter your email address first.");
+      return;
+    }
+    setError("");
+    setForgotPwdMsg("");
+    setForgotPwdLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setForgotPwdMsg("Password reset email sent. Check your inbox.");
+    } catch (err: unknown) {
+      const fbErr = err as FirebaseAuthError;
+      const code = fbErr?.code || '';
+      const errorMap: Record<string, string> = {
+        'auth/user-not-found': 'Email not registered.',
+        'auth/invalid-email': 'Please enter a valid email address.',
+        'auth/too-many-requests': 'Too many attempts. Please try again later.',
+      };
+      setForgotPwdMsg(errorMap[code] || 'Failed to send reset email.');
+    } finally {
+      setForgotPwdLoading(false);
     }
   };
 
@@ -34,16 +76,13 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // 1. Login with Google on Firebase client
       await signInWithPopup(auth, googleProvider);
-      
-      // 2. Sync user with backend (creates user in Firestore if new)
       await api.post("/auth/google", {});
-      
-      // 3. Redirect
       router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.message || "Google sign in failed.");
+    } catch (err: unknown) {
+      const fbErr = err as FirebaseAuthError;
+      const code = fbErr?.code || '';
+      setError(FIREBASE_ERRORS[code] || 'Google sign in failed.');
     } finally {
       setLoading(false);
     }
@@ -57,6 +96,7 @@ export default function Login() {
         <img
           alt="Abstract geometric background"
           className="absolute inset-0 w-full h-full object-cover z-0"
+          loading="lazy"
           src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFzFlFu7NXs2_VGKnr1njxibMPR6OAbvd9gIAZuBtJyCK_-8XljMIN6rjT4UhjzscYDPoRIl_Zf9LkXCjbilPPXHwrXDkzBs03NNq4Il108IdjC7mVDGu7-egBy4husq4ElZIf54avAFN6WMPy1n4Yt6HXBk7Us6JnfyRYJD26ugcWJGtdtqqUhikdXWU1ygbM1zA3HAzRHGX8kE2KDzHQsyeHusectIkdT6OpIu5WseItKIcL_N2qCBUVm3S5JKDqrLzxjirr_5_6"
         />
         {/* Gradient Overlay */}
@@ -120,6 +160,11 @@ export default function Login() {
 
           {/* Form */}
           <form className="space-y-6" onSubmit={handleEmailLogin}>
+            {forgotPwdMsg && (
+              <div className={`p-3 text-sm rounded-lg ${forgotPwdMsg.includes("sent") ? "text-secondary bg-secondary-container" : "text-error bg-error-container"}`}>
+                {forgotPwdMsg}
+              </div>
+            )}
             {error && (
               <div className="p-3 text-sm text-error bg-error-container rounded-lg">
                 {error}
@@ -159,12 +204,14 @@ export default function Login() {
                 >
                   Password
                 </label>
-                <a
-                  className="font-body-sm text-body-sm text-primary hover:text-primary-container transition-colors font-medium"
-                  href="#"
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  disabled={forgotPwdLoading}
+                  className="font-body-sm text-body-sm text-primary hover:text-primary-container transition-colors font-medium disabled:opacity-50"
                 >
-                  Forgot password?
-                </a>
+                  {forgotPwdLoading ? "Sending..." : "Forgot password?"}
+                </button>
               </div>
               <div className="relative">
                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
@@ -239,9 +286,8 @@ export default function Login() {
             </div>
           </form>
 
-          {/* Footer Link */}
           <p className="mt-8 text-center font-body-sm text-body-sm text-on-surface-variant">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               className="text-primary font-medium hover:underline decoration-primary/30 underline-offset-4 transition-all"
               href="/register"

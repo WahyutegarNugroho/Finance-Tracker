@@ -10,8 +10,29 @@ import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { ApiResponse } from "@/types";
+import { ApiResponse, CashFlowEntry } from "@/types";
 import Link from "next/link";
+
+interface AnalyticsOverview {
+  income: number;
+  expense: number;
+  balance: number;
+}
+
+interface CategoryBreakdownItem {
+  categoryId: string;
+  categoryName: string;
+  categoryIcon: string;
+  amount: number;
+  color: string;
+  percentage: number;
+}
+
+interface AnalyticsCategories {
+  totalExpense: number;
+  categories: CategoryBreakdownItem[];
+}
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -52,19 +73,19 @@ export default function Analytics() {
   }, [user, authLoading, router]);
 
   // Queries
-  const { data: overviewData, isLoading: overviewLoading } = useQuery<ApiResponse<any>>({
+  const { data: overviewData, isLoading: overviewLoading } = useQuery<ApiResponse<AnalyticsOverview>>({
     queryKey: ["analytics-overview"],
     queryFn: () => api.get("/analytics/overview"),
     enabled: !!user,
   });
 
-  const { data: cashflowData, isLoading: cashflowLoading } = useQuery<ApiResponse<any[]>>({
+  const { data: cashflowData, isLoading: cashflowLoading } = useQuery<ApiResponse<CashFlowEntry[]>>({
     queryKey: ["analytics-cashflow"],
     queryFn: () => api.get("/analytics/cashflow", { params: { months: 6 } }),
     enabled: !!user,
   });
 
-  const { data: categoryData, isLoading: categoryLoading } = useQuery<ApiResponse<any>>({
+  const { data: categoryData, isLoading: categoryLoading } = useQuery<ApiResponse<AnalyticsCategories>>({
     queryKey: ["analytics-categories"],
     queryFn: () => api.get("/analytics/categories"),
     enabled: !!user,
@@ -76,9 +97,9 @@ export default function Analytics() {
   const categories = breakdown?.categories || [];
 
   const lineChartData = useMemo(() => {
-    const labels = Array.isArray(cashflow) ? cashflow.map((m: any) => m.label) : [];
-    const incomeData = Array.isArray(cashflow) ? cashflow.map((m: any) => m.income) : [];
-    const expenseData = Array.isArray(cashflow) ? cashflow.map((m: any) => m.expense) : [];
+    const labels = Array.isArray(cashflow) ? cashflow.map((m) => m.label) : [];
+    const incomeData = Array.isArray(cashflow) ? cashflow.map((m) => m.income) : [];
+    const expenseData = Array.isArray(cashflow) ? cashflow.map((m) => m.expense) : [];
 
     return {
       labels,
@@ -123,6 +144,7 @@ export default function Analytics() {
         bodyColor: "#ffffff",
         padding: 10,
         callbacks: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           label: function(context: any) {
             return ` ${context.dataset.label}: ${formatCurrency(context.raw)}`;
           }
@@ -144,6 +166,7 @@ export default function Analytics() {
         },
         ticks: {
           color: "rgba(150, 150, 150, 0.8)",
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           callback: function(value: any) {
             return formatCurrency(value);
           }
@@ -153,9 +176,9 @@ export default function Analytics() {
   }), [formatCurrency]);
 
   const doughnutData = useMemo(() => {
-    const labels = Array.isArray(categories) ? categories.map((cat: any) => tCategory(cat.categoryName)) : [];
-    const amounts = Array.isArray(categories) ? categories.map((cat: any) => cat.amount) : [];
-    const colors = Array.isArray(categories) ? categories.map((cat: any) => cat.color || "#4648d4") : [];
+    const labels = Array.isArray(categories) ? categories.map((cat) => tCategory(cat.categoryName)) : [];
+    const amounts = Array.isArray(categories) ? categories.map((cat) => cat.amount) : [];
+    const colors = Array.isArray(categories) ? categories.map((cat) => cat.color || "#4648d4") : [];
 
     return {
       labels,
@@ -184,6 +207,7 @@ export default function Analytics() {
         bodyColor: "#ffffff",
         padding: 10,
         callbacks: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           label: function(context: any) {
             return ` ${context.label}: ${formatCurrency(context.raw)}`;
           }
@@ -320,7 +344,7 @@ export default function Analytics() {
                     </div>
 
                     <div className="flex flex-col gap-3 w-full sm:w-auto overflow-y-auto max-h-[160px] pr-2 custom-scrollbar">
-                      {Array.isArray(categories) ? categories.slice(0, 5).map((cat: any) => (
+                      {Array.isArray(categories) ? categories.slice(0, 5).map((cat) => (
                         <div key={cat.categoryId} className="flex items-center justify-between gap-4">
                           <div className="flex items-center gap-2">
                             <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color || '#4648d4' }}></div>
@@ -343,7 +367,7 @@ export default function Analytics() {
                     <Link href="/transactions?type=expense" className="text-sm text-primary hover:underline font-bold transition-all">{language === 'id' ? 'Lihat Semua' : 'View All'}</Link>
                   </div>
                   <div className="flex flex-col gap-3">
-                    {Array.isArray(categories) ? categories.slice(0, 5).map((cat: any) => (
+                    {Array.isArray(categories) ? categories.slice(0, 5).map((cat) => (
                       <div key={cat.categoryId} className="flex items-center p-3 rounded-lg hover:bg-surface-variant/30 transition-all border border-transparent hover:border-outline-variant/10 group">
                         <div 
                           className="w-10 h-10 rounded-full flex items-center justify-center mr-4 transition-transform group-hover:scale-110"

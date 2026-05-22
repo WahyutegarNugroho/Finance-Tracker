@@ -1,6 +1,25 @@
 const { db, admin } = require('../config/firebase');
 
 const USERS_COLLECTION = 'users';
+const BATCH_LIMIT = 500;
+
+/**
+ * Delete all documents in a collection for a user in batches of 500
+ */
+const deleteCollectionInBatches = async (collectionName, uid, filterFn = null) => {
+  const snapshot = await db.collection(collectionName).where('userId', '==', uid).get();
+  if (snapshot.empty) return;
+
+  const docs = filterFn ? snapshot.docs.filter(filterFn) : snapshot.docs;
+  if (docs.length === 0) return;
+
+  for (let i = 0; i < docs.length; i += BATCH_LIMIT) {
+    const batch = db.batch();
+    const chunk = docs.slice(i, i + BATCH_LIMIT);
+    chunk.forEach(doc => batch.delete(doc.ref));
+    await batch.commit();
+  }
+};
 
 /**
  * Get user profile by UID
@@ -38,25 +57,14 @@ const updateProfile = async (uid, data) => {
 
 /**
  * Reset all user data (transactions, budgets, custom categories)
+ * Uses batched writes to avoid Firestore write rate limits
  */
 const resetUserData = async (uid) => {
-  // Delete transactions
-  const txSnapshot = await db.collection('transactions').where('userId', '==', uid).get();
-  const txPromises = txSnapshot.docs.map(doc => doc.ref.delete());
-
-  // Delete budgets
-  const budgetSnapshot = await db.collection('budgets').where('userId', '==', uid).get();
-  const budgetPromises = budgetSnapshot.docs.map(doc => doc.ref.delete());
-
-  // Delete custom categories (where isDefault is not true)
-  const categorySnapshot = await db.collection('categories')
-    .where('userId', '==', uid)
-    .get();
-  const categoryPromises = categorySnapshot.docs
-    .filter(doc => !doc.data().isDefault)
-    .map(doc => doc.ref.delete());
-
-  await Promise.all([...txPromises, ...budgetPromises, ...categoryPromises]);
+  await Promise.all([
+    deleteCollectionInBatches('transactions', uid),
+    deleteCollectionInBatches('budgets', uid),
+    deleteCollectionInBatches('categories', uid, doc => !doc.data().isDefault),
+  ]);
 };
 
 module.exports = { getProfile, updateProfile, resetUserData };

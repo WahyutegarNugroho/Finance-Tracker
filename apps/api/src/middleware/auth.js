@@ -1,4 +1,5 @@
 const { auth } = require('../config/firebase');
+const logger = require('../utils/logger');
 
 /**
  * Authentication middleware
@@ -31,7 +32,7 @@ const authenticate = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error('Auth middleware error:', error.message);
+    logger.warn({ err: error, cid: req.correlationId }, 'Auth middleware error');
 
     if (error.code === 'auth/id-token-expired') {
       return res.status(401).json({

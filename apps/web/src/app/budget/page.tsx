@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ApiResponse } from "@/types";
+import type { Budget } from "@/types";
 import ConfirmDialog from "@/components/ConfirmDialog";
 
 export default function Budget() {
@@ -22,7 +23,7 @@ export default function Budget() {
   const queryClient = useQueryClient();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [budgetToEdit, setBudgetToEdit] = useState<any>(null);
+  const [budgetToEdit, setBudgetToEdit] = useState<Budget | null>(null);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
 
   // Confirm Dialog
@@ -61,13 +62,13 @@ export default function Budget() {
   };
 
   // Queries
-  const { data: budgetsData, isLoading: budgetsLoading } = useQuery<ApiResponse<any[]>>({
+  const { data: budgetsData, isLoading: budgetsLoading } = useQuery<ApiResponse<Budget[]>>({
     queryKey: ["budgets", selectedMonth, selectedYear],
     queryFn: () => api.get(`/budgets?month=${selectedMonth}&year=${selectedYear}`),
     enabled: !!user,
   });
 
-  const { data: summaryData, isLoading: summaryLoading } = useQuery<ApiResponse<any>>({
+  const { data: summaryData, isLoading: summaryLoading } = useQuery<ApiResponse<{ totalBudget: number; totalSpent: number; totalRemaining: number; overallPercentage: number; categoryCount: number }>>({
     queryKey: ["budgets-summary", selectedMonth, selectedYear],
     queryFn: () => api.get(`/budgets/summary?month=${selectedMonth}&year=${selectedYear}`),
     enabled: !!user,

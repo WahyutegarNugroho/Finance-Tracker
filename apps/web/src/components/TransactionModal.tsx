@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
@@ -33,7 +33,7 @@ export default function TransactionModal({
   const [date, setDate] = useState("");
   const [note, setNote] = useState("");
 
-  const formatWithDots = (val: string) => {
+  const formatWithDots = useCallback((val: string) => {
     const isDecimalAllowed = currency !== "IDR" && currency !== "JPY";
     
     if (isDecimalAllowed) {
@@ -50,7 +50,7 @@ export default function TransactionModal({
     } else {
       return val.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
-  };
+  }, [currency]);
 
   // Queries
   const { data: categoriesData, isLoading: fetchingCats } = useQuery<ApiResponse<Category[]>>({
@@ -63,24 +63,27 @@ export default function TransactionModal({
 
   useEffect(() => {
     if (isOpen) {
-      if (transactionToEdit) {
-        setType(transactionToEdit.type);
-        const amtStr = transactionToEdit.amount.toString();
-        setAmount(amtStr);
-        setDisplayAmount(formatWithDots(amtStr));
-        setCategoryId((transactionToEdit as any).categoryId || ""); 
-        setDate(new Date(transactionToEdit.date).toISOString().split("T")[0]);
-        setNote(transactionToEdit.note || "");
-      } else {
-        setType("expense");
-        setAmount("");
-        setDisplayAmount("");
-        setCategoryId("");
-        setDate(new Date().toISOString().split("T")[0]);
-        setNote("");
-      }
+      const timer = setTimeout(() => {
+        if (transactionToEdit) {
+          setType(transactionToEdit.type);
+          const amtStr = transactionToEdit.amount.toString();
+          setAmount(amtStr);
+          setDisplayAmount(formatWithDots(amtStr));
+          setCategoryId(transactionToEdit.categoryId || ""); 
+          setDate(new Date(transactionToEdit.date).toISOString().split("T")[0]);
+          setNote(transactionToEdit.note || "");
+        } else {
+          setType("expense");
+          setAmount("");
+          setDisplayAmount("");
+          setCategoryId("");
+          setDate(new Date().toISOString().split("T")[0]);
+          setNote("");
+        }
+      }, 0);
+      return () => clearTimeout(timer);
     }
-  }, [isOpen, transactionToEdit]);
+  }, [isOpen, transactionToEdit, formatWithDots]);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const isDecimalAllowed = currency !== "IDR" && currency !== "JPY";
@@ -107,13 +110,26 @@ export default function TransactionModal({
   useEffect(() => {
     if (!transactionToEdit && Array.isArray(categories) && categories.length > 0) {
       const defaultCat = categories.find((c) => c.type === type);
-      if (defaultCat) setCategoryId(defaultCat.id);
+      if (defaultCat) {
+        const timer = setTimeout(() => {
+          setCategoryId(defaultCat.id);
+        }, 0);
+        return () => clearTimeout(timer);
+      }
     }
   }, [type, categories, transactionToEdit]);
 
   // Mutation
   const saveMutation = useMutation({
-    mutationFn: (payload: any) => {
+    mutationFn: (payload: {
+      type: "income" | "expense";
+      amount: number;
+      categoryId: string;
+      categoryName: string;
+      categoryIcon: string;
+      date: string;
+      note: string;
+    }) => {
       if (transactionToEdit) {
         return api.put(`/transactions/${transactionToEdit.id}`, payload);
       }

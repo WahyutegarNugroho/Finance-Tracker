@@ -17,6 +17,12 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: "FinTrack - Personal Finance Management",
   description: "Track your income, expenses, and budgets effortlessly.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "FinTrack",
+  },
 };
 
 export default function RootLayout({
@@ -48,6 +54,21 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-background text-on-background font-body-lg text-body-lg min-h-screen flex flex-col relative overflow-x-hidden transition-colors duration-300">
+        <Script
+          id="register-sw"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').catch(function(err) {
+                    console.warn('SW registration failed:', err);
+                  });
+                });
+              }
+            `,
+          }}
+        />
         <Providers>
           {/* Decorative Background Image with Overlay */}
           <div

@@ -4,6 +4,7 @@ const { validate } = require('../middleware/validate');
 const authService = require('../services/auth.service');
 const response = require('../utils/response');
 const { authenticate } = require('../middleware/auth');
+const { authLimiter } = require('../middleware/rateLimiter');
 
 const router = express.Router();
 
@@ -13,11 +14,23 @@ const router = express.Router();
  */
 router.post(
   '/register',
+  authLimiter,
   validate([
     body('email').isEmail().withMessage('Valid email is required'),
     body('password')
-      .isLength({ min: 6 })
-      .withMessage('Password must be at least 6 characters'),
+      .isLength({ min: 8 })
+      .withMessage('Password must be at least 8 characters')
+      .custom((value) => {
+        const errors = [];
+        if (!/[a-z]/.test(value)) errors.push('a lowercase letter');
+        if (!/[A-Z]/.test(value)) errors.push('an uppercase letter');
+        if (!/\d/.test(value)) errors.push('a number');
+        if (!/[^a-zA-Z0-9]/.test(value)) errors.push('a special character');
+        if (errors.length > 0) {
+          throw new Error(`Password must contain: ${errors.join(', ')}`);
+        }
+        return true;
+      }),
     body('displayName')
       .notEmpty()
       .trim()
@@ -33,7 +46,7 @@ router.post(
         return response.error(res, 'Email already in use.', 409);
       }
       if (error.code === 'auth/invalid-password') {
-        return response.error(res, 'Password must be at least 6 characters.', 400);
+        return response.error(res, 'Password does not meet requirements.', 400);
       }
       next(error);
     }
@@ -47,6 +60,7 @@ router.post(
  */
 router.post(
   '/google',
+  authLimiter,
   authenticate,
   async (req, res, next) => {
     try {

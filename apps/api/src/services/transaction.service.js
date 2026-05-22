@@ -1,18 +1,65 @@
 const { db, admin } = require('../config/firebase');
-const { parsePagination, buildPaginationMeta } = require('../utils/pagination');
+const { parsePagination, encodeCursor, buildCursor } = require('../utils/pagination');
 
 const COLLECTION = 'transactions';
+const USERS_COLLECTION = 'users';
+
+const calculateNextRecurringDate = (fromDate, frequency) => {
+  const date = new Date(fromDate);
+  switch (frequency) {
+    case 'daily': date.setDate(date.getDate() + 1); break;
+    case 'weekly': date.setDate(date.getDate() + 7); break;
+    case 'monthly': date.setMonth(date.getMonth() + 1); break;
+    case 'yearly': date.setFullYear(date.getFullYear() + 1); break;
+  }
+  return date;
+};
 
 /**
- * Get transactions with filtering, search, and pagination
+ * Get transactions with server-side filtering, search, and cursor-based pagination
  */
 const getTransactions = async (userId, queryParams) => {
-  const { page, limit } = parsePagination(queryParams);
+  const { limit } = parsePagination(queryParams);
 
-  // Fetch ALL transactions for this user (single-field query, no composite index needed)
-  const snapshot = await db.collection(COLLECTION).where('userId', '==', userId).get();
+  let query = db.collection(COLLECTION).where('userId', '==', userId);
 
-  // Map docs to plain objects
+  if (queryParams.type && queryParams.type !== 'all') {
+    query = query.where('type', '==', queryParams.type);
+  }
+
+  if (queryParams.categoryId) {
+    query = query.where('categoryId', '==', queryParams.categoryId);
+  }
+
+  if (queryParams.startDate) {
+    query = query.where('date', '>=', new Date(queryParams.startDate));
+  }
+
+  if (queryParams.endDate) {
+    query = query.where('date', '<=', new Date(queryParams.endDate));
+  }
+
+  const order = queryParams.order === 'asc' ? 'asc' : 'desc';
+  const sortBy = queryParams.sortBy === 'amount' ? 'amount' : 'date';
+  query = query.orderBy(sortBy, order).orderBy('__name__', order);
+
+  if (queryParams.cursor) {
+    try {
+      const cursor = JSON.parse(Buffer.from(queryParams.cursor, 'base64').toString('utf8'));
+      if (cursor.sortValue !== undefined && cursor.id) {
+        const sortValue = sortBy === 'amount' ? Number(cursor.sortValue) : new Date(cursor.sortValue);
+        query = query.startAfter(sortValue, cursor.id);
+      }
+    } catch {
+      // Invalid cursor, ignore and start from beginning
+    }
+  }
+
+  const fetchLimit = limit + 1;
+  query = query.limit(fetchLimit);
+
+  const snapshot = await query.get();
+
   let transactions = snapshot.docs.map((doc) => {
     const data = doc.data();
     return {
@@ -24,53 +71,27 @@ const getTransactions = async (userId, queryParams) => {
     };
   });
 
-  // Filter by type (in-memory)
-  if (queryParams.type && queryParams.type !== 'all') {
-    transactions = transactions.filter((tx) => tx.type === queryParams.type);
+  const hasMore = transactions.length > limit;
+  if (hasMore) {
+    transactions = transactions.slice(0, limit);
   }
 
-  // Filter by search query (in-memory)
   if (queryParams.search) {
     const searchLower = queryParams.search.toLowerCase();
-    transactions = transactions.filter((tx) => 
+    transactions = transactions.filter((tx) =>
       (tx.note && tx.note.toLowerCase().includes(searchLower)) ||
       (tx.categoryName && tx.categoryName.toLowerCase().includes(searchLower))
     );
   }
 
-  // Filter by category (in-memory)
-  if (queryParams.categoryId) {
-    transactions = transactions.filter((tx) => tx.categoryId === queryParams.categoryId);
-  }
+  const nextCursor = hasMore && snapshot.docs.length > 0
+    ? encodeCursor(buildCursor(snapshot.docs[limit - 1], sortBy))
+    : null;
 
-  // Filter by date range (in-memory)
-  if (queryParams.startDate) {
-    const start = new Date(queryParams.startDate).getTime();
-    transactions = transactions.filter((tx) => new Date(tx.date).getTime() >= start);
-  }
-  if (queryParams.endDate) {
-    const end = new Date(queryParams.endDate).getTime();
-    transactions = transactions.filter((tx) => new Date(tx.date).getTime() <= end);
-  }
-
-  // Sort (in-memory)
-  const sortBy = queryParams.sortBy || 'date';
-  const order = queryParams.order || 'desc';
-  transactions.sort((a, b) => {
-    const aVal = a[sortBy] instanceof Date ? a[sortBy].getTime() : a[sortBy];
-    const bVal = b[sortBy] instanceof Date ? b[sortBy].getTime() : b[sortBy];
-    return order === 'desc' ? (bVal > aVal ? 1 : -1) : (aVal > bVal ? 1 : -1);
-  });
-
-  const totalItems = transactions.length;
-
-  // Paginate (in-memory)
-  const offset = (page - 1) * limit;
-  transactions = transactions.slice(offset, offset + limit);
-
-  const pagination = buildPaginationMeta(page, limit, totalItems);
-
-  return { transactions, pagination };
+  return {
+    transactions,
+    pagination: { hasMore, nextCursor, itemsPerPage: limit },
+  };
 };
 
 /**
@@ -97,6 +118,10 @@ const getTransactionById = async (userId, transactionId) => {
  * Create a new transaction
  */
 const createTransaction = async (userId, data) => {
+  // Fetch user's currency for the transaction
+  const userDoc = await db.collection(USERS_COLLECTION).doc(userId).get();
+  const userCurrency = userDoc.exists ? (userDoc.data().currency || 'IDR') : 'IDR';
+
   const transactionData = {
     userId,
     categoryId: data.categoryId,
@@ -104,11 +129,24 @@ const createTransaction = async (userId, data) => {
     categoryIcon: data.categoryIcon,
     type: data.type,
     amount: Math.abs(data.amount),
+    currency: data.currency || userCurrency,
     note: data.note || '',
     date: data.date ? new Date(data.date) : new Date(),
+    isRecurring: data.isRecurring || false,
+    recurringFrequency: data.recurringFrequency || null,
+    recurringEndDate: data.recurringEndDate ? new Date(data.recurringEndDate) : null,
+    tags: data.tags || [],
+    attachments: data.attachments || [],
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   };
+
+  if (data.isRecurring && data.recurringFrequency) {
+    transactionData.recurringNextDate = calculateNextRecurringDate(
+      transactionData.date,
+      data.recurringFrequency
+    );
+  }
 
   const docRef = await db.collection(COLLECTION).add(transactionData);
 
@@ -130,7 +168,9 @@ const updateTransaction = async (userId, transactionId, data) => {
 
   const allowedFields = [
     'categoryId', 'categoryName', 'categoryIcon',
-    'type', 'amount', 'note', 'date',
+    'type', 'amount', 'note', 'date', 'currency',
+    'isRecurring', 'recurringFrequency', 'recurringEndDate',
+    'tags', 'attachments',
   ];
 
   const updateData = {};
@@ -182,12 +222,14 @@ const deleteTransaction = async (userId, transactionId) => {
  * Returns total income, total expense, and transaction count
  */
 const getTransactionSummary = async (userId, month, year) => {
-  const startDate = new Date(year, month - 1, 1).getTime();
-  const endDate = new Date(year, month, 0, 23, 59, 59, 999).getTime();
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 0, 23, 59, 59, 999);
 
   const snapshot = await db
     .collection(COLLECTION)
     .where('userId', '==', userId)
+    .where('date', '>=', startDate)
+    .where('date', '<=', endDate)
     .get();
 
   let totalIncome = 0;
@@ -196,15 +238,11 @@ const getTransactionSummary = async (userId, month, year) => {
 
   snapshot.docs.forEach((doc) => {
     const data = doc.data();
-    const dateValue = (data.date?.toDate?.() || new Date(data.date)).getTime();
-    
-    if (dateValue >= startDate && dateValue <= endDate) {
-      transactionCount++;
-      if (data.type === 'income') {
-        totalIncome += data.amount;
-      } else {
-        totalExpense += data.amount;
-      }
+    transactionCount++;
+    if (data.type === 'income') {
+      totalIncome += data.amount;
+    } else {
+      totalExpense += data.amount;
     }
   });
 

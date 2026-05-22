@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import Sidebar from "@/components/Sidebar";
 import Topbar from "@/components/Topbar";
 import BottomNav from "@/components/BottomNav";
@@ -34,9 +34,10 @@ function TransactionsContent() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
 
-  // Pagination & Filters
-  const [page, setPage] = useState(1);
-  const [typeFilter, setTypeFilter] = useState("all"); // 'all', 'income', 'expense'
+  // Cursor-based Pagination & Filters
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [cursorStack, setCursorStack] = useState<Array<string | null>>([]);
+  const [typeFilter, setTypeFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
 
@@ -54,33 +55,49 @@ function TransactionsContent() {
     }
   }, [user, authLoading, router]);
 
-  // Debounce search query
+  // Debounce search query — reset cursor on new search
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchQuery);
-      setPage(1); // Reset to page 1 on new search
+      setCursor(null);
+      setCursorStack([]);
     }, 500);
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
+  // Reset cursor when type filter changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCursor(null);
+      setCursorStack([]);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [typeFilter]);
+
   // Query
   const { data: transactionsData, isLoading: transactionsLoading, isError } = useQuery<ApiResponse<Transaction[]>>({
-    queryKey: ["transactions", page, typeFilter, debouncedSearch],
-    queryFn: () => {
-      let url = `/transactions?page=${page}&limit=10`;
+    queryKey: ["transactions", cursor, typeFilter, debouncedSearch],
+    queryFn: ({ signal }) => {
+      let url = `/transactions?limit=10`;
+      if (cursor) url += `&cursor=${encodeURIComponent(cursor)}`;
       if (typeFilter !== "all") url += `&type=${typeFilter}`;
       if (debouncedSearch) url += `&search=${encodeURIComponent(debouncedSearch)}`;
-      return api.get(url);
+      return api.get(url, { signal });
     },
     enabled: !!user,
   });
 
   const transactions = transactionsData?.data || [];
   const pagination = transactionsData?.pagination;
-  const totalPages = pagination?.totalPages || 1;
-  const totalItems = pagination?.totalItems || 0;
+  const hasMore = pagination?.hasMore ?? false;
+  const canGoBack = cursorStack.length > 0;
 
   const filteredTransactions = Array.isArray(transactions) ? transactions : [];
+
+  const resetPagination = useCallback(() => {
+    setCursor(null);
+    setCursorStack([]);
+  }, []);
 
   // Mutation
   const deleteMutation = useMutation({
@@ -90,10 +107,11 @@ function TransactionsContent() {
       await queryClient.cancelQueries({ queryKey: ["transactions"] });
 
       // Snapshot the previous value
-      const previousTransactions = queryClient.getQueryData(["transactions", page, typeFilter]);
+      const queryKey = ["transactions", cursor, typeFilter, debouncedSearch];
+      const previousTransactions = queryClient.getQueryData(queryKey);
 
       // Optimistically update to the new value
-      queryClient.setQueryData(["transactions", page, typeFilter], (old: ApiResponse<Transaction[]> | undefined) => {
+      queryClient.setQueryData(queryKey, (old: ApiResponse<Transaction[]> | undefined) => {
         if (!old || !Array.isArray(old.data)) return old;
         return {
           ...old,
@@ -102,15 +120,15 @@ function TransactionsContent() {
       });
 
       // Return a context object with the snapshotted value
-      return { previousTransactions };
+      return { previousTransactions, queryKey };
     },
     onSuccess: () => {
       toast.success(language === 'id' ? "Transaksi dihapus!" : "Transaction deleted!");
     },
     onError: (err, id, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
-      if (context?.previousTransactions) {
-        queryClient.setQueryData(["transactions", page, typeFilter], context.previousTransactions);
+      if (context?.previousTransactions && context?.queryKey) {
+        queryClient.setQueryData(context.queryKey, context.previousTransactions);
       }
       toast.error(language === 'id' ? "Gagal menghapus transaksi." : "Failed to delete transaction.");
     },
@@ -134,6 +152,15 @@ function TransactionsContent() {
     setTransactionToDelete(null);
   };
 
+  const sanitizeCSV = (value: string): string => {
+    const s = String(value);
+    const dangerousChars = ['=', '+', '-', '@', '|', '%'];
+    if (dangerousChars.some(c => s.trimStart().startsWith(c))) {
+      return `"'${s.replace(/"/g, '""')}`;
+    }
+    return s.replace(/"/g, '""');
+  };
+
   const handleExport = async () => {
     try {
       let url = `/transactions?page=1&limit=1000`;
@@ -149,15 +176,17 @@ function TransactionsContent() {
         return;
       }
       
-      const headers = ["Date", "Category", "Note", "Amount", "Type"];
+      const headers = ["Date", "Category", "Note", "Amount", "Type", "Currency", "Tags"];
       const csvContent = [
         headers.join(","),
-        ...allTx.map((tx: any) => [
+        ...allTx.map((tx: Transaction) => [
           new Date(tx.date).toISOString().split('T')[0],
-          `"${tx.categoryName}"`,
-          `"${tx.note || ''}"`,
+          `"${sanitizeCSV(tx.categoryName || '')}"`,
+          `"${sanitizeCSV(tx.note || '')}"`,
           tx.amount,
-          tx.type
+          tx.type,
+          tx.currency || '',
+          `"${sanitizeCSV((tx.tags || []).join('; '))}"`
         ].join(","))
       ].join("\n");
 
@@ -233,7 +262,7 @@ function TransactionsContent() {
             typeFilter={typeFilter}
             setTypeFilter={setTypeFilter}
             onExport={handleExport}
-            setPage={setPage}
+            onResetPagination={resetPagination}
           />
 
           <TransactionTable 
@@ -250,27 +279,37 @@ function TransactionsContent() {
           {/* Pagination */}
           <div className="mt-auto px-6 py-4 border-t border-outline-variant/10 flex items-center justify-between bg-surface-container-lowest/50 rounded-xl bg-surface/80">
             <span className="font-body-sm text-body-sm text-on-surface-variant">
-              {t("transactions_page.pagination.showing")} {page} {t("transactions_page.pagination.of")} {Math.max(1, totalPages)} ({totalItems} {t("transactions_page.pagination.total")})
+              {filteredTransactions.length > 0
+                ? (language === 'id' ? `${filteredTransactions.length} transaksi` : `${filteredTransactions.length} transactions`)
+                : ''}
             </span>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="p-1 rounded-md hover:bg-surface-variant text-on-surface disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                onClick={() => {
+                  const prev = cursorStack[cursorStack.length - 1] || null;
+                  if (prev !== undefined) {
+                    setCursorStack(prev => prev.slice(0, -1));
+                    setCursor(prev);
+                  }
+                }}
+                disabled={!canGoBack}
+                className="p-2 rounded-md hover:bg-surface-variant text-on-surface disabled:opacity-30 disabled:hover:bg-transparent transition-colors flex items-center gap-1"
               >
-                <span className="material-symbols-outlined">chevron_left</span>
+                <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+                <span className="font-body-sm text-body-sm">{t("transactions_page.pagination.previous") || "Previous"}</span>
               </button>
-              <div className="flex gap-1">
-                <span className="w-8 h-8 rounded-md bg-primary text-on-primary font-body-sm text-body-sm flex items-center justify-center">
-                  {page}
-                </span>
-              </div>
               <button 
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                disabled={page >= totalPages || totalPages === 0}
-                className="p-1 rounded-md hover:bg-surface-variant text-on-surface disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                onClick={() => {
+                  if (hasMore && pagination?.nextCursor) {
+                    setCursorStack(prev => [...prev, cursor]);
+                    setCursor(pagination.nextCursor!);
+                  }
+                }}
+                disabled={!hasMore}
+                className="p-2 rounded-md hover:bg-surface-variant text-on-surface disabled:opacity-30 disabled:hover:bg-transparent transition-colors flex items-center gap-1"
               >
-                <span className="material-symbols-outlined">chevron_right</span>
+                <span className="font-body-sm text-body-sm">{t("transactions_page.pagination.next") || "Next"}</span>
+                <span className="material-symbols-outlined text-[18px]">chevron_right</span>
               </button>
             </div>
           </div>
@@ -294,8 +333,7 @@ function TransactionsContent() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSuccess={() => {
-          // Re-fetch transactions
-          setPage(1);
+          resetPagination();
           queryClient.invalidateQueries({ queryKey: ["transactions"] });
         }}
         transactionToEdit={transactionToEdit}

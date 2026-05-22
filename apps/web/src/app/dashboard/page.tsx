@@ -48,20 +48,7 @@ export default function Dashboard() {
 
   const data = dashboardData?.data;
 
-  if (authLoading) {
-    return (
-      <div className="bg-background min-h-screen">
-        <Topbar />
-        <Sidebar activePath="/dashboard" />
-        <main className="pt-[88px] pb-[88px] md:pb-8 px-4 md:pl-[284px] md:pr-8 min-h-screen">
-          <DashboardSkeleton />
-        </main>
-        <BottomNav activePath="/dashboard" />
-      </div>
-    );
-  }
-
-  if (dashboardLoading) {
+  if (authLoading || dashboardLoading) {
     return (
       <div className="bg-background min-h-screen">
         <Topbar />
@@ -86,12 +73,10 @@ export default function Dashboard() {
             </div>
             <div>
               <h2 className="font-headline-md text-headline-md text-on-background mb-2">
-                {t("dashboard_page.no_data") || "No data available."}
+                {t("dashboard_page.no_data")}
               </h2>
               <p className="font-body-sm text-body-sm text-on-surface-variant max-w-sm mx-auto">
-                {language === 'id' 
-                  ? "Anda belum memiliki data transaksi untuk bulan ini. Mari buat transaksi pertama Anda sekarang!" 
-                  : "You don't have any transactions for this month yet. Let's create your first transaction now!"}
+                {t("dashboard_page.no_data_desc")}
               </p>
             </div>
             <button 
