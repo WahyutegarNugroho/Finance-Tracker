@@ -13,88 +13,115 @@
 
 ---
 
-## Description
+## Nama Project
 
-FinTrack is a premium, responsive wealth management web application structured as an NPM Workspaces monorepo. Built on a modern web architecture (Next.js 16, React 19, Tailwind CSS v4, Express.js, and Firebase), FinTrack acts as a comprehensive financial command center. Designed for individuals who demand complete control over their cash flow, the platform combines a sophisticated dark-mode user interface, interactive data visualizations, and high-performance navigation.
-
----
-
-## Problems Solved
-
-Personal finance management often becomes a hurdle due to several systemic challenges:
-1. **Lack of Financial Transparency:** Consolidating real-time balances, income ratios, and aggregate expenditures onto a single unified surface is complex.
-2. **Budget Overspending:** Standard platforms fail to enforce category spending discipline, lacking proactive warnings before monthly budget limits are breached.
-3. **High-Friction Manual Recording:** Cluttered, unintuitive data-entry forms discourage consistent tracking of day-to-day transactions.
-4. **Cognitive Overload:** Raw numerical spreadsheets fail to convey strategic patterns, making financial trends difficult to analyze.
-
-**FinTrack addresses these pain points by:**
-* Offering a premium, high-density dashboard that delivers instant visual clarity.
-* Implementing a smart budgeting system with dynamic visual indicators to prevent overspending.
-* Providing a high-performance transaction workflow refined with smooth micro-interactions.
+**FinTrack** (Finance Tracker)
 
 ---
 
-## Key Features
+## Deskripsi Singkat
 
-FinTrack is engineered with premium capabilities to provide a superior wealth management experience:
-
-* **Visual Analytics Dashboard:** Uses Chart.js to render interactive spend-distribution charts, income-to-expense ratios, and category allocation structures.
-* **Streamlined Transaction Management (CRUD):** Log incoming and outgoing funds with ease. Includes robust searching, date-range filtering, instant updates, and secure transaction deletion.
-* **Smart Budgeting & Limits:** Set strict monthly expenditure limits across specific categories (e.g., Food, Utilities, Transport) and receive instant visual indicators as category consumption increases.
-* **Secure Authentication:** User accounts, credentials, and stateful sessions are handled securely by Firebase Authentication.
-* **Customizable Settings:** Manage profile settings, currency configurations, and general dashboard preferences.
-* **Premium Responsive Interface:** Modern glassmorphism components, fully optimized layouts for mobile and desktop screens, and seamless hardware-accelerated animations.
+Aplikasi web manajemen keuangan pribadi berbasis monorepo (NPM Workspaces) dengan arsitektur Next.js 16 + Express.js + Firebase. Menyediakan dashboard visual, pencatatan transaksi CRUD, smart budgeting, analisis tren keuangan, dan autentikasi aman — semuanya dalam satu antarmuka premium modern.
 
 ---
 
-## Tech Stack & Architecture Rationale
+## Problem yang Diselesaikan
 
-The project is architected as an **NPM Workspaces (Monorepo)**, decoupling Frontend and Backend concerns while maintaining clean integration.
+1. **Kurangnya transparansi finansial** — saldo, pemasukan, dan pengeluaran tidak terlihat dalam satu tempat.
+2. **Pengeluaran melebihi anggaran** — tidak ada peringatan dini saat budget kategori hampir habis.
+3. **Ribet mencatat transaksi** — form input tidak intuitif sehingga malas mencatat.
+4. **Analisis keuangan sulit** — data mentah berupa angka tanpa visualisasi tren.
 
-### Frontend (Web Workspace)
+---
 
-| Technology | Role | Rationale |
+## Fitur Utama
+
+- **Dashboard Interaktif** — ringkasan saldo, pemasukan/pengeluaran, tren cashflow (Chart.js).
+- **Manajemen Transaksi CRUD** — tambah, edit, hapus transaksi dengan filter & pagination cursor-based.
+- **Smart Budgeting** — batas pengeluaran per kategori dengan indikator visual (good/warning/critical).
+- **Analisis Keuangan** — tren bulanan, breakdown kategori, perbandingan tahunan.
+- **Batch Operasi** — buat/hapus transaksi dalam jumlah banyak sekaligus.
+- **Autentikasi Firebase** — email/password + Google Sign-In.
+- **Multi-mata Uang** — dukungan IDR, USD, EUR, GBP, JPY.
+- **Dark/Light Mode + Multi Bahasa** — EN/ID.
+- **Ekspor CSV** — unduh data transaksi.
+
+---
+
+## Kelebihan
+
+- **Monorepo terstruktur** — kode frontend dan backend terpisah rapi dalam satu repo.
+- **Cursor-based pagination** — performa tinggi untuk ribuan transaksi (tanpa offset).
+- **Optimasi query Firestore** — read-after-write dihilangkan, query batch di-chunk 500, analytics 5→3 queries.
+- **Denormalized category data** — nama/icon kategori disimpan langsung di transaksi (tidak perlu JOIN).
+- **Firestore transaction** — createBudget atomic check-then-insert (cegah duplikat).
+- **Token caching** — verifikasi Firebase Auth di-cache 5 menit.
+- **Responsive** — mobile-first dengan Sidebar (desktop) & BottomNav (mobile).
+
+## Kekurangan
+
+- **Tidak ada PWA penuh** — hanya service worker dasar untuk cache.
+- **Tidak ada notifikasi push** — belum ada reminder tagihan atau budget alert real-time.
+- **Search client-side** — pencarian transaksi dilakukan di memori setelah fetch (Firestore tidak mendukung full-text search native).
+- **Tidak ada role-based access** — single user per akun, belum support multi-user/sharing.
+- **Belum ada backup/restore data** — data sepenuhnya tergantung pada Firestore.
+
+---
+
+## Tech Stack & Alasan
+
+Proyek ini diarsiteki sebagai **NPM Workspaces (Monorepo)** yang memisahkan concern Frontend dan Backend.
+
+### Frontend (apps/web)
+
+| Teknologi | Peran | Alasan |
 | :--- | :--- | :--- |
-| **Next.js 16 (App Router)** | Frontend Framework | Supports React Server Components (RSC) for optimized initial page load, directory-based routing, and built-in SEO capabilities. |
-| **React 19** | Core UI Library | Harnesses the latest concurrent features, optimized client rendering cycles, and unified state transition APIs. |
-| **Tailwind CSS v4** | UI Styling | Promotes rapid design iteration with utility classes, utilizing CSS variables, compile-time performance optimizations, and sleek aesthetic utilities. |
-| **TanStack React Query v5** | Server State Management | Eliminates boilerplate data-fetching code, automating API caching, server state synchronization, and optimistic UI updates. |
-| **Chart.js & React-Chartjs-2** | Data Visualization | Renders high-performance interactive charts for responsive data representation. |
-| **Sonner** | Toast Notifications | Lightweight and modern toast notification system providing non-intrusive feedback on user transactions. |
+| **Next.js 16 (App Router)** | Framework Frontend | RSC, routing berdasarkan direktori, SEO built-in. |
+| **React 19** | UI Library | Concurrent features, performa rendering optimal. |
+| **Tailwind CSS v4** | Styling | Utility-first, desain cepat dengan CSS variables. |
+| **TanStack React Query v5** | State Management Server | Caching otomatis, invalidasi query, optimistic update. |
+| **Chart.js + react-chartjs-2** | Visualisasi Data | Chart interaktif ringan untuk dashboard & analitik. |
+| **Sonner** | Notifikasi | Toast modern ringan tanpa dependency berat. |
 
-### Backend (API Workspace)
+### Backend (apps/api)
 
-| Technology | Role | Rationale |
+| Teknologi | Peran | Alasan |
 | :--- | :--- | :--- |
-| **Node.js & Express.js** | Runtime & API Framework | Yields a lightweight, secure REST API, allowing modular router separation and highly customizable middleware. |
-| **Google Firebase Admin SDK** | Database & Security | **Cloud Firestore** delivers low-latency NoSQL document storage. **Firebase Auth** safely validates tokens, credentials, and user authorization levels. |
-| **Express Validator** | Input Validation | Enforces strict, server-side data sanitization and format validation before updating document stores. |
-| **Helmet & CORS** | Security Middleware | Hardens HTTP response headers and manages cross-origin resource sharing securely. |
+| **Node.js + Express.js** | Runtime & REST API | Ringan, modular middleware, ekosistem luas. |
+| **Firebase Admin SDK** | Database & Auth | Cloud Firestore (NoSQL real-time) + Firebase Auth (token aman). |
+| **Firestore** | Database | Dokumen NoSQL skalabel, tanpa perlu ORM. |
+| **Express Validator** | Validasi Input | Sanitasi data server-side sebelum ke database. |
+| **Helmet + CORS** | Keamanan | Header HTTP aman, CORS terkontrol. |
+| **Pino** | Logging | Logger berperforma tinggi dengan correlation ID. |
+| **Vitest + Supertest** | Testing | Unit test & integration test API. |
 
 ---
 
-## Installation & Setup Instructions
+## Cara Install & Run
 
-Ensure that you have **Node.js (version 18 or later)** and **npm** installed on your system.
+### Prasyarat
 
-### 1. Clone the Repository
+- Node.js >= 18
+- npm
+- Firebase project (dengan Authentication & Firestore diaktifkan)
+
+### 1. Clone
+
 ```bash
 git clone https://github.com/WahyutegarNugroho/Finance-Tracker.git
 cd Finance-Tracker
 ```
 
-### 2. Install Monorepo Dependencies
-Install all package packages for both workspaces concurrently from the root directory:
+### 2. Install Dependencies
+
 ```bash
 npm install
 ```
 
-### 3. Configure Environment Variables
+### 3. Konfigurasi Environment
 
-The application depends on a Firebase project. Create the required environment files in the respective workspaces:
+#### Backend — `apps/api/.env`
 
-#### **A. Backend Configuration (`apps/api/.env`)**
-Create an `.env` file within the `apps/api/` directory and configure the variables:
 ```env
 PORT=5000
 
@@ -110,13 +137,12 @@ FIREBASE_APP_ID=your-app-id
 
 FRONTEND_URL=http://localhost:3000
 
-# Used for creating the seed account
 SEED_USER_EMAIL=demo@fintrack.com
 SEED_USER_PASSWORD=Demo123456!
 ```
 
-#### **B. Frontend Configuration (`apps/web/.env.local`)**
-Create a `.env.local` file within the `apps/web/` directory:
+#### Frontend — `apps/web/.env.local`
+
 ```env
 NEXT_PUBLIC_FIREBASE_API_KEY=your-firebase-api-key
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
@@ -128,28 +154,29 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
 NEXT_PUBLIC_API_URL=http://localhost:5000/api
 ```
 
-### 4. Seed Initial Data (Optional)
-To populate your Firestore database with dummy transaction histories, categories, and active limits, run the seeder command from the root:
+### 4. Seed Data (Opsional)
+
 ```bash
 npm run seed
 ```
-> The default credentials created are: **demo@fintrack.com** with password **Demo123456!**
 
-### 5. Start Development Servers
-To start the Frontend and Backend concurrently in your development environment:
+Default login: **demo@fintrack.com** / **Demo123456!**
 
-Launch two separate terminal windows from the root directory:
+### 5. Jalankan
 
-* **Terminal 1: Start Backend API (Port 5000)**
-  ```bash
-  npm run dev:api
-  ```
-* **Terminal 2: Start Frontend Web App (Port 3000)**
-  ```bash
-  npm run dev:web
-  ```
+**Terminal 1 — API (port 5000)**
 
-Open your browser and navigate to: **[http://localhost:3000](http://localhost:3000)**
+```bash
+cd apps/api && npm start
+```
+
+**Terminal 2 — Web (port 3000)**
+
+```bash
+cd apps/web && npm run build && npm start
+```
+
+Buka **http://localhost:3000**
 
 ---
 
