@@ -30,7 +30,7 @@ export default function CashFlowChart() {
   const { formatCurrency } = useAuth();
 
   const { data: cashflowData, isLoading } = useQuery<ApiResponse<CashFlowEntry[]>>({
-    queryKey: ["analytics-cashflow-dashboard"],
+    queryKey: ["analytics-cashflow"],
     queryFn: () => api.get("/analytics/cashflow", { params: { months: 6 } }),
   });
 

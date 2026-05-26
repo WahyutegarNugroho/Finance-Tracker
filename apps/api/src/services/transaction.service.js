@@ -1,4 +1,5 @@
-const { db, admin } = require('../config/firebase');
+const { db } = require('../config/firebase');
+const { serializeDoc, mapSnapshot, now } = require('../utils/firestore');
 const { parsePagination, encodeCursor, buildCursor } = require('../utils/pagination');
 
 const COLLECTION = 'transactions';
@@ -55,27 +56,16 @@ const getTransactions = async (userId, queryParams) => {
     }
   }
 
-  const fetchLimit = limit + 1;
+  // When search is used, increase fetch size to compensate for client-side filtering
+  const searchMultiplier = queryParams.search ? 5 : 1;
+  const fetchLimit = (limit + 1) * searchMultiplier;
   query = query.limit(fetchLimit);
 
   const snapshot = await query.get();
 
-  let transactions = snapshot.docs.map((doc) => {
-    const data = doc.data();
-    return {
-      id: doc.id,
-      ...data,
-      date: data.date?.toDate?.() || data.date,
-      createdAt: data.createdAt?.toDate?.() || data.createdAt,
-      updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
-    };
-  });
+  let transactions = mapSnapshot(snapshot);
 
-  const hasMore = transactions.length > limit;
-  if (hasMore) {
-    transactions = transactions.slice(0, limit);
-  }
-
+  // Apply search filter before pagination to ensure correct hasMore detection
   if (queryParams.search) {
     const searchLower = queryParams.search.toLowerCase();
     transactions = transactions.filter((tx) =>
@@ -84,8 +74,13 @@ const getTransactions = async (userId, queryParams) => {
     );
   }
 
+  const hasMore = transactions.length > limit;
+  if (hasMore) {
+    transactions = transactions.slice(0, limit);
+  }
+
   const nextCursor = hasMore && snapshot.docs.length > 0
-    ? encodeCursor(buildCursor(snapshot.docs[limit - 1], sortBy))
+    ? encodeCursor(buildCursor(snapshot.docs[Math.min(limit - 1, snapshot.docs.length - 1)], sortBy))
     : null;
 
   return {
@@ -104,14 +99,7 @@ const getTransactionById = async (userId, transactionId) => {
     return null;
   }
 
-  const data = doc.data();
-  return {
-    id: doc.id,
-    ...data,
-    date: data.date?.toDate?.() || data.date,
-    createdAt: data.createdAt?.toDate?.() || data.createdAt,
-    updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
-  };
+  return serializeDoc(doc);
 };
 
 /**
@@ -137,8 +125,8 @@ const createTransaction = async (userId, data) => {
     recurringEndDate: data.recurringEndDate ? new Date(data.recurringEndDate) : null,
     tags: data.tags || [],
     attachments: data.attachments || [],
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    createdAt: now(),
+    updatedAt: now(),
   };
 
   if (data.isRecurring && data.recurringFrequency) {
@@ -187,19 +175,17 @@ const updateTransaction = async (userId, transactionId, data) => {
     }
   }
 
-  updateData.updatedAt = admin.firestore.FieldValue.serverTimestamp();
+  updateData.updatedAt = now();
 
   await db.collection(COLLECTION).doc(transactionId).update(updateData);
 
-  const updated = await db.collection(COLLECTION).doc(transactionId).get();
-  const updatedData = updated.data();
-
+  // Construct response from original data + updates instead of re-fetching (saves 1 read)
   return {
-    id: updated.id,
-    ...updatedData,
-    date: updatedData.date?.toDate?.() || updatedData.date,
-    createdAt: updatedData.createdAt?.toDate?.() || updatedData.createdAt,
-    updatedAt: updatedData.updatedAt?.toDate?.() || updatedData.updatedAt,
+    id: transactionId,
+    ...doc.data(),
+    ...updateData,
+    date: updateData.date || (doc.data().date?.toDate?.() || doc.data().date),
+    updatedAt: new Date(),
   };
 };
 
@@ -256,6 +242,57 @@ const getTransactionSummary = async (userId, month, year) => {
   };
 };
 
+/**
+ * Batch create transactions
+ * Uses Firestore batch write for atomic creation (max 500)
+ */
+const batchCreateTransactions = async (userId, transactionsData) => {
+  const userDoc = await db.collection(USERS_COLLECTION).doc(userId).get();
+  const userCurrency = userDoc.exists ? (userDoc.data().currency || 'IDR') : 'IDR';
+
+  if (transactionsData.length > 500) {
+    throw new Error('Batch size exceeds Firestore limit of 500 operations.');
+  }
+
+  const batch = db.batch();
+  const created = [];
+
+  for (const tx of transactionsData) {
+    const docRef = db.collection(COLLECTION).doc();
+    const data = {
+      userId,
+      categoryId: tx.categoryId,
+      categoryName: tx.categoryName,
+      categoryIcon: tx.categoryIcon || '',
+      type: tx.type,
+      amount: Math.abs(tx.amount),
+      currency: tx.currency || userCurrency,
+      note: tx.note || '',
+      date: tx.date ? new Date(tx.date) : new Date(),
+      isRecurring: tx.isRecurring || false,
+      recurringFrequency: tx.recurringFrequency || null,
+      recurringEndDate: tx.recurringEndDate ? new Date(tx.recurringEndDate) : null,
+      tags: tx.tags || [],
+      attachments: tx.attachments || [],
+      createdAt: now(),
+      updatedAt: now(),
+    };
+
+    if (tx.isRecurring && tx.recurringFrequency) {
+      data.recurringNextDate = calculateNextRecurringDate(
+        data.date,
+        tx.recurringFrequency
+      );
+    }
+
+    batch.set(docRef, data);
+    created.push({ id: docRef.id, ...data });
+  }
+
+  await batch.commit();
+  return created;
+};
+
 module.exports = {
   getTransactions,
   getTransactionById,
@@ -263,4 +300,5 @@ module.exports = {
   updateTransaction,
   deleteTransaction,
   getTransactionSummary,
+  batchCreateTransactions,
 };

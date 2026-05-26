@@ -35,7 +35,7 @@ export default function Settings() {
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
 
   const resetDataMutation = useMutation({
-    mutationFn: () => api.deleteWithBody("/users/reset", { confirm: "RESET" }),
+    mutationFn: () => api.delete("/users/reset", { confirm: "RESET" }),
     onSuccess: () => {
       queryClient.invalidateQueries();
       toast.success(language === 'id' ? "Seluruh data Anda telah berhasil direset!" : "All your data has been successfully reset!");

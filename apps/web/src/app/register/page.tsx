@@ -7,6 +7,7 @@ import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase";
 import { api } from "@/lib/api";
 import type { FirebaseAuthError } from "@/types";
+import { FIREBASE_ERRORS } from "@/lib/constants";
 
 export default function Register() {
   const router = useRouter();
@@ -15,18 +16,6 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const FIREBASE_ERRORS: Record<string, string> = {
-    'auth/user-not-found': 'Email not registered. Please sign up.',
-    'auth/wrong-password': 'Incorrect password. Please try again.',
-    'auth/invalid-credential': 'Invalid email or password.',
-    'auth/too-many-requests': 'Too many attempts. Please try again later.',
-    'auth/invalid-email': 'Please enter a valid email address.',
-    'auth/email-already-in-use': 'This email is already registered.',
-    'auth/weak-password': 'Password is too weak.',
-    'auth/user-disabled': 'This account has been disabled.',
-    'auth/network-request-failed': 'Network error. Please check your connection.',
-  };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();

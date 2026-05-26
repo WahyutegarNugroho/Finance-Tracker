@@ -17,6 +17,19 @@ class ApiError extends Error {
   }
 }
 
+const parseResponse = async (response: Response) => {
+  const contentType = response.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    return await response.json();
+  }
+  const text = await response.text();
+  throw new ApiError(
+    response.status,
+    `Server returned non-JSON response (${response.status})`,
+    { textSnippet: text.substring(0, 100) }
+  );
+};
+
 /**
  * Core fetch wrapper with auth token injection and auto-refresh on 401
  */
@@ -57,10 +70,7 @@ const fetchWithAuth = async (endpoint: string, options: RequestInit = {}, params
       const retryResponse = await fetch(url, { ...options, headers });
 
       if (retryResponse.ok) {
-        const retryContentType = retryResponse.headers.get("content-type");
-        if (retryContentType && retryContentType.includes("application/json")) {
-          return await retryResponse.json();
-        }
+        return await parseResponse(retryResponse);
       }
 
       if (retryResponse.status === 401) {
@@ -71,34 +81,15 @@ const fetchWithAuth = async (endpoint: string, options: RequestInit = {}, params
         throw new ApiError(401, 'Session expired. Please sign in again.');
       }
 
-      // Replace response with retry response for downstream handling
-      const contentType = retryResponse.headers.get("content-type");
-      let data;
-      if (contentType && contentType.includes("application/json")) {
-        data = await retryResponse.json();
-      } else {
-        const text = await retryResponse.text();
-        throw new ApiError(retryResponse.status, `Server returned non-JSON response (${retryResponse.status})`, { textSnippet: text.substring(0, 100) });
-      }
-      if (!retryResponse.ok) {
-        throw new ApiError(retryResponse.status, data.message || 'An error occurred', data);
-      }
-      return data;
+      const data = await parseResponse(retryResponse);
+      throw new ApiError(retryResponse.status, data.message || 'An error occurred', data);
     } catch (refreshError) {
       if (refreshError instanceof ApiError) throw refreshError;
       throw new ApiError(401, 'Session expired. Please sign in again.');
     }
   }
 
-  const contentType = response.headers.get("content-type");
-  let data;
-  
-  if (contentType && contentType.includes("application/json")) {
-    data = await response.json();
-  } else {
-    const text = await response.text();
-    throw new ApiError(response.status, `Server returned non-JSON response (${response.status})`, { textSnippet: text.substring(0, 100) });
-  }
+  const data = await parseResponse(response);
 
   if (!response.ok) {
     throw new ApiError(response.status, data.message || 'An error occurred', data);
@@ -122,9 +113,6 @@ export const api = {
   put: (endpoint: string, body: unknown, options?: RequestInit) => 
     fetchWithAuth(endpoint, { ...options, method: 'PUT', body: JSON.stringify(body) }),
     
-  delete: (endpoint: string, options?: RequestInit) => 
-    fetchWithAuth(endpoint, { ...options, method: 'DELETE' }),
-  
-  deleteWithBody: (endpoint: string, body: unknown, options?: RequestInit) =>
-    fetchWithAuth(endpoint, { ...options, method: 'DELETE', body: JSON.stringify(body) }),
+  delete: (endpoint: string, body?: unknown, options?: RequestInit) =>
+    fetchWithAuth(endpoint, { ...options, method: 'DELETE', body: body ? JSON.stringify(body) : undefined }),
 };

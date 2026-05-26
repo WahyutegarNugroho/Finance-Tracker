@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { User, onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { api } from "@/lib/api";
 import { useRouter } from "next/navigation";
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
@@ -62,16 +63,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Fetch user profile to get currency preference
       if (firebaseUser) {
         try {
-          const token = await firebaseUser.getIdToken();
-          const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-          const res = await fetch(`${apiBaseUrl}/users/profile`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (res.ok) {
-            const json = await res.json();
-            const userCurrency = json.data?.currency || "IDR";
-            setCurrencyState(userCurrency);
-          }
+          const json = await api.get("/users/profile");
+          const userCurrency = json?.data?.currency || "IDR";
+          setCurrencyState(userCurrency);
         } catch {
           // Keep default currency on error
         }

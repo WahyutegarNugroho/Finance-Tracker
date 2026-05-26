@@ -16,16 +16,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Transaction, ApiResponse } from "@/types";
 import ConfirmDialog from "@/components/ConfirmDialog";
-
-// Formatter for date
-const formatDate = (dateString: string, lang: string) => {
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat(lang === "id" ? "id-ID" : "en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(date);
-};
+import { formatDate } from "@/lib/formatting";
 
 function TransactionsContent() {
   const { user, loading: authLoading, formatCurrency } = useAuth();

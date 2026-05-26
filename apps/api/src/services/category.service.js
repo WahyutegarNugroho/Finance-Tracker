@@ -1,6 +1,8 @@
-const { db, admin } = require('../config/firebase');
+const { db } = require('../config/firebase');
+const { serializeDoc, now } = require('../utils/firestore');
 
 const COLLECTION = 'categories';
+const BATCH_LIMIT = 500;
 
 /**
  * Get all categories for a user (including defaults)
@@ -12,10 +14,7 @@ const getCategories = async (userId) => {
     .get();
 
   return snapshot.docs
-    .map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }))
+    .map((doc) => serializeDoc(doc))
     .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 };
 
@@ -29,7 +28,7 @@ const getCategoryById = async (userId, categoryId) => {
     return null;
   }
 
-  return { id: doc.id, ...doc.data() };
+  return serializeDoc(doc);
 };
 
 /**
@@ -43,8 +42,8 @@ const createCategory = async (userId, data) => {
     color: data.color || '#4648d4',
     type: data.type || 'expense',
     isDefault: false,
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    createdAt: now(),
+    updatedAt: now(),
   };
 
   const docRef = await db.collection(COLLECTION).add(categoryData);
@@ -72,7 +71,7 @@ const updateCategory = async (userId, categoryId, data) => {
     }
   }
 
-  updateData.updatedAt = admin.firestore.FieldValue.serverTimestamp();
+  updateData.updatedAt = now();
 
   await db.collection(COLLECTION).doc(categoryId).update(updateData);
 
@@ -85,21 +84,24 @@ const updateCategory = async (userId, categoryId, data) => {
       .get();
 
     if (!txSnapshot.empty) {
-      const batch = db.batch();
       const txUpdate = {};
       if (updateData.name) txUpdate.categoryName = updateData.name;
       if (updateData.icon) txUpdate.categoryIcon = updateData.icon;
 
-      txSnapshot.docs.forEach((txDoc) => {
-        batch.update(txDoc.ref, txUpdate);
-      });
-
-      await batch.commit();
+      // Chunk into batches of 500 to avoid Firestore batch limit
+      for (let i = 0; i < txSnapshot.docs.length; i += BATCH_LIMIT) {
+        const batch = db.batch();
+        const chunk = txSnapshot.docs.slice(i, i + BATCH_LIMIT);
+        chunk.forEach((txDoc) => {
+          batch.update(txDoc.ref, txUpdate);
+        });
+        await batch.commit();
+      }
     }
   }
 
-  const updated = await db.collection(COLLECTION).doc(categoryId).get();
-  return { id: updated.id, ...updated.data() };
+  // Return constructed object instead of re-fetching (saves 1 read)
+  return { id: categoryId, ...doc.data(), ...updateData, updatedAt: new Date() };
 };
 
 /**

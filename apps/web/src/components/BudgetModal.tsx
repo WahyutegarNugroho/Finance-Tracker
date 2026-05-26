@@ -1,17 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { Budget } from "@/types";
-
-type Category = {
-  id: string;
-  name: string;
-  icon: string;
-  type: string;
-};
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Budget, Category, ApiResponse } from "@/types";
+import { formatWithDots, cleanAmountInput } from "@/lib/formatting";
 
 type BudgetModalProps = {
   isOpen: boolean;
@@ -32,61 +28,21 @@ export default function BudgetModal({
 }: BudgetModalProps) {
   const { currencySymbol, currency } = useAuth();
   const { t, tCategory } = useLanguage();
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [fetchingCats, setFetchingCats] = useState(false);
+  const queryClient = useQueryClient();
 
   // Form State
   const [limitAmount, setLimitAmount] = useState("");
   const [displayAmount, setDisplayAmount] = useState("");
   const [categoryId, setCategoryId] = useState("");
 
-  const formatWithDots = useCallback((val: string) => {
-    const isDecimalAllowed = currency !== "IDR" && currency !== "JPY";
-    
-    if (isDecimalAllowed) {
-      // Normalize and split integer and decimal parts
-      let cleaned = val.replace(/,/g, ".").replace(/[^0-9.]/g, "");
-      const parts = cleaned.split(".");
-      if (parts.length > 2) {
-        cleaned = parts[0] + "." + parts.slice(1).join("");
-      }
-      
-      const formattedInt = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-      const formattedDec = parts[1] !== undefined ? "." + parts[1] : "";
-      return formattedInt + formattedDec;
-    } else {
-      return val.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
-  }, [currency]);
+  const { data: categoriesData, isLoading: fetchingCats } = useQuery<ApiResponse<Category[]>>({
+    queryKey: ["categories"],
+    queryFn: () => api.get("/categories"),
+    enabled: isOpen,
+  });
 
-  const fetchCategories = useCallback(async () => {
-    setFetchingCats(true);
-    try {
-      const response = await api.get("/categories");
-      const rawData = response?.data;
-      const expenseCats = Array.isArray(rawData) 
-        ? rawData.filter((c: Category) => c.type === "expense")
-        : [];
-      setCategories(expenseCats);
-      if (!budgetToEdit && expenseCats.length > 0) {
-        setCategoryId(expenseCats[0].id);
-      }
-    } catch (err) {
-      console.error("Failed to fetch categories", err);
-    } finally {
-      setFetchingCats(false);
-    }
-  }, [budgetToEdit]);
-
-  useEffect(() => {
-    if (isOpen) {
-      const timer = setTimeout(() => {
-        fetchCategories();
-      }, 0);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen, fetchCategories]);
+  const allCategories = Array.isArray(categoriesData?.data) ? categoriesData.data : [];
+  const categories = allCategories.filter((c: Category) => c.type === "expense");
 
   useEffect(() => {
     if (isOpen) {
@@ -94,69 +50,62 @@ export default function BudgetModal({
         if (budgetToEdit) {
           const amtStr = budgetToEdit.limitAmount.toString();
           setLimitAmount(amtStr);
-          setDisplayAmount(formatWithDots(amtStr));
+          setDisplayAmount(formatWithDots(amtStr, currency));
           setCategoryId(budgetToEdit.categoryId);
         } else {
           setLimitAmount("");
           setDisplayAmount("");
-          setCategoryId("");
+          if (categories.length > 0) {
+            setCategoryId(categories[0].id);
+          } else {
+            setCategoryId("");
+          }
         }
       }, 0);
       return () => clearTimeout(timer);
     }
-  }, [isOpen, budgetToEdit, formatWithDots]);
+  }, [isOpen, budgetToEdit, currency]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const isDecimalAllowed = currency !== "IDR" && currency !== "JPY";
-    let inputVal = e.target.value;
-    
-    if (isDecimalAllowed) {
-      inputVal = inputVal.replace(/,/g, ".");
-      let cleaned = inputVal.replace(/[^0-9.]/g, "");
-      const parts = cleaned.split(".");
-      if (parts.length > 2) {
-        cleaned = parts[0] + "." + parts.slice(1).join("");
-      }
-      
-      setLimitAmount(cleaned);
-      setDisplayAmount(formatWithDots(cleaned));
-    } else {
-      const raw = inputVal.replace(/\D/g, "");
-      setLimitAmount(raw);
-      setDisplayAmount(formatWithDots(raw));
-    }
+    const cleaned = cleanAmountInput(e.target.value, currency);
+    setLimitAmount(cleaned);
+    setDisplayAmount(formatWithDots(cleaned, currency));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const saveMutation = useMutation({
+    mutationFn: (payload: Record<string, unknown>) => {
+      if (budgetToEdit) {
+        return api.put(`/budgets/${budgetToEdit.id}`, payload);
+      }
+      return api.post("/budgets", payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["budgets"] });
+      queryClient.invalidateQueries({ queryKey: ["budgets-summary"] });
+      toast.success(budgetToEdit ? "Budget updated!" : "Budget created!");
+      onSuccess();
+      onClose();
+    },
+    onError: () => {
+      toast.error("Failed to save budget.");
+    }
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!limitAmount || !categoryId) return;
 
-    setLoading(true);
-    try {
-      const selectedCategory = Array.isArray(categories) ? categories.find((c) => c.id === categoryId) : null;
-      const payload = {
-        limitAmount: parseFloat(limitAmount),
-        categoryId,
-        categoryName: selectedCategory?.name || "Unknown",
-        categoryIcon: selectedCategory?.icon || "category",
-        month: month || new Date().getMonth() + 1,
-        year: year || new Date().getFullYear(),
-      };
+    const selectedCategory = categories.find((c) => c.id === categoryId) || null;
+    const payload = {
+      limitAmount: parseFloat(limitAmount),
+      categoryId,
+      categoryName: selectedCategory?.name || "Unknown",
+      categoryIcon: selectedCategory?.icon || "category",
+      month: month || new Date().getMonth() + 1,
+      year: year || new Date().getFullYear(),
+    };
 
-      if (budgetToEdit) {
-        await api.put(`/budgets/${budgetToEdit.id}`, payload);
-      } else {
-        await api.post("/budgets", payload);
-      }
-      onSuccess();
-      onClose();
-    } catch (err: unknown) {
-      console.error("Failed to save budget", err);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      alert((err as any).response?.data?.message || "Failed to save budget.");
-    } finally {
-      setLoading(false);
-    }
+    saveMutation.mutate(payload);
   };
 
   if (!isOpen) return null;
@@ -223,10 +172,10 @@ export default function BudgetModal({
           <div className="pt-2">
             <button
               type="submit"
-              disabled={loading}
+              disabled={saveMutation.isPending}
               className="w-full bg-primary text-on-primary font-medium py-3 rounded-xl hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-70 flex justify-center items-center"
             >
-              {loading ? (
+              {saveMutation.isPending ? (
                 <span className="material-symbols-outlined animate-spin">
                   progress_activity
                 </span>

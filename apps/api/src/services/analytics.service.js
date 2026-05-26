@@ -1,68 +1,59 @@
 const { db } = require('../config/firebase');
+const { fromFirestoreTimestamp, mapSnapshot } = require('../utils/firestore');
 
 const TRANSACTIONS_COLLECTION = 'transactions';
+
+const fromTs = (ts) => fromFirestoreTimestamp(ts);
+
+const computePeriod = (year, month, offset) => ({
+  start: new Date(year, month - 1 + offset, 1),
+  end: new Date(year, month + offset, 0, 23, 59, 59, 999),
+});
 
 /**
  * Dashboard overview data
  * Returns summary cards + recent transactions
+ * Optimized: 3 queries instead of 5 (merged current/prev month, removed categories query)
  */
 const getDashboardOverview = async (userId) => {
   const now = new Date();
   const currentMonth = now.getMonth() + 1;
   const currentYear = now.getFullYear();
 
-  const startOfMonth = new Date(currentYear, currentMonth - 1, 1);
-  const endOfMonth = new Date(currentYear, currentMonth, 0, 23, 59, 59, 999);
+  const { start: startOfMonth, end: endOfMonth } = computePeriod(currentYear, currentMonth, 0);
+  const { start: startOfPrevMonth, end: endOfPrevMonth } = computePeriod(currentYear, currentMonth, -1);
 
-  const startOfPrevMonth = new Date(currentYear, currentMonth - 2, 1);
-  const endOfPrevMonth = new Date(currentYear, currentMonth - 1, 0, 23, 59, 59, 999);
-
-  // Fetch only current month transactions
-  const currentSnapshot = await db
-    .collection(TRANSACTIONS_COLLECTION)
-    .where('userId', '==', userId)
-    .where('date', '>=', startOfMonth)
-    .where('date', '<=', endOfMonth)
-    .get();
-
-  const currentMonthTx = currentSnapshot.docs.map(doc => {
-    const data = doc.data();
-    return {
-      id: doc.id,
-      ...data,
-      date: data.date?.toDate?.() || new Date(data.date),
-    };
-  });
-
-  // Fetch only previous month transactions
-  const prevSnapshot = await db
+  // Single query spanning both months — split client-side (saves 1 read)
+  const bothSnapshots = await db
     .collection(TRANSACTIONS_COLLECTION)
     .where('userId', '==', userId)
     .where('date', '>=', startOfPrevMonth)
-    .where('date', '<=', endOfPrevMonth)
+    .where('date', '<=', endOfMonth)
     .get();
 
-  const prevMonthTx = prevSnapshot.docs.map(doc => {
-    const data = doc.data();
-    return {
-      id: doc.id,
-      ...data,
-      date: data.date?.toDate?.() || new Date(data.date),
-    };
-  });
+  // Split into current and previous month arrays in memory
+  const currentMonthTx = [];
+  const prevMonthTx = [];
 
   let currentIncome = 0;
   let currentExpense = 0;
-  currentMonthTx.forEach((tx) => {
-    if (tx.type === 'income') currentIncome += tx.amount;
-    else currentExpense += tx.amount;
-  });
-
   let prevIncome = 0;
   let prevExpense = 0;
-  prevMonthTx.forEach((tx) => {
-    if (tx.type === 'income') prevIncome += tx.amount;
-    else prevExpense += tx.amount;
+
+  bothSnapshots.docs.forEach((doc) => {
+    const data = doc.data();
+    const txDate = fromTs(data.date);
+    const id = doc.id;
+
+    if (txDate >= startOfMonth) {
+      currentMonthTx.push({ id, ...data, date: txDate });
+      if (data.type === 'income') currentIncome += data.amount;
+      else currentExpense += data.amount;
+    } else {
+      prevMonthTx.push({ id, ...data, date: txDate });
+      if (data.type === 'income') prevIncome += data.amount;
+      else prevExpense += data.amount;
+    }
   });
 
   // Percentage changes
@@ -87,14 +78,7 @@ const getDashboardOverview = async (userId) => {
     .limit(5)
     .get();
 
-  const recentTransactions = recentSnapshot.docs.map(doc => {
-    const data = doc.data();
-    return {
-      id: doc.id,
-      ...data,
-      date: data.date?.toDate?.() || new Date(data.date),
-    };
-  });
+  const recentTransactions = mapSnapshot(recentSnapshot);
 
   // Get budget summary
   const budgetSnapshot = await db
@@ -113,27 +97,17 @@ const getDashboardOverview = async (userId) => {
     ? Math.round((currentExpense / totalBudgetLimit) * 100)
     : 0;
 
-  // Load category colors from Firestore
-  const categorySnapshot = await db
-    .collection('categories')
-    .where('userId', '==', userId)
-    .get();
-  const categoryColorMap = {};
-  categorySnapshot.docs.forEach((doc) => {
-    const data = doc.data();
-    categoryColorMap[doc.id] = data.color || '#4648d4';
-  });
-
-  // Calculate category breakdown for current month
+  // Category colors are already denormalized in transaction data as categoryColor
+  // No need for a separate categories query — saves 1 read
   const categoryMap = {};
-  
+
   currentMonthTx.forEach((tx) => {
     if (tx.type === 'expense') {
       if (!categoryMap[tx.categoryId]) {
         categoryMap[tx.categoryId] = {
           name: tx.categoryName,
           amount: 0,
-          color: categoryColorMap[tx.categoryId] || tx.categoryColor || '#4648d4'
+          color: tx.categoryColor || '#4648d4'
         };
       }
       categoryMap[tx.categoryId].amount += tx.amount;
@@ -193,7 +167,7 @@ const getCashFlow = async (userId, months = 6) => {
 
   snapshot.docs.forEach((doc) => {
     const data = doc.data();
-    const date = data.date?.toDate?.() || new Date(data.date);
+    const date = fromTs(data.date);
     const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
     if (monthlyData[key]) {
@@ -233,10 +207,11 @@ const getCategoryBreakdown = async (userId, month, year) => {
   snapshot.docs.forEach((doc) => {
     const data = doc.data();
     totalExpense += data.amount;
+    const catId = data.categoryId;
 
-    if (!categoryMap[data.categoryId]) {
-      categoryMap[data.categoryId] = {
-        categoryId: data.categoryId,
+    if (!categoryMap[catId]) {
+      categoryMap[catId] = {
+        categoryId: catId,
         categoryName: data.categoryName,
         categoryIcon: data.categoryIcon,
         amount: 0,
@@ -244,8 +219,8 @@ const getCategoryBreakdown = async (userId, month, year) => {
       };
     }
 
-    categoryMap[data.categoryId].amount += data.amount;
-    categoryMap[data.categoryId].count++;
+    categoryMap[catId].amount += data.amount;
+    categoryMap[catId].count++;
   });
 
   const categories = Object.values(categoryMap)
@@ -292,7 +267,7 @@ const getTrends = async (userId) => {
 
   snapshot.docs.forEach((doc) => {
     const data = doc.data();
-    const date = data.date?.toDate?.() || new Date(data.date);
+    const date = fromTs(data.date);
     const yr = date.getFullYear();
     const mo = date.getMonth();
 

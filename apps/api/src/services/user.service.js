@@ -1,4 +1,5 @@
-const { db, admin } = require('../config/firebase');
+const { db } = require('../config/firebase');
+const { serializeDoc, now } = require('../utils/firestore');
 
 const USERS_COLLECTION = 'users';
 const BATCH_LIMIT = 500;
@@ -31,7 +32,7 @@ const getProfile = async (uid) => {
     return null;
   }
 
-  return { uid, ...doc.data() };
+  return serializeDoc(doc);
 };
 
 /**
@@ -47,11 +48,12 @@ const updateProfile = async (uid, data) => {
     }
   }
 
-  updateData.updatedAt = admin.firestore.FieldValue.serverTimestamp();
+  updateData.updatedAt = now();
 
   await db.collection(USERS_COLLECTION).doc(uid).update(updateData);
 
-  // Return updated profile
+  // Preserve full profile in response — re-fetch is needed here since we
+  // don't have the original doc data in scope
   return getProfile(uid);
 };
 

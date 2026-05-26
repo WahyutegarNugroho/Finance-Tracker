@@ -93,6 +93,26 @@ export interface Budget {
   userId: string;
 }
 
+export interface AnalyticsOverview {
+  income: number;
+  expense: number;
+  balance: number;
+}
+
+export interface CategoryBreakdownItem {
+  categoryId: string;
+  categoryName: string;
+  categoryIcon: string;
+  amount: number;
+  color: string;
+  percentage: number;
+}
+
+export interface AnalyticsCategories {
+  totalExpense: number;
+  categories: CategoryBreakdownItem[];
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   data: T;

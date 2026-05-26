@@ -15,21 +15,13 @@ import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { formatShortDate } from "@/lib/formatting";
 
 export default function Dashboard() {
   const { user, loading: authLoading, formatCurrency } = useAuth();
   const { language, t, tCategory } = useLanguage();
   const router = useRouter();
   const queryClient = useQueryClient();
-
-  // Formatter for relative time or date
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat(language === 'id' ? 'id-ID' : 'en-US', {
-      month: "short",
-      day: "numeric",
-    }).format(date);
-  };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -145,7 +137,7 @@ export default function Dashboard() {
 
           <RecentTransactions 
             transactions={data.recentTransactions} 
-            formatDate={formatDate} 
+            formatDate={(d) => formatShortDate(d, language)} 
           />
         </div>
       </main>

@@ -10,28 +10,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { ApiResponse, CashFlowEntry } from "@/types";
+import { ApiResponse, CashFlowEntry, AnalyticsOverview, AnalyticsCategories } from "@/types";
 import Link from "next/link";
-
-interface AnalyticsOverview {
-  income: number;
-  expense: number;
-  balance: number;
-}
-
-interface CategoryBreakdownItem {
-  categoryId: string;
-  categoryName: string;
-  categoryIcon: string;
-  amount: number;
-  color: string;
-  percentage: number;
-}
-
-interface AnalyticsCategories {
-  totalExpense: number;
-  categories: CategoryBreakdownItem[];
-}
 
 import {
   Chart as ChartJS,

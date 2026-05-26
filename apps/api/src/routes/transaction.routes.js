@@ -4,7 +4,6 @@ const { validate } = require('../middleware/validate');
 const { authenticate } = require('../middleware/auth');
 const transactionService = require('../services/transaction.service');
 const response = require('../utils/response');
-const { db, admin } = require('../config/firebase');
 
 const router = express.Router();
 
@@ -96,48 +95,11 @@ router.post('/batch',
   ]),
   async (req, res, next) => {
     try {
-      // Get user currency for the batch
-      const userDoc = await admin.firestore().collection('users').doc(req.user.uid).get();
-      const userCurrency = userDoc.exists ? (userDoc.data().currency || 'IDR') : 'IDR';
+      const created = await transactionService.batchCreateTransactions(
+        req.user.uid,
+        req.body.transactions
+      );
 
-      const batch = db.batch();
-      const created = [];
-
-      for (const tx of req.body.transactions) {
-        const docRef = db.collection('transactions').doc();
-        const data = {
-          userId: req.user.uid,
-          categoryId: tx.categoryId,
-          categoryName: tx.categoryName,
-          categoryIcon: tx.categoryIcon || '',
-          type: tx.type,
-          amount: Math.abs(tx.amount),
-          currency: tx.currency || userCurrency,
-          note: tx.note || '',
-          date: tx.date ? new Date(tx.date) : new Date(),
-          isRecurring: tx.isRecurring || false,
-          recurringFrequency: tx.recurringFrequency || null,
-          recurringEndDate: tx.recurringEndDate ? new Date(tx.recurringEndDate) : null,
-          tags: tx.tags || [],
-          attachments: tx.attachments || [],
-          createdAt: admin.firestore.FieldValue.serverTimestamp(),
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        };
-        if (tx.isRecurring && tx.recurringFrequency) {
-          const baseDate = tx.date ? new Date(tx.date) : new Date();
-          data.recurringNextDate = new Date(baseDate);
-          switch (tx.recurringFrequency) {
-            case 'daily': data.recurringNextDate.setDate(data.recurringNextDate.getDate() + 1); break;
-            case 'weekly': data.recurringNextDate.setDate(data.recurringNextDate.getDate() + 7); break;
-            case 'monthly': data.recurringNextDate.setMonth(data.recurringNextDate.getMonth() + 1); break;
-            case 'yearly': data.recurringNextDate.setFullYear(data.recurringNextDate.getFullYear() + 1); break;
-          }
-        }
-        batch.set(docRef, data);
-        created.push({ id: docRef.id, ...data });
-      }
-
-      await batch.commit();
       return response.created(res, created, `${created.length} transactions created.`);
     } catch (error) {
       next(error);

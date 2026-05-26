@@ -1,4 +1,5 @@
-const { db, admin } = require('../config/firebase');
+const { db } = require('../config/firebase');
+const { serializeDoc, now } = require('../utils/firestore');
 
 const BUDGETS_COLLECTION = 'budgets';
 const TRANSACTIONS_COLLECTION = 'transactions';
@@ -159,8 +160,8 @@ const createBudget = async (userId, data) => {
         period: data.period || 'monthly',
         month,
         year,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        createdAt: now(),
+        updatedAt: now(),
       };
 
       const docRef = db.collection(BUDGETS_COLLECTION).doc();
@@ -205,12 +206,12 @@ const updateBudget = async (userId, budgetId, data) => {
     }
   }
 
-  updateData.updatedAt = admin.firestore.FieldValue.serverTimestamp();
+  updateData.updatedAt = now();
 
   await db.collection(BUDGETS_COLLECTION).doc(budgetId).update(updateData);
 
-  const updated = await db.collection(BUDGETS_COLLECTION).doc(budgetId).get();
-  return { id: updated.id, ...updated.data() };
+  // Return constructed object from original data + updates instead of re-fetching
+  return { id: budgetId, ...doc.data(), ...updateData, updatedAt: new Date() };
 };
 
 /**

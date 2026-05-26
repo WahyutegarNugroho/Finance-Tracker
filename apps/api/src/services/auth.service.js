@@ -1,5 +1,5 @@
 const { db, auth } = require('../config/firebase');
-const { admin } = require('../config/firebase');
+const { serializeDoc, now } = require('../utils/firestore');
 
 const USERS_COLLECTION = 'users';
 
@@ -39,8 +39,8 @@ const registerUser = async (email, password, displayName) => {
     photoURL: null,
     currency: 'IDR',
     darkMode: false,
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    createdAt: now(),
+    updatedAt: now(),
   };
 
   await db.collection(USERS_COLLECTION).doc(userRecord.uid).set(userData);
@@ -53,8 +53,8 @@ const registerUser = async (email, password, displayName) => {
       ...category,
       userId: userRecord.uid,
       isDefault: true,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      createdAt: now(),
+      updatedAt: now(),
     });
   }
   await batch.commit();
@@ -82,8 +82,8 @@ const handleGoogleSignIn = async (uid, email, displayName, photoURL) => {
       photoURL: photoURL || null,
       currency: 'IDR',
       darkMode: false,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      createdAt: now(),
+      updatedAt: now(),
     };
 
     await userRef.set(userData);
@@ -96,8 +96,8 @@ const handleGoogleSignIn = async (uid, email, displayName, photoURL) => {
         ...category,
         userId: uid,
         isDefault: true,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        createdAt: now(),
+        updatedAt: now(),
       });
     }
     await batch.commit();
@@ -107,7 +107,7 @@ const handleGoogleSignIn = async (uid, email, displayName, photoURL) => {
 
   // Existing user — update last login info
   await userRef.update({
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    updatedAt: now(),
   });
 
   return { uid, ...userDoc.data(), isNewUser: false };
@@ -123,7 +123,7 @@ const getUserProfile = async (uid) => {
     return null;
   }
 
-  return { uid, ...userDoc.data() };
+  return serializeDoc(userDoc);
 };
 
 module.exports = {

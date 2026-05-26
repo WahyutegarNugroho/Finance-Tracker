@@ -2,6 +2,26 @@ const { auth } = require('../config/firebase');
 const logger = require('../utils/logger');
 
 /**
+ * Simple in-memory token cache (TTL: 5 minutes)
+ * Reduces Firebase Auth verifyIdToken calls on every request
+ */
+const tokenCache = new Map();
+const TOKEN_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+const getCachedToken = (token) => {
+  const cached = tokenCache.get(token);
+  if (cached && Date.now() - cached.ts < TOKEN_CACHE_TTL) {
+    return cached.decodedToken;
+  }
+  tokenCache.delete(token);
+  return null;
+};
+
+const setCachedToken = (token, decodedToken) => {
+  tokenCache.set(token, { decodedToken, ts: Date.now() });
+};
+
+/**
  * Authentication middleware
  * Verifies Firebase ID token from Authorization header
  * Attaches decoded user info to req.user
@@ -20,6 +40,13 @@ const authenticate = async (req, res, next) => {
 
     const token = authHeader.split('Bearer ')[1];
 
+    // Check cache first
+    const cached = getCachedToken(token);
+    if (cached) {
+      req.user = cached;
+      return next();
+    }
+
     const decodedToken = await auth.verifyIdToken(token);
 
     req.user = {
@@ -29,6 +56,8 @@ const authenticate = async (req, res, next) => {
       picture: decodedToken.picture || null,
       emailVerified: decodedToken.email_verified || false,
     };
+
+    setCachedToken(token, req.user);
 
     next();
   } catch (error) {

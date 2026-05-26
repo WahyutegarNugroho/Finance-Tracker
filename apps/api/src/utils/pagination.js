@@ -13,19 +13,6 @@ const parsePagination = (query) => {
   return { page, limit };
 };
 
-const buildPaginationMeta = (page, limit, totalItems) => {
-  const totalPages = Math.ceil(totalItems / limit);
-
-  return {
-    currentPage: page,
-    totalPages,
-    totalItems,
-    itemsPerPage: limit,
-    hasNextPage: page < totalPages,
-    hasPrevPage: page > 1,
-  };
-};
-
 const buildCursor = (doc, sortBy = 'date') => {
   const data = doc.data();
   const cursor = { id: doc.id };
@@ -64,7 +51,6 @@ const parseCursor = (query) => {
 
 module.exports = {
   parsePagination,
-  buildPaginationMeta,
   buildCursor,
   encodeCursor,
   decodeCursor,
