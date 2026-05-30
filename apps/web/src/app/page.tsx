@@ -30,15 +30,15 @@ export default function Home() {
       <main className="flex-1 w-full pt-32 pb-16">
         <section className="px-gutter md:px-container-margin max-w-[1440px] mx-auto flex flex-col items-center text-center mb-24">
           <h1 className="font-display text-display text-on-background max-w-4xl mb-6 tracking-tight">
-            Track Every Rupiah. <br className="hidden md:block" />
+            Control your spending. <br className="hidden md:block" />
             <span className="text-primary relative inline-block">
-              Own Your Financial Future.
+              Grow your savings.
               <div className="absolute bottom-1 left-0 w-full h-3 bg-primary/20 -z-10 rounded-full"></div>
             </span>
           </h1>
           <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mb-10 leading-relaxed">
-            Monitor income, control expenses, and stay on top of your budget —
-            all in one clean dashboard. No jargon, no fluff.
+            A simple, intuitive dashboard to track your daily transactions, monitor cash flow, 
+            and set budgets without the complexity.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 mb-20 w-full sm:w-auto">
             <Link href="/register" className="font-label-caps text-label-caps bg-primary text-on-primary px-8 py-4 rounded-xl hover:bg-primary/90 hover:scale-[1.02] transition-all shadow-[0_8px_20px_rgba(70,72,212,0.25)] w-full sm:w-auto text-center flex items-center justify-center">
