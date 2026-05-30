@@ -68,7 +68,7 @@ Aplikasi web manajemen keuangan pribadi berbasis monorepo (NPM Workspaces) denga
 
 ---
 
-## Tech Stack & Alasan
+## Tech Stack
 
 Proyek ini diarsiteki sebagai **NPM Workspaces (Monorepo)** yang memisahkan concern Frontend dan Backend.
 
