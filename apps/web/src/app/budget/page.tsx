@@ -55,11 +55,8 @@ export default function Budget() {
     }
   };
 
-  const getMonthName = (m: number) => {
-    const monthsId = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-    const monthsEn = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    return language === 'id' ? monthsId[m - 1] : monthsEn[m - 1];
-  };
+  const getMonthName = (m: number) =>
+    new Intl.DateTimeFormat(language === 'id' ? 'id' : 'en', { month: 'long' }).format(new Date(2024, m - 1));
 
   // Queries
   const { data: budgetsData, isLoading: budgetsLoading } = useQuery<ApiResponse<Budget[]>>({
@@ -83,10 +80,10 @@ export default function Budget() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["budgets"] });
       queryClient.invalidateQueries({ queryKey: ["budgets-summary"] });
-      toast.success(language === 'id' ? "Anggaran berhasil dihapus" : "Budget deleted successfully");
+      toast.success(t("budget_page.delete_success"));
     },
     onError: () => {
-      toast.error(language === 'id' ? "Gagal menghapus anggaran" : "Failed to delete budget");
+      toast.error(t("budget_page.delete_error"));
     }
   });
 
@@ -173,7 +170,7 @@ export default function Budget() {
                   <div className="absolute -right-20 -top-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4 relative z-10">
                     <div>
-                      <h2 className="font-label-caps text-label-caps text-on-surface-variant mb-2">{language === 'id' ? 'Total Anggaran Bulanan' : 'Total Monthly Budget'}</h2>
+                      <h2 className="font-label-caps text-label-caps text-on-surface-variant mb-2">{t("budget_page.total_monthly_budget")}</h2>
                       <div className="flex items-baseline gap-2">
                         <span className="font-display text-display text-on-surface font-bold">{formatCurrency(summary.totalSpent)}</span>
                         <span className="font-body-lg text-body-lg text-outline">/ {formatCurrency(summary.totalBudget)}</span>
@@ -181,12 +178,12 @@ export default function Budget() {
                     </div>
                     <div className="flex items-center gap-6">
                       <div className="flex flex-col items-end">
-                        <span className="font-label-caps text-label-caps text-on-surface-variant">{language === 'id' ? 'Tersisa' : 'Remaining'}</span>
+                        <span className="font-label-caps text-label-caps text-on-surface-variant">{t("budget_page.remaining_label")}</span>
                         <span className="font-headline-md text-headline-md text-secondary font-semibold">{formatCurrency(summary.totalRemaining)}</span>
                       </div>
                       <div className="h-10 w-px bg-outline-variant/40"></div>
                       <div className="flex flex-col items-end">
-                        <span className="font-label-caps text-label-caps text-on-surface-variant">{language === 'id' ? 'Terpakai' : 'Spent'}</span>
+                        <span className="font-label-caps text-label-caps text-on-surface-variant">{t("budget_page.spent_label")}</span>
                         <span className="font-headline-md text-headline-md text-on-surface font-semibold">{summary.overallPercentage}%</span>
                       </div>
                     </div>
@@ -206,13 +203,13 @@ export default function Budget() {
 
               {/* Category Breakdown Grid */}
               <div className="mb-4">
-                <h3 className="font-headline-md text-headline-md text-on-surface font-semibold">{language === 'id' ? 'Rincian Kategori' : 'Category Breakdown'}</h3>
+                <h3 className="font-headline-md text-headline-md text-on-surface font-semibold">{t("budget_page.category_breakdown")}</h3>
               </div>
               
               {(!Array.isArray(budgets) || budgets.length === 0) ? (
                 <div className="text-center py-12 bg-surface/50 rounded-xl border border-outline-variant/20">
                   <span className="material-symbols-outlined text-4xl text-outline mb-2">account_balance_wallet</span>
-                  <p className="text-on-surface-variant">{language === 'id' ? 'Belum ada anggaran untuk bulan ini.' : 'No budgets set for this month.'}</p>
+                  <p className="text-on-surface-variant">{t("budget_page.no_budgets")}</p>
                   <button 
                     onClick={() => {
                       setBudgetToEdit(null);
@@ -220,7 +217,7 @@ export default function Budget() {
                     }}
                     className="mt-4 text-primary font-medium hover:underline"
                   >
-                    {language === 'id' ? 'Buat anggaran pertama Anda' : 'Create your first budget'}
+                    {t("budget_page.create_first")}
                   </button>
                 </div>
               ) : (
@@ -288,7 +285,7 @@ export default function Budget() {
                           </div>
                           {b.status === 'critical' && (
                             <p className="font-body-sm text-[10px] text-error mt-1.5 opacity-80">
-                              {language === 'id' ? `Tersisa hanya ${formatCurrency(b.remaining)}` : `Only ${formatCurrency(b.remaining)} remaining`}
+                              {t("budget_page.only_remaining").replace("{remaining}", formatCurrency(b.remaining))}
                             </p>
                           )}
                         </div>
@@ -318,8 +315,8 @@ export default function Budget() {
 
       <ConfirmDialog 
         isOpen={isConfirmOpen}
-        title={language === 'id' ? "Hapus Anggaran" : "Delete Budget"}
-        message={language === 'id' ? "Apakah Anda yakin ingin menghapus batas anggaran ini? Tindakan ini tidak dapat dibatalkan." : "Are you sure you want to delete this budget limit? This action cannot be undone."}
+        title={t("budget_page.delete_title")}
+        message={t("budget_page.delete_message")}
         onConfirm={handleConfirmDelete}
         onCancel={() => {
           setIsConfirmOpen(false);

@@ -19,7 +19,7 @@ interface SummaryCardsProps {
 
 export default function SummaryCards({ data }: SummaryCardsProps) {
   const { formatCurrency } = useAuth();
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -126,7 +126,7 @@ export default function SummaryCards({ data }: SummaryCardsProps) {
               {data.budgetUsage}%
             </h3>
             <p className="font-body-sm text-body-sm text-outline pb-0.5 text-[10px]">
-              {language === 'id' ? 'dari' : 'of'} {formatCurrency(data.budgetLimit)}
+              {t("budget_page.of")} {formatCurrency(data.budgetLimit)}
             </p>
           </div>
           <div className="w-full bg-surface-variant rounded-full h-2 mt-3 overflow-hidden">

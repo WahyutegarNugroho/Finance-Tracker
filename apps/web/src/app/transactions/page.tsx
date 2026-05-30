@@ -20,7 +20,7 @@ import { formatDate } from "@/lib/formatting";
 
 function TransactionsContent() {
   const { user, loading: authLoading, formatCurrency } = useAuth();
-  const { language, t, tCategory } = useLanguage();
+  const { t, tCategory } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
@@ -114,14 +114,14 @@ function TransactionsContent() {
       return { previousTransactions, queryKey };
     },
     onSuccess: () => {
-      toast.success(language === 'id' ? "Transaksi dihapus!" : "Transaction deleted!");
+      toast.success(t("transactions_page.delete_success"));
     },
     onError: (err, id, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousTransactions && context?.queryKey) {
         queryClient.setQueryData(context.queryKey, context.previousTransactions);
       }
-      toast.error(language === 'id' ? "Gagal menghapus transaksi." : "Failed to delete transaction.");
+      toast.error(t("transactions_page.delete_error"));
     },
     onSettled: () => {
       // Always refetch after error or success to keep server in sync
@@ -158,16 +158,16 @@ function TransactionsContent() {
       if (typeFilter !== "all") url += `&type=${typeFilter}`;
       if (debouncedSearch) url += `&search=${encodeURIComponent(debouncedSearch)}`;
       
-      toast.loading(language === 'id' ? "Mengekspor data..." : "Exporting data...", { id: "export-csv" });
+      toast.loading(t("transactions_page.exporting"), { id: "export-csv" });
       const res = await api.get(url);
       const allTx = res?.data || [];
       
       if (allTx.length === 0) {
-        toast.error(language === 'id' ? "Tidak ada data untuk diekspor" : "No data to export", { id: "export-csv" });
+        toast.error(t("transactions_page.no_export_data"), { id: "export-csv" });
         return;
       }
       
-      const headers = ["Date", "Category", "Note", "Amount", "Type", "Currency", "Tags"];
+      const headers = [t("transactions_page.csv_header_date"), t("transactions_page.csv_header_category"), t("transactions_page.csv_header_note"), t("transactions_page.csv_header_amount"), t("transactions_page.csv_header_type"), t("transactions_page.csv_header_currency"), t("transactions_page.csv_header_tags")];
       const csvContent = [
         headers.join(","),
         ...allTx.map((tx: Transaction) => [
@@ -191,10 +191,10 @@ function TransactionsContent() {
       link.click();
       document.body.removeChild(link);
       
-      toast.success(language === 'id' ? "Ekspor CSV berhasil!" : "CSV Export successful!", { id: "export-csv" });
+      toast.success(t("transactions_page.export_success"), { id: "export-csv" });
     } catch (err) {
       console.error("Export failed", err);
-      toast.error(language === 'id' ? "Gagal mengekspor data." : "Failed to export data.", { id: "export-csv" });
+      toast.error(t("transactions_page.export_error"), { id: "export-csv" });
     }
   };
 
@@ -243,7 +243,7 @@ function TransactionsContent() {
 
           {isError && (
             <div className="p-4 bg-error-container text-error rounded-xl">
-              Failed to load transactions.
+              {t("transactions_page.error_load")}
             </div>
           )}
 
@@ -271,7 +271,7 @@ function TransactionsContent() {
           <div className="mt-auto px-6 py-4 border-t border-outline-variant/10 flex items-center justify-between bg-surface-container-lowest/50 rounded-xl bg-surface/80">
             <span className="font-body-sm text-body-sm text-on-surface-variant">
               {filteredTransactions.length > 0
-                ? (language === 'id' ? `${filteredTransactions.length} transaksi` : `${filteredTransactions.length} transactions`)
+                ? t("transactions_page.transaction_count").replace("{count}", String(filteredTransactions.length))
                 : ''}
             </span>
             <div className="flex items-center gap-2">
@@ -332,8 +332,8 @@ function TransactionsContent() {
 
       <ConfirmDialog 
         isOpen={isConfirmOpen}
-        title={language === 'id' ? "Hapus Transaksi" : "Delete Transaction"}
-        message={language === 'id' ? "Apakah Anda yakin ingin menghapus transaksi ini? Tindakan ini tidak dapat dibatalkan." : "Are you sure you want to delete this transaction? This action cannot be undone."}
+        title={t("transactions_page.delete_title")}
+        message={t("transactions_page.delete_message")}
         onConfirm={handleConfirmDelete}
         onCancel={() => {
           setIsConfirmOpen(false);

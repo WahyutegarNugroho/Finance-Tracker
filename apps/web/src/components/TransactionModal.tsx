@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
@@ -15,6 +15,28 @@ type TransactionModalProps = {
   transactionToEdit?: Transaction | null;
 };
 
+function initForm(transactionToEdit: Transaction | null | undefined, defaultDate: string) {
+  if (transactionToEdit) {
+    const amtStr = transactionToEdit.amount.toString();
+    return {
+      type: transactionToEdit.type as "income" | "expense",
+      amount: amtStr,
+      displayAmount: amtStr,
+      categoryId: transactionToEdit.categoryId || "",
+      date: new Date(transactionToEdit.date).toISOString().split("T")[0],
+      note: transactionToEdit.note || "",
+    };
+  }
+  return {
+    type: "expense" as "income" | "expense",
+    amount: "",
+    displayAmount: "",
+    categoryId: "",
+    date: defaultDate,
+    note: "",
+  };
+}
+
 export default function TransactionModal({
   isOpen,
   onClose,
@@ -22,22 +44,15 @@ export default function TransactionModal({
   transactionToEdit,
 }: TransactionModalProps) {
   const { currencySymbol, currency } = useAuth();
-  const { language, t, tCategory } = useLanguage();
+  const { t, tCategory } = useLanguage();
   const queryClient = useQueryClient();
-
-  // Form State
-  const [type, setType] = useState<"income" | "expense">("expense");
-  const [amount, setAmount] = useState("");
-  const [displayAmount, setDisplayAmount] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-  const [date, setDate] = useState("");
-  const [note, setNote] = useState("");
+  const defaultDate = useMemo(() => new Date().toISOString().split("T")[0], []);
+  const [form, setForm] = useState(() => initForm(transactionToEdit, defaultDate));
 
   const formatWithDots = useCallback((val: string) => {
     const isDecimalAllowed = currency !== "IDR" && currency !== "JPY";
     
     if (isDecimalAllowed) {
-      // Normalize and split integer and decimal parts
       let cleaned = val.replace(/,/g, ".").replace(/[^0-9.]/g, "");
       const parts = cleaned.split(".");
       if (parts.length > 2) {
@@ -59,31 +74,15 @@ export default function TransactionModal({
     enabled: isOpen,
   });
 
-  const categories = Array.isArray(categoriesData?.data) ? categoriesData.data : [];
+  const categories = useMemo(
+    () => (Array.isArray(categoriesData?.data) ? categoriesData.data : []),
+    [categoriesData]
+  );
 
-  useEffect(() => {
-    if (isOpen) {
-      const timer = setTimeout(() => {
-        if (transactionToEdit) {
-          setType(transactionToEdit.type);
-          const amtStr = transactionToEdit.amount.toString();
-          setAmount(amtStr);
-          setDisplayAmount(formatWithDots(amtStr));
-          setCategoryId(transactionToEdit.categoryId || ""); 
-          setDate(new Date(transactionToEdit.date).toISOString().split("T")[0]);
-          setNote(transactionToEdit.note || "");
-        } else {
-          setType("expense");
-          setAmount("");
-          setDisplayAmount("");
-          setCategoryId("");
-          setDate(new Date().toISOString().split("T")[0]);
-          setNote("");
-        }
-      }, 0);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen, transactionToEdit, formatWithDots]);
+  const filteredCategories = useMemo(
+    () => categories.filter((c) => c.type === form.type),
+    [categories, form.type]
+  );
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const isDecimalAllowed = currency !== "IDR" && currency !== "JPY";
@@ -97,27 +96,12 @@ export default function TransactionModal({
         cleaned = parts[0] + "." + parts.slice(1).join("");
       }
       
-      setAmount(cleaned);
-      setDisplayAmount(formatWithDots(cleaned));
+      setForm(f => ({ ...f, amount: cleaned, displayAmount: formatWithDots(cleaned) }));
     } else {
       const raw = inputVal.replace(/\D/g, "");
-      setAmount(raw);
-      setDisplayAmount(formatWithDots(raw));
+      setForm(f => ({ ...f, amount: raw, displayAmount: formatWithDots(raw) }));
     }
   };
-
-  // Change default category when type changes
-  useEffect(() => {
-    if (!transactionToEdit && Array.isArray(categories) && categories.length > 0) {
-      const defaultCat = categories.find((c) => c.type === type);
-      if (defaultCat) {
-        const timer = setTimeout(() => {
-          setCategoryId(defaultCat.id);
-        }, 0);
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [type, categories, transactionToEdit]);
 
   // Mutation
   const saveMutation = useMutation({
@@ -137,44 +121,47 @@ export default function TransactionModal({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      toast.success(transactionToEdit ? 
-        (language === 'id' ? "Transaksi diperbarui!" : "Transaction updated!") : 
-        (language === 'id' ? "Transaksi ditambahkan!" : "Transaction added!")
-      );
+      toast.success(transactionToEdit ? t("transactions_page.save_success_update") : t("transactions_page.save_success_create"));
       onSuccess();
       onClose();
     },
     onError: () => {
-      toast.error(language === 'id' ? "Gagal menyimpan transaksi." : "Failed to save transaction.");
+      toast.error(t("transactions_page.save_error"));
     }
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!amount || !categoryId || !date) return;
+    if (!form.amount || !form.categoryId || !form.date) return;
 
-    const selectedCategory = Array.isArray(categories) ? categories.find((c) => c.id === categoryId) : null;
+    const selectedCategory = categories.find((c) => c.id === form.categoryId);
     const payload = {
-      type,
-      amount: parseFloat(amount),
-      categoryId,
+      type: form.type,
+      amount: parseFloat(form.amount),
+      categoryId: form.categoryId,
       categoryName: selectedCategory?.name || "Unknown",
       categoryIcon: selectedCategory?.icon || "category",
-      date: new Date(date).toISOString(),
-      note,
+      date: new Date(form.date).toISOString(),
+      note: form.note,
     };
 
     saveMutation.mutate(payload);
   };
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
-  const filteredCategories = Array.isArray(categories) 
-    ? categories.filter((c) => c.type === type)
-    : [];
-
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+    <div key={transactionToEdit?.id || 'new'} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="bg-surface w-full max-w-md rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 border border-outline-variant/20">
         <div className="flex justify-between items-center p-6 border-b border-outline-variant/10">
           <h2 className="font-headline-md text-headline-md font-bold text-on-background">
@@ -193,9 +180,9 @@ export default function TransactionModal({
           <div className="flex p-1 bg-surface-variant/30 rounded-xl">
             <button
               type="button"
-              onClick={() => setType("expense")}
+              onClick={() => setForm(f => ({ ...f, type: "expense", categoryId: "" }))}
               className={`flex-1 py-2 text-center rounded-lg text-sm font-medium transition-colors ${
-                type === "expense"
+                form.type === "expense"
                   ? "bg-surface shadow-sm text-error"
                   : "text-on-surface-variant hover:text-on-surface"
               }`}
@@ -204,9 +191,9 @@ export default function TransactionModal({
             </button>
             <button
               type="button"
-              onClick={() => setType("income")}
+              onClick={() => setForm(f => ({ ...f, type: "income", categoryId: "" }))}
               className={`flex-1 py-2 text-center rounded-lg text-sm font-medium transition-colors ${
-                type === "income"
+                form.type === "income"
                   ? "bg-surface shadow-sm text-secondary"
                   : "text-on-surface-variant hover:text-on-surface"
               }`}
@@ -228,7 +215,7 @@ export default function TransactionModal({
                 type="text"
                 inputMode="numeric"
                 required
-                value={displayAmount}
+                value={form.displayAmount}
                 onChange={handleAmountChange}
                 className="w-full pl-8 pr-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
                 placeholder="0"
@@ -244,20 +231,20 @@ export default function TransactionModal({
               </label>
               <select
                 required
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
+                value={form.categoryId}
+                onChange={(e) => setForm(f => ({ ...f, categoryId: e.target.value }))}
                 disabled={fetchingCats}
                 className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none appearance-none"
               >
                 {fetchingCats ? (
                   <option>{t("common.loading")}</option>
-                ) : Array.isArray(filteredCategories) ? (
+                ) : (
                   filteredCategories.map((c) => (
                     <option key={c.id} value={c.id}>
                       {tCategory(c.name)}
                     </option>
                   ))
-                ) : null}
+                )}
               </select>
             </div>
 
@@ -269,8 +256,8 @@ export default function TransactionModal({
               <input
                 type="date"
                 required
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
+                value={form.date}
+                onChange={(e) => setForm(f => ({ ...f, date: e.target.value }))}
                 className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
               />
             </div>
@@ -279,14 +266,14 @@ export default function TransactionModal({
           {/* Note */}
           <div>
             <label className="block text-sm font-medium text-on-surface-variant mb-1">
-              {t("transactions_page.table.note")} ({language === 'id' ? 'Opsional' : 'Optional'})
+              {t("transactions_page.table.note")} {t("transactions_page.optional")}
             </label>
             <input
               type="text"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
+              value={form.note}
+              onChange={(e) => setForm(f => ({ ...f, note: e.target.value }))}
               className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
-              placeholder="What was this for?"
+              placeholder={t("transactions_page.table.note")}
             />
           </div>
 

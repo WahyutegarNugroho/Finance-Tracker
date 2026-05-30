@@ -121,7 +121,7 @@ export default function Dashboard() {
 
           {queryError && (
             <div className="mb-4 p-4 bg-error-container text-error rounded-xl">
-              Failed to load dashboard data.
+              {t("dashboard_page.load_error")}
             </div>
           )}
 

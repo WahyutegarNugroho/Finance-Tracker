@@ -20,7 +20,7 @@ export default function Home() {
             <Link href="/login" className="font-label-caps text-label-caps px-3 md:px-4 py-2 rounded-lg text-on-surface-variant hover:text-primary transition-colors">
               Log In
             </Link>
-            <Link href="/login" className="font-label-caps text-label-caps bg-primary text-on-primary px-4 md:px-5 py-2 md:py-2.5 rounded-lg hover:bg-primary/90 hover:scale-[1.02] transition-all shadow-sm">
+            <Link href="/register" className="font-label-caps text-label-caps bg-primary text-on-primary px-4 md:px-5 py-2 md:py-2.5 rounded-lg hover:bg-primary/90 hover:scale-[1.02] transition-all shadow-sm">
               Get Started
             </Link>
           </div>
@@ -30,19 +30,18 @@ export default function Home() {
       <main className="flex-1 w-full pt-32 pb-16">
         <section className="px-gutter md:px-container-margin max-w-[1440px] mx-auto flex flex-col items-center text-center mb-24">
           <h1 className="font-display text-display text-on-background max-w-4xl mb-6 tracking-tight">
-            Take Control of Your <br className="hidden md:block" />
+            Track Every Rupiah. <br className="hidden md:block" />
             <span className="text-primary relative inline-block">
-              Financial Future
+              Own Your Financial Future.
               <div className="absolute bottom-1 left-0 w-full h-3 bg-primary/20 -z-10 rounded-full"></div>
             </span>
           </h1>
           <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mb-10 leading-relaxed">
-            Experience precision, security, and forward-thinking technology with
-            our modern wealth management platform. Designed for the sophisticated
-            architect of their own portfolio.
+            Monitor income, control expenses, and stay on top of your budget —
+            all in one clean dashboard. No jargon, no fluff.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 mb-20 w-full sm:w-auto">
-            <Link href="/login" className="font-label-caps text-label-caps bg-primary text-on-primary px-8 py-4 rounded-xl hover:bg-primary/90 hover:scale-[1.02] transition-all shadow-[0_8px_20px_rgba(70,72,212,0.25)] w-full sm:w-auto text-center flex items-center justify-center">
+            <Link href="/register" className="font-label-caps text-label-caps bg-primary text-on-primary px-8 py-4 rounded-xl hover:bg-primary/90 hover:scale-[1.02] transition-all shadow-[0_8px_20px_rgba(70,72,212,0.25)] w-full sm:w-auto text-center flex items-center justify-center">
               Get Started
             </Link>
             <Link href="/dashboard" className="font-label-caps text-label-caps glass-panel text-on-surface-variant px-8 py-4 rounded-xl hover:text-primary hover:scale-[1.02] transition-all w-full sm:w-auto text-center flex items-center justify-center">
@@ -153,11 +152,11 @@ export default function Home() {
           <div className="max-w-[1440px] mx-auto relative z-10">
             <div className="text-center mb-16">
               <h2 className="font-headline-lg text-headline-lg text-on-background mb-4">
-                Engineered for Precision
+                See Where Your Money Goes
               </h2>
               <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">
-                High-density data visualization mapped to intuitive interfaces.
-                We eliminate cognitive overload so you can focus on strategy.
+                Visual charts and smart insights that make sense of your spending.
+                No accounting degree required.
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
@@ -171,9 +170,8 @@ export default function Home() {
                   Smart Analytics
                 </h3>
                 <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-                  Deep dive into your financial data with AI-driven insights and
-                  forecasting tools designed for the modern investor. Visualize
-                  trends before they happen.
+                  Track transactions, spot spending patterns, and understand
+                  your financial habits at a glance.
                 </p>
               </div>
 
@@ -187,9 +185,8 @@ export default function Home() {
                   Budget Tracking
                 </h3>
                 <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-                  Granular control over your cash flow. Categorize, monitor, and
-                  optimize your spending with an interface that feels like a
-                  precision instrument.
+                  Set monthly budgets per category and get alerts before you
+                  overspend. Simple, effective, no surprises.
                 </p>
               </div>
 
@@ -203,9 +200,8 @@ export default function Home() {
                   Mobile Ready
                 </h3>
                 <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-                  Your financial command center, available anywhere. A seamless,
-                  responsive experience across all your devices without
-                  compromising functionality.
+                  Fully responsive design that works on desktop and mobile.
+                  Check your finances anytime, anywhere.
                 </p>
               </div>
             </div>
@@ -223,10 +219,7 @@ export default function Home() {
 
           <div className="text-center">
             <p className="font-body-sm text-body-sm text-on-surface-variant opacity-80">
-              © 2026 whtsn. All rights reserved.
-            </p>
-            <p className="font-label-sm text-[10px] uppercase tracking-[0.2em] text-primary/40 mt-1">
-              Precision Financial Instrument
+              © {new Date().getFullYear()} FinTrack. All rights reserved.
             </p>
           </div>
         </footer>

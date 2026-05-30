@@ -29,7 +29,7 @@ interface SpendingChartProps {
 
 export default function SpendingChart({ expenseByCategory, totalExpense }: SpendingChartProps) {
   const { formatCurrency } = useAuth();
-  const { language, t, tCategory } = useLanguage();
+  const { t, tCategory } = useLanguage();
 
   const doughnutData = {
     labels: Array.isArray(expenseByCategory) ? expenseByCategory.map((cat) => tCategory(cat.name)) : [],
@@ -79,7 +79,7 @@ export default function SpendingChart({ expenseByCategory, totalExpense }: Spend
               {/* Inner Circle for Doughnut Effect */}
               <div className="absolute w-28 h-28 bg-surface rounded-full flex flex-col items-center justify-center shadow-sm pointer-events-none">
                 <span className="font-label-caps text-label-caps text-outline text-[9px] uppercase tracking-tighter">
-                  {language === 'id' ? 'Total Keluar' : 'Total Exp'}
+                  {t("dashboard_page.total_expense_short")}
                 </span>
                 <span className="font-numeric-data text-[13px] font-bold text-on-surface mt-0.5 px-2 text-center leading-tight">
                   {formatCurrency(totalExpense)}
@@ -101,12 +101,19 @@ export default function SpendingChart({ expenseByCategory, totalExpense }: Spend
                   </span>
                 </div>
               )) : null}
+              {Array.isArray(expenseByCategory) && expenseByCategory.length > 5 && (
+                <div className="flex items-center justify-center pt-1">
+                  <span className="text-xs text-on-surface-variant font-medium bg-surface-variant/50 px-2 py-0.5 rounded-full">
+                    +{expenseByCategory.length - 5} more
+                  </span>
+                </div>
+              )}
             </div>
           </>
         ) : (
           <div className="flex flex-col items-center justify-center text-outline gap-2 py-8">
             <span className="material-symbols-outlined text-4xl">pie_chart</span>
-            <p className="text-xs italic">{language === 'id' ? 'Belum ada data pengeluaran' : 'No spending data yet'}</p>
+            <p className="text-xs italic">{t("dashboard_page.no_spending_data")}</p>
           </div>
         )}
       </div>

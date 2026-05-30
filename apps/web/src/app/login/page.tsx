@@ -81,16 +81,9 @@ export default function Login() {
     <div className="bg-background text-on-background min-h-screen flex antialiased">
       {/* Left Panel: Hero/Gradient Illustration */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center p-12">
-        {/* Hero Image Background */}
-        <img
-          alt="Abstract geometric background"
-          className="absolute inset-0 w-full h-full object-cover z-0"
-          loading="lazy"
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFzFlFu7NXs2_VGKnr1njxibMPR6OAbvd9gIAZuBtJyCK_-8XljMIN6rjT4UhjzscYDPoRIl_Zf9LkXCjbilPPXHwrXDkzBs03NNq4Il108IdjC7mVDGu7-egBy4husq4ElZIf54avAFN6WMPy1n4Yt6HXBk7Us6JnfyRYJD26ugcWJGtdtqqUhikdXWU1ygbM1zA3HAzRHGX8kE2KDzHQsyeHusectIkdT6OpIu5WseItKIcL_N2qCBUVm3S5JKDqrLzxjirr_5_6"
-        />
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/80 to-on-primary-fixed/90 mix-blend-multiply z-10"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent z-10"></div>
+        {/* Hero Background Gradient */}
+        <div className="absolute inset-0 z-0 bg-gradient-to-br from-primary/30 via-primary-fixed/20 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent z-10"></div>
 
         {/* Hero Content */}
         <div className="relative z-20 max-w-lg text-left">
@@ -106,8 +99,8 @@ export default function Login() {
             Smart money management starts here.
           </h1>
           <p className="font-body-lg text-body-lg text-white/90 max-w-md">
-            Experience precision, security, and forward-thinking technology with
-            the ultimate instrument for modern wealth management.
+            Track your income, control expenses, and stay on budget —
+            all from one clean dashboard.
           </p>
         </div>
       </div>

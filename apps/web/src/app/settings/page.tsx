@@ -21,7 +21,7 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 export default function Settings() {
   const { user, loading: authLoading, logout, setCurrency: setGlobalCurrency } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const { language, setLanguage, t, tCategory } = useLanguage();
+  const { setLanguage, t, tCategory } = useLanguage();
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -38,10 +38,10 @@ export default function Settings() {
     mutationFn: () => api.delete("/users/reset", { confirm: "RESET" }),
     onSuccess: () => {
       queryClient.invalidateQueries();
-      toast.success(language === 'id' ? "Seluruh data Anda telah berhasil direset!" : "All your data has been successfully reset!");
+      toast.success(t("settings_page.reset_success"));
     },
     onError: () => {
-      toast.error(language === 'id' ? "Gagal mereset data." : "Failed to reset data.");
+      toast.error(t("settings_page.reset_error"));
     }
   });
 
@@ -85,16 +85,16 @@ export default function Settings() {
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       if (res.data?.currency) setGlobalCurrency(res.data.currency);
-      toast.success(language === 'id' ? "Profil diperbarui!" : "Profile updated!");
+      toast.success(t("settings_page.profile_updated"));
     },
-    onError: () => toast.error(language === 'id' ? "Gagal memperbarui profil." : "Failed to update profile.")
+    onError: () => toast.error(t("settings_page.profile_error"))
   });
 
   const addCategoryMutation = useMutation({
     mutationFn: (cat: Partial<Category>) => api.post("/categories", cat),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
-      toast.success(language === 'id' ? "Kategori ditambahkan!" : "Category added!");
+      toast.success(t("settings_page.category_added"));
     }
   });
 
@@ -102,7 +102,7 @@ export default function Settings() {
     mutationFn: ({ id, name }: { id: string, name: string }) => api.put(`/categories/${id}`, { name }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
-      toast.success(language === 'id' ? "Kategori diperbarui!" : "Category updated!");
+      toast.success(t("settings_page.category_updated"));
     }
   });
 
@@ -110,17 +110,15 @@ export default function Settings() {
     mutationFn: (id: string) => api.delete(`/categories/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
-      toast.success(language === 'id' ? "Kategori dihapus!" : "Category deleted!");
+      toast.success(t("settings_page.category_deleted"));
     },
     onError: (err: unknown) => {
       const fbErr = err as FirebaseAuthError;
       const msg = fbErr?.data?.message || fbErr?.message || "";
       if (msg.includes("transactions") || msg.includes("Cannot delete")) {
-        toast.error(language === 'id' 
-          ? `Tidak dapat menghapus kategori ini karena memiliki transaksi.` 
-          : `Cannot delete this category because it has existing transactions.`);
+        toast.error(t("settings_page.category_has_transactions"));
       } else {
-        toast.error(language === 'id' ? `Gagal menghapus kategori.` : `Failed to delete category.`);
+        toast.error(t("settings_page.category_delete_error"));
       }
     }
   });
@@ -233,8 +231,8 @@ export default function Settings() {
 
       <ConfirmDialog 
         isOpen={isCategoryConfirmOpen}
-        title={language === 'id' ? "Hapus Kategori" : "Delete Category"}
-        message={language === 'id' ? "Apakah Anda yakin ingin menghapus kategori ini?" : "Are you sure you want to delete this category?"}
+        title={t("settings_page.delete_category_confirm")}
+        message={t("settings_page.delete_category_message")}
         onConfirm={handleConfirmDeleteCategory}
         onCancel={() => {
           setIsCategoryConfirmOpen(false);
@@ -244,11 +242,11 @@ export default function Settings() {
 
       <ConfirmDialog 
         isOpen={isResetConfirmOpen}
-        title={language === 'id' ? "Reset Semua Data Keuangan" : "Reset All Financial Data"}
-        message={language === 'id' ? "Apakah Anda yakin ingin menghapus seluruh data transaksi, anggaran, dan kategori kustom? Tindakan ini bersifat permanen dan tidak dapat dibatalkan." : "Are you sure you want to delete all transaction history, budgets, and custom categories? This action is permanent and cannot be undone."}
+        title={t("settings_page.reset_confirm_title")}
+        message={t("settings_page.reset_confirm_message")}
         onConfirm={handleConfirmResetData}
         onCancel={() => setIsResetConfirmOpen(false)}
-        confirmText={language === 'id' ? "Ya, Reset Sekarang" : "Yes, Reset Now"}
+        confirmText={t("settings_page.reset_confirm_button")}
       />
     </div>
   );

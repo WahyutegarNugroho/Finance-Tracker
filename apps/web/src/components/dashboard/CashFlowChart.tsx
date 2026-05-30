@@ -16,6 +16,7 @@ import {
   TooltipItem,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
+import { chartColors, chartColorWithOpacity } from "@/lib/colors";
 
 ChartJS.register(
   CategoryScale,
@@ -26,7 +27,7 @@ ChartJS.register(
 );
 
 export default function CashFlowChart() {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const { formatCurrency } = useAuth();
 
   const { data: cashflowData, isLoading } = useQuery<ApiResponse<CashFlowEntry[]>>({
@@ -42,13 +43,13 @@ export default function CashFlowChart() {
       {
         label: t("common.income") || "Income",
         data: cashflow.map((m: CashFlowEntry) => m.income),
-        backgroundColor: "#4648d4",
+        backgroundColor: chartColors.primary,
         borderRadius: 4,
       },
       {
         label: t("common.expense") || "Expense",
         data: cashflow.map((m: CashFlowEntry) => m.expense),
-        backgroundColor: "#ba1a1a",
+        backgroundColor: chartColors.error,
         borderRadius: 4,
       }
     ]
@@ -103,33 +104,33 @@ export default function CashFlowChart() {
           {t("dashboard_page.charts.cash_flow")}
         </h3>
         <span className="text-on-surface-variant font-body-sm text-body-sm">
-          {language === 'id' ? '6 Bulan Terakhir' : 'Last 6 Months'}
+          {t("dashboard_page.last_6_months")}
         </span>
       </div>
 
       <div className="flex-1 min-h-[240px] relative mt-2">
         {isLoading ? (
           <div className="absolute inset-0 flex items-center justify-center text-outline italic">
-            {language === 'id' ? 'Memuat grafik...' : 'Loading chart...'}
+            {t("dashboard_page.loading_chart")}
           </div>
         ) : cashflow.length > 0 ? (
           <Bar data={barChartData} options={barChartOptions} />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-outline italic">
-            {language === 'id' ? 'Belum ada data' : 'No data yet'}
+            {t("dashboard_page.no_spending_data")}
           </div>
         )}
       </div>
 
       <div className="flex justify-center gap-6 mt-6">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-[#4648d4]"></div>
+          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: chartColors.primary }}></div>
           <span className="font-label-caps text-label-caps text-on-surface-variant text-[10px]">
             {t("common.income")}
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-[#ba1a1a]"></div>
+          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: chartColors.error }}></div>
           <span className="font-label-caps text-label-caps text-on-surface-variant text-[10px]">
             {t("common.expense")}
           </span>

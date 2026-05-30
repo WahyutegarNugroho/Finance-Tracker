@@ -20,7 +20,7 @@ export default function FilterBar({
   onExport,
   onResetPagination,
 }: FilterBarProps) {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
 
   return (
     <div className="bg-surface/80 backdrop-blur-[12px] border border-white/10 rounded-xl p-4 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
@@ -50,7 +50,7 @@ export default function FilterBar({
             }}
             className="appearance-none flex items-center gap-2 pl-3 pr-8 py-2 bg-surface border border-outline-variant/30 rounded-lg hover:bg-surface-variant/30 transition-colors font-body-sm text-body-sm text-on-surface-variant focus:outline-none"
           >
-            <option value="all">{language === 'id' ? 'Tipe: Semua' : 'Type: All'}</option>
+            <option value="all">{t("transactions_page.filter_all_types")}</option>
             <option value="income">{t("common.income")}</option>
             <option value="expense">{t("common.expense")}</option>
           </select>

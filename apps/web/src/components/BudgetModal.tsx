@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
@@ -18,6 +18,21 @@ type BudgetModalProps = {
   year?: number;
 };
 
+function initForm(budgetToEdit: Budget | null | undefined, firstCategoryId: string) {
+  if (budgetToEdit) {
+    return {
+      limitAmount: budgetToEdit.limitAmount.toString(),
+      displayAmount: budgetToEdit.limitAmount.toString(),
+      categoryId: budgetToEdit.categoryId,
+    };
+  }
+  return {
+    limitAmount: "",
+    displayAmount: "",
+    categoryId: firstCategoryId,
+  };
+}
+
 export default function BudgetModal({
   isOpen,
   onClose,
@@ -30,46 +45,22 @@ export default function BudgetModal({
   const { t, tCategory } = useLanguage();
   const queryClient = useQueryClient();
 
-  // Form State
-  const [limitAmount, setLimitAmount] = useState("");
-  const [displayAmount, setDisplayAmount] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-
   const { data: categoriesData, isLoading: fetchingCats } = useQuery<ApiResponse<Category[]>>({
     queryKey: ["categories"],
     queryFn: () => api.get("/categories"),
     enabled: isOpen,
   });
 
-  const allCategories = Array.isArray(categoriesData?.data) ? categoriesData.data : [];
-  const categories = allCategories.filter((c: Category) => c.type === "expense");
+  const categories = useMemo(() => {
+    const all = Array.isArray(categoriesData?.data) ? categoriesData.data : [];
+    return all.filter((c: Category) => c.type === "expense");
+  }, [categoriesData]);
 
-  useEffect(() => {
-    if (isOpen) {
-      const timer = setTimeout(() => {
-        if (budgetToEdit) {
-          const amtStr = budgetToEdit.limitAmount.toString();
-          setLimitAmount(amtStr);
-          setDisplayAmount(formatWithDots(amtStr, currency));
-          setCategoryId(budgetToEdit.categoryId);
-        } else {
-          setLimitAmount("");
-          setDisplayAmount("");
-          if (categories.length > 0) {
-            setCategoryId(categories[0].id);
-          } else {
-            setCategoryId("");
-          }
-        }
-      }, 0);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen, budgetToEdit, currency]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [form, setForm] = useState(() => initForm(budgetToEdit, categories.length > 0 ? categories[0]?.id : ""));
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const cleaned = cleanAmountInput(e.target.value, currency);
-    setLimitAmount(cleaned);
-    setDisplayAmount(formatWithDots(cleaned, currency));
+    setForm(f => ({ ...f, limitAmount: cleaned, displayAmount: formatWithDots(cleaned, currency) }));
   };
 
   const saveMutation = useMutation({
@@ -82,23 +73,23 @@ export default function BudgetModal({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["budgets"] });
       queryClient.invalidateQueries({ queryKey: ["budgets-summary"] });
-      toast.success(budgetToEdit ? "Budget updated!" : "Budget created!");
+      toast.success(budgetToEdit ? t("budget_page.updated_success") : t("budget_page.created_success"));
       onSuccess();
       onClose();
     },
     onError: () => {
-      toast.error("Failed to save budget.");
+      toast.error(t("budget_page.save_error"));
     }
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!limitAmount || !categoryId) return;
+    if (!form.limitAmount || !form.categoryId) return;
 
-    const selectedCategory = categories.find((c) => c.id === categoryId) || null;
+    const selectedCategory = categories.find((c) => c.id === form.categoryId) || null;
     const payload = {
-      limitAmount: parseFloat(limitAmount),
-      categoryId,
+      limitAmount: parseFloat(form.limitAmount),
+      categoryId: form.categoryId,
       categoryName: selectedCategory?.name || "Unknown",
       categoryIcon: selectedCategory?.icon || "category",
       month: month || new Date().getMonth() + 1,
@@ -108,10 +99,20 @@ export default function BudgetModal({
     saveMutation.mutate(payload);
   };
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+    <div key={budgetToEdit?.id || 'new'} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="bg-surface w-full max-w-md rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 border border-outline-variant/20">
         <div className="flex justify-between items-center p-6 border-b border-outline-variant/10">
           <h2 className="font-headline-md text-headline-md font-bold text-on-background">
@@ -132,20 +133,20 @@ export default function BudgetModal({
             </label>
             <select
               required
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              disabled={fetchingCats || !!budgetToEdit} // Do not allow changing category when editing
+              value={form.categoryId}
+              onChange={(e) => setForm(f => ({ ...f, categoryId: e.target.value }))}
+              disabled={fetchingCats || !!budgetToEdit}
               className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none appearance-none disabled:opacity-50"
             >
               {fetchingCats ? (
                 <option>{t("common.loading")}</option>
-              ) : Array.isArray(categories) ? (
-                categories.map((c) => (
+              ) : (
+                categories.map((c: Category) => (
                   <option key={c.id} value={c.id}>
                     {tCategory(c.name)}
                   </option>
                 ))
-              ) : null}
+              )}
             </select>
           </div>
 
@@ -161,7 +162,7 @@ export default function BudgetModal({
                 type="text"
                 inputMode="numeric"
                 required
-                value={displayAmount}
+                value={form.displayAmount}
                 onChange={handleAmountChange}
                 className="w-full pl-8 pr-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
                 placeholder="0"

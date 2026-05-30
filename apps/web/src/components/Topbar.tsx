@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { toast } from "sonner";
 
 export default function Topbar() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -15,6 +16,7 @@ export default function Topbar() {
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
+      toast.info(t("common.search") + ': ' + searchQuery.trim());
       router.push(`/transactions?search=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
     }
@@ -49,7 +51,7 @@ export default function Topbar() {
             {theme === 'dark' ? 'light_mode' : 'dark_mode'}
           </span>
         </button>
-        <button onClick={() => alert(t("common.language") === "Bahasa" ? "Anda tidak memiliki notifikasi baru." : "You have no new notifications.")} className="hover:text-primary transition-colors cursor-pointer p-2 rounded-full hover:bg-surface-variant/50 relative">
+        <button onClick={() => toast.info(t("common.no_notifications"))} className="hover:text-primary transition-colors cursor-pointer p-2 rounded-full hover:bg-surface-variant/50 relative">
           <span
             className="material-symbols-outlined"
             data-icon="notifications"

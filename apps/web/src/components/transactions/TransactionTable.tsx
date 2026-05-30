@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Transaction } from "@/types";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
@@ -22,6 +22,7 @@ export default function TransactionTable({
 }: TransactionTableProps) {
   const { language, t, tCategory } = useLanguage();
   const { formatCurrency } = useAuth();
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   return (
     <div className="bg-surface/80 backdrop-blur-[12px] border border-white/10 rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.02)] overflow-hidden flex-1 flex flex-col min-h-[400px]">
@@ -84,31 +85,36 @@ export default function TransactionTable({
                         ? 'bg-secondary/10 text-secondary' 
                         : 'bg-surface-variant/50 text-on-surface-variant'
                     }`}>
-                      {tx.type === 'income' ? (language === 'id' ? 'Kredit' : 'Credit') : (language === 'id' ? 'Debit' : 'Debit')}
+                      {tx.type === 'income' ? t("common.credit") : t("common.debit")}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-outline transition-opacity relative group/menu">
-                    <button className="p-1 hover:bg-surface-variant rounded-full transition-colors opacity-0 group-hover:opacity-100">
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-outline relative">
+                    <button
+                      onClick={() => setOpenMenuId(openMenuId === tx.id ? null : tx.id)}
+                      onBlur={() => setOpenMenuId(null)}
+                      className="p-1 hover:bg-surface-variant rounded-full transition-colors"
+                    >
                       <span className="material-symbols-outlined text-[20px]">more_vert</span>
                     </button>
                     
-                    {/* Dropdown Menu */}
-                    <div className="absolute right-6 top-1/2 -translate-y-1/2 w-32 bg-surface border border-outline-variant/20 rounded-lg shadow-lg opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all z-10 flex flex-col overflow-hidden text-left">
-                      <button 
-                        onClick={() => onEdit(tx)}
-                        className="text-left px-4 py-2 text-sm text-on-surface hover:bg-surface-variant/50 flex items-center gap-2"
-                      >
-                        <span className="material-symbols-outlined text-[18px]">edit</span>
-                        {t("common.edit")}
-                      </button>
-                      <button 
-                        onClick={() => onDelete(tx.id)}
-                        className="text-left px-4 py-2 text-sm text-error hover:bg-error-container/50 flex items-center gap-2"
-                      >
-                        <span className="material-symbols-outlined text-[18px]">delete</span>
-                        {t("common.delete")}
-                      </button>
-                    </div>
+                    {openMenuId === tx.id && (
+                      <div className="absolute right-0 top-full mt-1 w-32 bg-surface border border-outline-variant/20 rounded-lg shadow-lg z-10 flex flex-col overflow-hidden text-left">
+                        <button 
+                          onMouseDown={(e) => { e.preventDefault(); onEdit(tx); setOpenMenuId(null); }}
+                          className="w-full text-left px-4 py-2 text-sm text-on-surface hover:bg-surface-variant/50 flex items-center gap-2"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">edit</span>
+                          {t("common.edit")}
+                        </button>
+                        <button 
+                          onMouseDown={(e) => { e.preventDefault(); onDelete(tx.id); setOpenMenuId(null); }}
+                          className="w-full text-left px-4 py-2 text-sm text-error hover:bg-error-container/50 flex items-center gap-2"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">delete</span>
+                          {t("common.delete")}
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))

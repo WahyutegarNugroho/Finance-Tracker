@@ -27,6 +27,7 @@ import {
   Filler
 } from "chart.js";
 import { Line, Doughnut } from "react-chartjs-2";
+import { chartColors, chartColorWithOpacity } from "@/lib/colors";
 
 ChartJS.register(
   CategoryScale,
@@ -43,7 +44,7 @@ ChartJS.register(
 
 export default function Analytics() {
   const { user, loading: authLoading, formatCurrency } = useAuth();
-  const { language, t, tCategory } = useLanguage();
+  const { t, tCategory } = useLanguage();
   const router = useRouter();
 
   useEffect(() => {
@@ -87,22 +88,22 @@ export default function Analytics() {
         {
           label: t("common.income") || "Income",
           data: incomeData,
-          borderColor: "#4648d4",
-          backgroundColor: "rgba(70, 72, 212, 0.1)",
+          borderColor: chartColors.primary,
+          backgroundColor: chartColorWithOpacity(chartColors.primary, 0.1),
           tension: 0.3,
           borderWidth: 2.5,
-          pointBackgroundColor: "#4648d4",
+          pointBackgroundColor: chartColors.primary,
           pointHoverRadius: 6,
           fill: true,
         },
         {
           label: t("common.expense") || "Expense",
           data: expenseData,
-          borderColor: "#ba1a1a",
-          backgroundColor: "rgba(186, 26, 26, 0.1)",
+          borderColor: chartColors.error,
+          backgroundColor: chartColorWithOpacity(chartColors.error, 0.1),
           tension: 0.3,
           borderWidth: 2.5,
-          pointBackgroundColor: "#ba1a1a",
+          pointBackgroundColor: chartColors.error,
           pointHoverRadius: 6,
           borderDash: [5, 5],
           fill: false,
@@ -239,7 +240,7 @@ export default function Analytics() {
                     {formatCurrency(overview?.income || 0)}
                   </div>
                   <div className="text-sm text-secondary font-medium flex items-center gap-1">
-                    {language === 'id' ? 'Pendapatan bulan ini' : 'Income this month'}
+                    {t("analytics_page.income_this_month")}
                   </div>
                 </div>
 
@@ -254,7 +255,7 @@ export default function Analytics() {
                     {formatCurrency(overview?.expense || 0)}
                   </div>
                   <div className="text-sm text-error font-medium flex items-center gap-1">
-                    {language === 'id' ? 'Pengeluaran bulan ini' : 'Spending this month'}
+                    {t("analytics_page.spending_this_month")}
                   </div>
                 </div>
 
@@ -270,7 +271,7 @@ export default function Analytics() {
                     {formatCurrency(overview?.balance || 0)}
                   </div>
                   <div className="text-sm text-secondary font-medium flex items-center gap-1 relative z-10">
-                    {language === 'id' ? 'Saldo saat ini' : 'Current balance'}
+                    {t("analytics_page.current_balance")}
                   </div>
                 </div>
               </section>
@@ -296,7 +297,7 @@ export default function Analytics() {
                     <Line data={lineChartData} options={lineChartOptions} />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-outline italic">
-                      {language === 'id' ? 'Belum ada data' : 'No data yet'}
+                      {t("analytics_page.no_data")}
                     </div>
                   )}
                 </div>
@@ -312,13 +313,13 @@ export default function Analytics() {
                         <>
                           <Doughnut data={doughnutData} options={doughnutOptions} />
                           <div className="absolute w-28 h-28 bg-surface rounded-full flex flex-col items-center justify-center shadow-sm pointer-events-none">
-                            <span className="text-[10px] text-outline font-bold uppercase tracking-wider">{language === 'id' ? 'Total Keluar' : 'Total Exp'}</span>
+                            <span className="text-[10px] text-outline font-bold uppercase tracking-wider">{t("dashboard_page.total_expense_short")}</span>
                             <span className="font-numeric-data text-lg font-bold text-on-surface">{formatCurrency(breakdown?.totalExpense || 0)}</span>
                           </div>
                         </>
                       ) : (
                         <div className="w-full h-full rounded-full bg-surface-variant flex items-center justify-center">
-                          <span className="text-sm text-outline italic">{language === 'id' ? 'Belum ada pengeluaran' : 'No expenses recorded'}</span>
+                          <span className="text-sm text-outline italic">{t("analytics_page.no_expense")}</span>
                         </div>
                       )}
                     </div>
@@ -327,14 +328,21 @@ export default function Analytics() {
                       {Array.isArray(categories) ? categories.slice(0, 5).map((cat) => (
                         <div key={cat.categoryId} className="flex items-center justify-between gap-4">
                           <div className="flex items-center gap-2">
-                            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color || '#4648d4' }}></div>
+                            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color || chartColors.primary }}></div>
                             <span className="text-sm text-on-surface-variant font-medium truncate max-w-[120px]">{tCategory(cat.categoryName)}</span>
                           </div>
                           <span className="text-sm font-semibold">{cat.percentage}%</span>
                         </div>
                       )) : null}
+                      {Array.isArray(categories) && categories.length > 5 && (
+                        <div className="flex items-center justify-center pt-1">
+                          <span className="text-xs text-on-surface-variant font-medium bg-surface-variant/50 px-2 py-0.5 rounded-full">
+                            +{categories.length - 5} more
+                          </span>
+                        </div>
+                      )}
                       {(!Array.isArray(categories) || categories.length === 0) && (
-                        <p className="text-sm text-outline italic">{language === 'id' ? 'Belum ada pengeluaran' : 'No expenses recorded'}</p>
+                        <p className="text-sm text-outline italic">{t("analytics_page.no_expense")}</p>
                       )}
                     </div>
                   </div>
@@ -343,8 +351,8 @@ export default function Analytics() {
                 {/* Top Spending List */}
                 <div className="glass-card rounded-xl p-6 flex flex-col gap-4">
                   <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-headline-md text-headline-md font-semibold text-on-surface">{language === 'id' ? 'Pengeluaran Terbesar' : 'Top Spending'}</h3>
-                    <Link href="/transactions?type=expense" className="text-sm text-primary hover:underline font-bold transition-all">{language === 'id' ? 'Lihat Semua' : 'View All'}</Link>
+                    <h3 className="font-headline-md text-headline-md font-semibold text-on-surface">{t("analytics_page.top_spending")}</h3>
+                    <Link href="/transactions?type=expense" className="text-sm text-primary hover:underline font-bold transition-all">{t("common.view_all")}</Link>
                   </div>
                   <div className="flex flex-col gap-3">
                     {Array.isArray(categories) ? categories.slice(0, 5).map((cat) => (
@@ -357,7 +365,7 @@ export default function Analytics() {
                         </div>
                         <div className="flex-1">
                           <div className="font-medium text-on-surface">{tCategory(cat.categoryName)}</div>
-                          <div className="text-[10px] text-outline uppercase tracking-wider font-bold">{language === 'id' ? 'Kategori utama' : 'Top category'}</div>
+                          <div className="text-[10px] text-outline uppercase tracking-wider font-bold">{t("analytics_page.top_category")}</div>
                         </div>
                         <div className="flex flex-col items-end">
                           <span className="font-numeric-data font-bold text-on-surface">{formatCurrency(cat.amount)}</span>
@@ -368,7 +376,7 @@ export default function Analytics() {
                     {(!Array.isArray(categories) || categories.length === 0) && (
                       <div className="flex flex-col items-center justify-center py-10 text-outline gap-2">
                         <span className="material-symbols-outlined text-4xl">receipt_long</span>
-                        <p className="text-sm">{language === 'id' ? 'Tidak ada data pengeluaran' : 'No spending data found'}</p>
+                        <p className="text-sm">{t("analytics_page.no_spending_found")}</p>
                       </div>
                     )}
                   </div>
