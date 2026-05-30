@@ -2,6 +2,7 @@ const express = require('express');
 const { body, param, query } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate } = require('../middleware/auth');
+const { db } = require('../config/firebase');
 const transactionService = require('../services/transaction.service');
 const response = require('../utils/response');
 

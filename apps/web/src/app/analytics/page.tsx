@@ -27,7 +27,7 @@ import {
   Filler
 } from "chart.js";
 import { Line, Doughnut } from "react-chartjs-2";
-import { chartColors, chartColorWithOpacity } from "@/lib/colors";
+import { chartColors, chartColorWithOpacity, getCategoryColor } from "@/lib/colors";
 
 ChartJS.register(
   CategoryScale,
@@ -159,7 +159,7 @@ export default function Analytics() {
   const doughnutData = useMemo(() => {
     const labels = Array.isArray(categories) ? categories.map((cat) => tCategory(cat.categoryName)) : [];
     const amounts = Array.isArray(categories) ? categories.map((cat) => cat.amount) : [];
-    const colors = Array.isArray(categories) ? categories.map((cat) => cat.color || "#4648d4") : [];
+    const colors = Array.isArray(categories) ? categories.map((cat, idx) => getCategoryColor(cat.categoryName, idx)) : [];
 
     return {
       labels,
@@ -325,10 +325,10 @@ export default function Analytics() {
                     </div>
 
                     <div className="flex flex-col gap-3 w-full sm:w-auto overflow-y-auto max-h-[160px] pr-2 custom-scrollbar">
-                      {Array.isArray(categories) ? categories.slice(0, 5).map((cat) => (
+                      {Array.isArray(categories) ? categories.slice(0, 5).map((cat, idx) => (
                         <div key={cat.categoryId} className="flex items-center justify-between gap-4">
                           <div className="flex items-center gap-2">
-                            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color || chartColors.primary }}></div>
+                            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: getCategoryColor(cat.categoryName, idx) }}></div>
                             <span className="text-sm text-on-surface-variant font-medium truncate max-w-[120px]">{tCategory(cat.categoryName)}</span>
                           </div>
                           <span className="text-sm font-semibold">{cat.percentage}%</span>
@@ -355,24 +355,27 @@ export default function Analytics() {
                     <Link href="/transactions?type=expense" className="text-sm text-primary hover:underline font-bold transition-all">{t("common.view_all")}</Link>
                   </div>
                   <div className="flex flex-col gap-3">
-                    {Array.isArray(categories) ? categories.slice(0, 5).map((cat) => (
-                      <div key={cat.categoryId} className="flex items-center p-3 rounded-lg hover:bg-surface-variant/30 transition-all border border-transparent hover:border-outline-variant/10 group">
-                        <div 
-                          className="w-10 h-10 rounded-full flex items-center justify-center mr-4 transition-transform group-hover:scale-110"
-                          style={{ backgroundColor: `${cat.color || '#4648d4'}15`, color: cat.color || '#4648d4' }}
-                        >
-                          <span className="material-symbols-outlined text-[20px]">{cat.categoryIcon || 'category'}</span>
+                    {Array.isArray(categories) ? categories.slice(0, 5).map((cat, idx) => {
+                      const catColor = getCategoryColor(cat.categoryName, idx);
+                      return (
+                        <div key={cat.categoryId} className="flex items-center p-3 rounded-lg hover:bg-surface-variant/30 transition-all border border-transparent hover:border-outline-variant/10 group">
+                          <div 
+                            className="w-10 h-10 rounded-full flex items-center justify-center mr-4 transition-transform group-hover:scale-110"
+                            style={{ backgroundColor: `${catColor}15`, color: catColor }}
+                          >
+                            <span className="material-symbols-outlined text-[20px]">{cat.categoryIcon || 'category'}</span>
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-medium text-on-surface">{tCategory(cat.categoryName)}</div>
+                            <div className="text-[10px] text-outline uppercase tracking-wider font-bold">{t("analytics_page.top_category")}</div>
+                          </div>
+                          <div className="flex flex-col items-end">
+                            <span className="font-numeric-data font-bold text-on-surface">{formatCurrency(cat.amount)}</span>
+                            <span className="text-xs font-semibold text-outline">{cat.percentage}%</span>
+                          </div>
                         </div>
-                        <div className="flex-1">
-                          <div className="font-medium text-on-surface">{tCategory(cat.categoryName)}</div>
-                          <div className="text-[10px] text-outline uppercase tracking-wider font-bold">{t("analytics_page.top_category")}</div>
-                        </div>
-                        <div className="flex flex-col items-end">
-                          <span className="font-numeric-data font-bold text-on-surface">{formatCurrency(cat.amount)}</span>
-                          <span className="text-xs font-semibold text-outline">{cat.percentage}%</span>
-                        </div>
-                      </div>
-                    )) : null}
+                      );
+                    }) : null}
                     {(!Array.isArray(categories) || categories.length === 0) && (
                       <div className="flex flex-col items-center justify-center py-10 text-outline gap-2">
                         <span className="material-symbols-outlined text-4xl">receipt_long</span>

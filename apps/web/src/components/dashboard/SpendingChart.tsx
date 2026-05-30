@@ -1,8 +1,8 @@
 "use client";
-
 import React from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { getCategoryColor } from "@/lib/colors";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -36,7 +36,7 @@ export default function SpendingChart({ expenseByCategory, totalExpense }: Spend
     datasets: [
       {
         data: Array.isArray(expenseByCategory) ? expenseByCategory.map((cat) => cat.percentage) : [],
-        backgroundColor: Array.isArray(expenseByCategory) ? expenseByCategory.map((cat) => cat.color || "#4648d4") : [],
+        backgroundColor: Array.isArray(expenseByCategory) ? expenseByCategory.map((cat, idx) => getCategoryColor(cat.name, idx)) : [],
         borderWidth: 0,
         hoverOffset: 4,
       }
@@ -88,10 +88,10 @@ export default function SpendingChart({ expenseByCategory, totalExpense }: Spend
             </div>
 
             <div className="mt-8 w-full flex flex-col gap-2.5 overflow-y-auto max-h-[140px] pr-1 custom-scrollbar">
-              {Array.isArray(expenseByCategory) ? expenseByCategory.slice(0, 5).map((cat) => (
+              {Array.isArray(expenseByCategory) ? expenseByCategory.slice(0, 5).map((cat, idx) => (
                 <div key={cat.name} className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: cat.color }}></div>
+                    <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: getCategoryColor(cat.name, idx) }}></div>
                     <span className="font-body-sm text-body-sm text-on-surface-variant truncate">
                       {tCategory(cat.name)}
                     </span>
