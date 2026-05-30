@@ -77,7 +77,7 @@ export default function SpendingChart({ expenseByCategory, totalExpense }: Spend
             <div className="relative w-40 h-40 flex items-center justify-center">
               <Doughnut data={doughnutData} options={doughnutOptions} />
               {/* Inner Circle for Doughnut Effect */}
-              <div className="absolute w-28 h-28 bg-surface rounded-full flex flex-col items-center justify-center shadow-sm pointer-events-none">
+              <div className="absolute w-28 h-28 flex flex-col items-center justify-center pointer-events-none">
                 <span className="font-label-caps text-label-caps text-outline text-[9px] uppercase tracking-tighter">
                   {t("dashboard_page.total_expense_short")}
                 </span>

@@ -312,7 +312,7 @@ export default function Analytics() {
                       {Array.isArray(categories) && categories.length > 0 ? (
                         <>
                           <Doughnut data={doughnutData} options={doughnutOptions} />
-                          <div className="absolute w-28 h-28 bg-surface rounded-full flex flex-col items-center justify-center shadow-sm pointer-events-none">
+                          <div className="absolute w-28 h-28 flex flex-col items-center justify-center pointer-events-none">
                             <span className="text-[10px] text-outline font-bold uppercase tracking-wider">{t("dashboard_page.total_expense_short")}</span>
                             <span className="font-numeric-data text-lg font-bold text-on-surface">{formatCurrency(breakdown?.totalExpense || 0)}</span>
                           </div>
