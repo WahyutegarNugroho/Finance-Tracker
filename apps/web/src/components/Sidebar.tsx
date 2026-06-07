@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from "next/image";
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -80,10 +81,12 @@ export default function Sidebar({ activePath }: SidebarProps) {
         {/* User Profile Snippet in Sidebar */}
         <div className="mt-4 pt-4 border-t border-outline-variant/20 flex items-center gap-3 px-2">
           <div className="w-10 h-10 rounded-full overflow-hidden border border-primary/20 bg-surface-variant shrink-0">
-            <img
+            <Image
               alt={user?.displayName || "User Profile"}
               className="w-full h-full object-cover"
               src={user?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.displayName || "User")}&background=random`}
+              width={40}
+              height={40}
             />
           </div>
           <div className="flex-1 overflow-hidden">

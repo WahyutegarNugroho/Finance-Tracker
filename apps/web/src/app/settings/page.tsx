@@ -10,7 +10,6 @@ import CategoryManager from "@/components/settings/CategoryManager";
 import SettingsSkeleton from "@/components/settings/SettingsSkeleton";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
-import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -20,8 +19,7 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 
 export default function Settings() {
   const { user, loading: authLoading, logout, setCurrency: setGlobalCurrency } = useAuth();
-  const { theme, toggleTheme } = useTheme();
-  const { setLanguage, t, tCategory } = useLanguage();
+  const { t } = useLanguage();
   const router = useRouter();
   const queryClient = useQueryClient();
 

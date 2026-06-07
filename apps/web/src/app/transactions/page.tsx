@@ -19,8 +19,8 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 import { formatDate } from "@/lib/formatting";
 
 function TransactionsContent() {
-  const { user, loading: authLoading, formatCurrency } = useAuth();
-  const { t, tCategory } = useLanguage();
+  const { user, loading: authLoading } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();

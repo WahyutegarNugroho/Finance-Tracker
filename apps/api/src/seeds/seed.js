@@ -4,7 +4,7 @@
  * 
  * Usage: node src/seeds/seed.js
  */
-
+/* eslint-disable no-console */
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 

@@ -18,8 +18,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatShortDate } from "@/lib/formatting";
 
 export default function Dashboard() {
-  const { user, loading: authLoading, formatCurrency } = useAuth();
-  const { language, t, tCategory } = useLanguage();
+  const { user, loading: authLoading } = useAuth();
+  const { language, t } = useLanguage();
   const router = useRouter();
   const queryClient = useQueryClient();
 

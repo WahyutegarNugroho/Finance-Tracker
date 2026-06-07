@@ -21,7 +21,7 @@ const getDashboardOverview = async (userId) => {
   const currentYear = now.getFullYear();
 
   const { start: startOfMonth, end: endOfMonth } = computePeriod(currentYear, currentMonth, 0);
-  const { start: startOfPrevMonth, end: endOfPrevMonth } = computePeriod(currentYear, currentMonth, -1);
+  const { start: startOfPrevMonth } = computePeriod(currentYear, currentMonth, -1);
 
   // Single query spanning both months — split client-side (saves 1 read)
   const bothSnapshots = await db

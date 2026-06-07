@@ -73,9 +73,9 @@ export default function Analytics() {
   });
 
   const overview = overviewData?.data;
-  const cashflow = cashflowData?.data || [];
+  const cashflow = useMemo(() => cashflowData?.data || [], [cashflowData]);
   const breakdown = categoryData?.data;
-  const categories = breakdown?.categories || [];
+  const categories = useMemo(() => breakdown?.categories || [], [breakdown]);
 
   const lineChartData = useMemo(() => {
     const labels = Array.isArray(cashflow) ? cashflow.map((m) => m.label) : [];

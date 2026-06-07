@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface ProfileSectionProps {
@@ -36,10 +37,12 @@ export default function ProfileSection({
       </h3>
       <div className="flex flex-col sm:flex-row gap-8 items-start sm:items-center mb-8">
         <div className="relative">
-          <img 
+          <Image 
             alt={displayName} 
-            className="w-24 h-24 rounded-full border-2 border-primary/20 shadow-sm object-cover bg-surface-variant flex items-center justify-center text-on-surface-variant font-display text-4xl" 
+            className="rounded-full border-2 border-primary/20 shadow-sm object-cover bg-surface-variant" 
             src={user?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random`}
+            width={96}
+            height={96}
           />
         </div>
         <div className="flex-grow w-full">

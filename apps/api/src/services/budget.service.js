@@ -1,5 +1,5 @@
 const { db } = require('../config/firebase');
-const { serializeDoc, now } = require('../utils/firestore');
+const { now } = require('../utils/firestore');
 
 const BUDGETS_COLLECTION = 'budgets';
 const TRANSACTIONS_COLLECTION = 'transactions';

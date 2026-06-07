@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Image from "next/image";
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
@@ -61,10 +62,12 @@ export default function Topbar() {
           {/* <span className="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span> */}
         </button>
         <div className="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/30 cursor-pointer ml-2 bg-surface-variant">
-          <img
+          <Image
             alt={user?.displayName || "User avatar"}
             className="w-full h-full object-cover"
             src={user?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.displayName || "User")}&background=random`}
+            width={32}
+            height={32}
           />
         </div>
       </div>

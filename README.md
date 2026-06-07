@@ -7,7 +7,7 @@
   <img src="https://img.shields.io/badge/React-19.0-blue?style=for-the-badge&logo=react&logoColor=white" alt="React" />
   <img src="https://img.shields.io/badge/Tailwind%20CSS-v4.0-38bdf8?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS v4" />
   <img src="https://img.shields.io/badge/Express-4.21-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express" />
-  <img src="https://img.shields.io/badge/Firebase-13.0-FFCA28?style=for-the-badge&logo=firebase&logoColor=white" alt="Firebase" />
+  <img src="https://img.shields.io/badge/Firebase_Admin-v13_%7C_Client-v12-FFCA28?style=for-the-badge&logo=firebase&logoColor=white" alt="Firebase Admin v13 / Client v12" />
   <img src="https://img.shields.io/badge/React%20Query-v5-FF4154?style=for-the-badge&logo=react-query&logoColor=white" alt="React Query" />
 </div>
 
@@ -164,16 +164,27 @@ Default login: **demo@fintrack.com** / **Demo123456!**
 
 ### 5. Jalankan
 
-**Terminal 1 — API (port 5000)**
+#### Mode Development (hot-reload)
+
+Dari root project, jalankan di dua terminal terpisah:
 
 ```bash
-cd apps/api && npm start
+# Terminal 1 — API (port 5000) dengan nodemon
+npm run dev:api
+
+# Terminal 2 — Web (port 3000) dengan Next.js dev server
+npm run dev:web
 ```
 
-**Terminal 2 — Web (port 3000)**
+#### Mode Production
 
 ```bash
-cd apps/web && npm run build && npm start
+# Build frontend
+npm run build
+
+# Jalankan API & Web
+cd apps/api && npm start
+cd apps/web && npm start
 ```
 
 Buka **http://localhost:3000**

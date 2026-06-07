@@ -16,7 +16,7 @@ import {
   TooltipItem,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
-import { chartColors, chartColorWithOpacity } from "@/lib/colors";
+import { chartColors } from "@/lib/colors";
 
 ChartJS.register(
   CategoryScale,
