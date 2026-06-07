@@ -11,6 +11,7 @@ interface CategoryManagerProps {
   onUpdateCategory: (id: string, name: string) => void;
   onDeleteCategory: (id: string) => void;
   isAdding: boolean;
+  isUpdating: boolean;
   isDeleting: boolean;
 }
 
@@ -21,6 +22,7 @@ export default function CategoryManager({
   onUpdateCategory,
   onDeleteCategory,
   isAdding,
+  isUpdating,
   isDeleting,
 }: CategoryManagerProps) {
   const { language, t, tCategory } = useLanguage();
@@ -133,7 +135,8 @@ export default function CategoryManager({
                     onChange={(e) => setEditCatName(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSaveEdit()}
                     onBlur={handleSaveEdit}
-                    className="bg-surface border border-primary/30 rounded px-2 py-1 text-body-sm outline-none w-32"
+                    disabled={isUpdating}
+                    className="bg-surface border border-primary/30 rounded px-2 py-1 text-body-sm outline-none w-32 disabled:opacity-50"
                   />
                 ) : (
                   <div>
