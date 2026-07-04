@@ -1,30 +1,15 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 
-const REQUIRED_FIREBASE_VARS = [
-  'NEXT_PUBLIC_FIREBASE_API_KEY',
-  'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN',
-  'NEXT_PUBLIC_FIREBASE_PROJECT_ID',
-  'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET',
-  'NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID',
-  'NEXT_PUBLIC_FIREBASE_APP_ID',
-] as const;
-
-const missingVars = REQUIRED_FIREBASE_VARS.filter(k => !process.env[k]);
-if (missingVars.length > 0) {
-  throw new Error(
-    `Firebase config missing: ${missingVars.join(', ')}. ` +
-    'Check your .env.local file.'
-  );
-}
-
+// Firebase client config — values are public by design (visible in browser network tab).
+// Firebase security is enforced via Security Rules, not API key secrecy.
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: "AIzaSyCPyOAT0fUD0Ntlk3-aUiclnVm7K6XQFro",
+  authDomain: "finance-tracker-2a358.firebaseapp.com",
+  projectId: "finance-tracker-2a358",
+  storageBucket: "finance-tracker-2a358.firebasestorage.app",
+  messagingSenderId: "160523211564",
+  appId: "1:160523211564:web:dc383ae4a8f1ad41ca5289",
 };
 
 // Initialize Firebase only if it hasn't been initialized yet
