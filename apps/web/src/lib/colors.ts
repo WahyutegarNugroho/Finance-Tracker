@@ -1,3 +1,4 @@
+// ponytail: SSR blind spot → inject CSS var values via inline <script> if SSR deployment needed
 function getCSSVar(name: string): string {
   if (typeof document === "undefined") return "";
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -18,6 +19,7 @@ export function chartColorWithOpacity(color: string, opacity: number): string {
   return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 }
 
+// ponytail: dual-language map → store color on Firestore category doc, remove client-side map
 const categoryColorMap: Record<string, string> = {
   // English Default Categories
   "Food & Dining": "#4648d4",      // Indigo
@@ -45,6 +47,7 @@ const categoryColorMap: Record<string, string> = {
   "Investasi": "#6366f1",
 };
 
+// ponytail: 10-color cycle → generate via HSL stepping when custom categories exceed palette length
 // Premium, modern, and harmonious dark/light mode palette (avoiding eye-searing colors)
 const premiumPalette = [
   "#4648d4", // Indigo

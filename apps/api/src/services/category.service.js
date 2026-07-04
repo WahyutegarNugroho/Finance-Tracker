@@ -2,6 +2,7 @@ const { db } = require('../config/firebase');
 const { serializeDoc, now } = require('../utils/firestore');
 
 const COLLECTION = 'categories';
+// ponytail: magic 500 repeated → import FIRESTORE_BATCH_LIMIT from utils/firestore
 const BATCH_LIMIT = 500;
 
 /**
@@ -88,15 +89,17 @@ const updateCategory = async (userId, categoryId, data) => {
       if (updateData.name) txUpdate.categoryName = updateData.name;
       if (updateData.icon) txUpdate.categoryIcon = updateData.icon;
 
-      // Chunk into batches of 500 to avoid Firestore batch limit
+      // Chunk into batches of 500 (parallel) to avoid Firestore batch limit
+      const batchPromises = [];
       for (let i = 0; i < txSnapshot.docs.length; i += BATCH_LIMIT) {
         const batch = db.batch();
         const chunk = txSnapshot.docs.slice(i, i + BATCH_LIMIT);
         chunk.forEach((txDoc) => {
           batch.update(txDoc.ref, txUpdate);
         });
-        await batch.commit();
+        batchPromises.push(batch.commit());
       }
+      await Promise.all(batchPromises);
     }
   }
 

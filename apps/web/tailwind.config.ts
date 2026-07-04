@@ -9,6 +9,7 @@ const config: Config = {
   darkMode: 'class',
   theme: {
     extend: {
+      // ponytail: manual 48-line CSS var map → auto-generate from M3 seed color when adding theme builder UI
       colors: {
         "on-background": "var(--color-on-background)",
         "primary": "var(--color-primary)",

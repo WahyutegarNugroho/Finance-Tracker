@@ -54,7 +54,7 @@ export default function ProfileSection({
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               className="w-full bg-surface-variant/30 border border-outline-variant/30 rounded-lg px-4 py-2 font-body-lg text-body-lg text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all" 
-              type="text" 
+              type="text" required
             />
           </div>
           <div>

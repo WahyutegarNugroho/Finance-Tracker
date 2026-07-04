@@ -38,7 +38,7 @@ export default function ConfirmDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+    <div role="dialog" aria-modal="true" aria-label={title} className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
       onMouseDown={(e) => { if (e.target === e.currentTarget) onCancel(); }}>
       <div className="bg-surface w-full max-w-sm rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 border border-outline-variant/20 flex flex-col p-6 gap-4">
         <div className="flex items-start gap-4">

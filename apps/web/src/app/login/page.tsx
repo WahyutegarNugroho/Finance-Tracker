@@ -49,12 +49,7 @@ export default function Login() {
     } catch (err: unknown) {
       const fbErr = err as FirebaseAuthError;
       const code = fbErr?.code || '';
-      const errorMap: Record<string, string> = {
-        'auth/user-not-found': 'Email not registered.',
-        'auth/invalid-email': 'Please enter a valid email address.',
-        'auth/too-many-requests': 'Too many attempts. Please try again later.',
-      };
-      setForgotPwdMsg(errorMap[code] || 'Failed to send reset email.');
+      setForgotPwdMsg(FIREBASE_ERRORS[code] || 'Failed to send reset email.');
     } finally {
       setForgotPwdLoading(false);
     }
@@ -66,7 +61,7 @@ export default function Login() {
 
     try {
       await signInWithPopup(auth, googleProvider);
-      await api.post("/auth/google", {});
+      await api.post("/auth/google");
       router.push("/dashboard");
     } catch (err: unknown) {
       const fbErr = err as FirebaseAuthError;
@@ -173,6 +168,7 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  aria-label="Email"
                 />
               </div>
             </div>
@@ -207,6 +203,7 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  aria-label="Password"
                 />
               </div>
             </div>

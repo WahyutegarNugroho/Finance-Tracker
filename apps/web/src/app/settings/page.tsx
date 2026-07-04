@@ -33,9 +33,10 @@ export default function Settings() {
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
 
   const resetDataMutation = useMutation({
-    mutationFn: () => api.delete("/users/reset", { confirm: "RESET" }),
+    mutationFn: () => api.post("/users/reset", { confirm: "RESET" }),
     onSuccess: () => {
-      queryClient.invalidateQueries();
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
       toast.success(t("settings_page.reset_success"));
     },
     onError: () => {
@@ -50,7 +51,7 @@ export default function Settings() {
   }, [user, authLoading, router]);
 
   // Queries
-  const { data: profileData, isLoading: profileLoading } = useQuery<ApiResponse<UserProfile>>({
+  const { data: profileData, isLoading: profileLoading, isError: profileError } = useQuery<ApiResponse<UserProfile>>({
     queryKey: ["profile"],
     queryFn: () => api.get("/users/profile"),
     enabled: !!user,
@@ -67,6 +68,7 @@ export default function Settings() {
   const categories = Array.isArray(categoriesData?.data) ? categoriesData.data : [];
 
   // Sync internal state with profile data
+  // ponytail: setTimeout(0) defers setState past React's hydration warning in StrictMode
   useEffect(() => {
     if (profile) {
       const timer = setTimeout(() => {
@@ -93,6 +95,9 @@ export default function Settings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       toast.success(t("settings_page.category_added"));
+    },
+    onError: () => {
+      toast.error(t("settings_page.category_add_error"));
     }
   });
 
@@ -138,6 +143,23 @@ export default function Settings() {
     resetDataMutation.mutate();
     setIsResetConfirmOpen(false);
   };
+
+  if (profileError) {
+    return (
+      <div className="bg-background min-h-screen">
+        <Topbar />
+        <Sidebar activePath="/settings" />
+        <main className="pt-[88px] pb-[88px] md:pb-8 px-4 md:pl-[284px] md:pr-8 min-h-screen">
+          <div className="max-w-4xl mx-auto p-8 text-center">
+            <div className="p-4 bg-error-container/50 text-error rounded-xl border border-error/20 inline-block">
+              {t("dashboard_page.load_error")}
+            </div>
+          </div>
+        </main>
+        <BottomNav activePath="/settings" />
+      </div>
+    );
+  }
 
   if (authLoading || (profileLoading && !profile)) {
     return (

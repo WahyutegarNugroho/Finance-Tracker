@@ -1,10 +1,11 @@
 "use client";
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
 import Image from "next/image";
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { getAvatarUrl } from '@/lib/formatting';
 
 interface SidebarProps {
   activePath: string;
@@ -12,13 +13,13 @@ interface SidebarProps {
 
 export default function Sidebar({ activePath }: SidebarProps) {
   const { user } = useAuth();
-  const { t } = useLanguage();
-  const menuItems = [
+  const { t, language } = useLanguage();
+  const menuItems = useMemo(() => [
     { name: t("common.dashboard"), icon: 'dashboard', path: '/dashboard' },
     { name: t("common.transactions"), icon: 'receipt_long', path: '/transactions' },
     { name: t("common.budget"), icon: 'account_balance_wallet', path: '/budget' },
     { name: t("common.analytics"), icon: 'analytics', path: '/analytics' },
-  ];
+  ], [t]);
 
   return (
     <aside className="bg-surface/95 backdrop-blur-xl fixed left-0 top-0 h-screen w-[260px] hidden md:flex flex-col border-r border-outline-variant/20 shadow-sm z-50 p-6 gap-4">
@@ -45,6 +46,7 @@ export default function Sidebar({ activePath }: SidebarProps) {
             <Link
               key={item.name}
               href={item.path}
+              aria-current={isActive ? "page" : undefined}
               className={
                 isActive
                   ? "text-primary font-bold flex items-center gap-3 px-4 py-3 bg-primary/10 rounded-lg cursor-pointer transition-all duration-200"
@@ -68,6 +70,7 @@ export default function Sidebar({ activePath }: SidebarProps) {
         {/* Settings */}
         <Link
           href="/settings"
+          aria-current={activePath === '/settings' ? "page" : undefined}
           className={
             activePath === '/settings'
               ? "text-primary font-bold flex items-center gap-3 px-4 py-3 bg-primary/10 rounded-lg cursor-pointer transition-all duration-200"
@@ -84,7 +87,7 @@ export default function Sidebar({ activePath }: SidebarProps) {
             <Image
               alt={user?.displayName || "User Profile"}
               className="w-full h-full object-cover"
-              src={user?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.displayName || "User")}&background=random`}
+              src={user?.photoURL || getAvatarUrl(user?.displayName)}
               width={40}
               height={40}
             />
@@ -94,7 +97,8 @@ export default function Sidebar({ activePath }: SidebarProps) {
               {user?.displayName || "John Doe"}
             </p>
             <p className="font-label-caps text-label-caps text-outline truncate">
-              {t("common.language") === "Bahasa" ? "Akun Pro" : "Pro Plan"}
+              {/* ponytail: hardcoded plan badge → hide or drive from user.subscription field when billing exists */}
+              {language === "id" ? "Akun Pro" : "Pro Plan"}
             </p>
           </div>
         </div>

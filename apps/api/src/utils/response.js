@@ -2,6 +2,7 @@
  * Standardized API response helpers
  */
 
+// ponytail: always-sent message field → omit when default when bandwidth optimization matters
 const success = (res, data = null, message = 'Success', statusCode = 200) => {
   const response = {
     success: true,

@@ -48,7 +48,7 @@ router.post(
       if (error.code === 'auth/invalid-password') {
         return response.error(res, 'Password does not meet requirements.', 400);
       }
-      next(error);
+      return next(error);
     }
   }
 );

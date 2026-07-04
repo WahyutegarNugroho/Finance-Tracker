@@ -37,35 +37,25 @@ export default function Budget() {
     }
   }, [user, authLoading, router]);
 
-  const handlePrevMonth = () => {
-    if (selectedMonth === 1) {
-      setSelectedMonth(12);
-      setSelectedYear((prev) => prev - 1);
-    } else {
-      setSelectedMonth((prev) => prev - 1);
-    }
-  };
-
-  const handleNextMonth = () => {
-    if (selectedMonth === 12) {
-      setSelectedMonth(1);
-      setSelectedYear((prev) => prev + 1);
-    } else {
-      setSelectedMonth((prev) => prev + 1);
-    }
+  const shiftMonth = (delta: number) => {
+    setSelectedMonth(m => {
+      if (m + delta > 12) { setSelectedYear(y => y + 1); return 1; }
+      if (m + delta < 1) { setSelectedYear(y => y - 1); return 12; }
+      return m + delta;
+    });
   };
 
   const getMonthName = (m: number) =>
     new Intl.DateTimeFormat(language === 'id' ? 'id' : 'en', { month: 'long' }).format(new Date(2024, m - 1));
 
   // Queries
-  const { data: budgetsData, isLoading: budgetsLoading } = useQuery<ApiResponse<Budget[]>>({
+  const { data: budgetsData, isLoading: budgetsLoading, isError: budgetsError } = useQuery<ApiResponse<Budget[]>>({
     queryKey: ["budgets", selectedMonth, selectedYear],
     queryFn: () => api.get(`/budgets?month=${selectedMonth}&year=${selectedYear}`),
     enabled: !!user,
   });
 
-  const { data: summaryData, isLoading: summaryLoading } = useQuery<ApiResponse<{ totalBudget: number; totalSpent: number; totalRemaining: number; overallPercentage: number; categoryCount: number }>>({
+  const { data: summaryData, isLoading: summaryLoading, isError: summaryError } = useQuery<ApiResponse<{ totalBudget: number; totalSpent: number; totalRemaining: number; overallPercentage: number; categoryCount: number }>>({
     queryKey: ["budgets-summary", selectedMonth, selectedYear],
     queryFn: () => api.get(`/budgets/summary?month=${selectedMonth}&year=${selectedYear}`),
     enabled: !!user,
@@ -73,6 +63,7 @@ export default function Budget() {
 
   const budgets = budgetsData?.data || [];
   const summary = summaryData?.data;
+  const loading = budgetsLoading || summaryLoading;
 
   // Mutation
   const deleteMutation = useMutation({
@@ -120,7 +111,12 @@ export default function Budget() {
       
       <main className="pt-[88px] pb-[88px] md:pb-8 px-4 md:pl-[284px] md:pr-8 min-h-screen w-full">
         <div className="max-w-[1440px] mx-auto">
-          {budgetsLoading || summaryLoading ? (
+          {(budgetsError || summaryError) && (
+            <div className="mb-4 p-4 bg-error-container/50 text-error rounded-xl border border-error/20">
+              {t("dashboard_page.load_error")}
+            </div>
+          )}
+          {loading ? (
             <BudgetSkeleton />
           ) : (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -135,7 +131,7 @@ export default function Budget() {
                   {/* Period Selector */}
                   <div className="flex items-center gap-3 bg-surface-container-high/60 border border-outline-variant/30 rounded-lg p-1.5 shadow-sm">
                     <button 
-                      onClick={handlePrevMonth}
+                      onClick={() => shiftMonth(-1)}
                       className="w-8 h-8 rounded-md flex items-center justify-center hover:bg-surface-container-highest text-on-surface-variant transition-colors"
                     >
                       <span className="material-symbols-outlined text-[20px]">chevron_left</span>
@@ -144,7 +140,7 @@ export default function Budget() {
                       {getMonthName(selectedMonth)} {selectedYear}
                     </span>
                     <button 
-                      onClick={handleNextMonth}
+                      onClick={() => shiftMonth(1)}
                       className="w-8 h-8 rounded-md flex items-center justify-center hover:bg-surface-container-highest text-on-surface-variant transition-colors"
                     >
                       <span className="material-symbols-outlined text-[20px]">chevron_right</span>
@@ -276,7 +272,7 @@ export default function Budget() {
                         <div className="mt-auto relative z-10">
                           <div className="flex justify-between items-end mb-2">
                             <span className={`font-numeric-data text-xs font-semibold ${b.status === 'critical' ? 'text-error' : 'text-on-surface'}`}>
-                              {formatCurrency(b.spent)} <span className="text-outline font-normal text-[10px]">/ {formatCurrency(b.limitAmount)}</span>
+                              {b.spent.toLocaleString()} <span className="text-outline font-normal text-[10px]">/ {b.limitAmount.toLocaleString()}</span>
                             </span>
                             <span className={`font-label-caps text-[10px] ${statusColor}`}>{b.percentage}%</span>
                           </div>

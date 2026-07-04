@@ -9,6 +9,7 @@ interface SkeletonProps {
   borderRadius?: string | number;
 }
 
+// ponytail: inline style sizing → accept Tailwind class strings when refactoring skeleton system
 export default function Skeleton({ className = "", width, height, borderRadius }: SkeletonProps) {
   const style: React.CSSProperties = {
     width: width,

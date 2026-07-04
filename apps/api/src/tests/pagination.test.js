@@ -4,31 +4,23 @@ import {
   buildCursor,
   encodeCursor,
   decodeCursor,
-  parseCursor,
 } from '../utils/pagination.js';
 
 describe('Pagination Utils', () => {
   describe('parsePagination', () => {
-    it('defaults to page 1, limit 10', () => {
+    it('defaults to limit 10', () => {
       const result = parsePagination({});
-      expect(result.page).toBe(1);
       expect(result.limit).toBe(10);
     });
 
-    it('parses valid page and limit', () => {
-      const result = parsePagination({ page: '3', limit: '25' });
-      expect(result.page).toBe(3);
+    it('parses valid limit', () => {
+      const result = parsePagination({ limit: '25' });
       expect(result.limit).toBe(25);
     });
 
     it('clamps limit to max 100', () => {
       const result = parsePagination({ limit: '999' });
       expect(result.limit).toBe(100);
-    });
-
-    it('clamps page to minimum 1', () => {
-      const result = parsePagination({ page: '0' });
-      expect(result.page).toBe(1);
     });
   });
 
@@ -81,16 +73,4 @@ describe('Pagination Utils', () => {
     });
   });
 
-  describe('parseCursor', () => {
-    it('returns empty object for missing cursor', () => {
-      expect(parseCursor({})).toEqual({});
-    });
-
-    it('decodes cursor from query', () => {
-      const cursor = { sortValue: '2026-05-22T00:00:00.000Z', sortField: 'date', id: 'abc' };
-      const encoded = encodeCursor(cursor);
-      const result = parseCursor({ cursor: encoded });
-      expect(result).toEqual(cursor);
-    });
-  });
 });

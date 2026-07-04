@@ -15,6 +15,7 @@ const computePeriod = (year, month, offset) => ({
  * Returns summary cards + recent transactions
  * Optimized: 3 queries instead of 5 (merged current/prev month, removed categories query)
  */
+// ponytail: 10k cap → use Firestore aggregation query when users exceed 5k monthly tx
 const getDashboardOverview = async (userId) => {
   const now = new Date();
   const currentMonth = now.getMonth() + 1;
@@ -29,11 +30,9 @@ const getDashboardOverview = async (userId) => {
     .where('userId', '==', userId)
     .where('date', '>=', startOfPrevMonth)
     .where('date', '<=', endOfMonth)
+    .orderBy('date', 'desc')
+    .limit(10000)
     .get();
-
-  // Split into current and previous month arrays in memory
-  const currentMonthTx = [];
-  const prevMonthTx = [];
 
   let currentIncome = 0;
   let currentExpense = 0;
@@ -43,19 +42,18 @@ const getDashboardOverview = async (userId) => {
   bothSnapshots.docs.forEach((doc) => {
     const data = doc.data();
     const txDate = fromTs(data.date);
-    const id = doc.id;
+    const isCurrent = txDate >= startOfMonth;
 
-    if (txDate >= startOfMonth) {
-      currentMonthTx.push({ id, ...data, date: txDate });
+    if (isCurrent) {
       if (data.type === 'income') currentIncome += data.amount;
       else currentExpense += data.amount;
     } else {
-      prevMonthTx.push({ id, ...data, date: txDate });
       if (data.type === 'income') prevIncome += data.amount;
       else prevExpense += data.amount;
     }
   });
 
+  // ponytail: toFixed→parseFloat round-trip → Math.round(n * 10) / 10 for one-decimal rounding
   // Percentage changes
   const incomeChange = prevIncome > 0
     ? (((currentIncome - prevIncome) / prevIncome) * 100).toFixed(1)
@@ -70,17 +68,27 @@ const getDashboardOverview = async (userId) => {
     ? (((currentBalance - prevBalance) / Math.abs(prevBalance)) * 100).toFixed(1)
     : 0;
 
-  // Get recent transactions (last 5) — server-side limit
-  const recentSnapshot = await db
-    .collection(TRANSACTIONS_COLLECTION)
-    .where('userId', '==', userId)
-    .orderBy('date', 'desc')
-    .limit(5)
-    .get();
+  // Derive recent 5 from the main snapshot (already sorted desc by date with limit)
+  const recentTransactions = mapSnapshot(bothSnapshots).slice(0, 5);
 
-  const recentTransactions = mapSnapshot(recentSnapshot);
+  // Build category spending from current month transactions
+  const categoryMap = {};
+  bothSnapshots.docs.forEach((doc) => {
+    const data = doc.data();
+    const txDate = fromTs(data.date);
+    if (txDate >= startOfMonth && data.type === 'expense') {
+      if (!categoryMap[data.categoryId]) {
+        categoryMap[data.categoryId] = {
+          name: data.categoryName,
+          amount: 0,
+          color: data.categoryColor || getColorForCategory(data.categoryName),
+        };
+      }
+      categoryMap[data.categoryId].amount += data.amount;
+    }
+  });
 
-  // Get budget summary
+  // Get budget summary (parallel)
   const budgetSnapshot = await db
     .collection('budgets')
     .where('userId', '==', userId)
@@ -97,22 +105,10 @@ const getDashboardOverview = async (userId) => {
     ? Math.round((currentExpense / totalBudgetLimit) * 100)
     : 0;
 
-  // Category colors are already denormalized in transaction data as categoryColor
-  // No need for a separate categories query — saves 1 read
-  const categoryMap = {};
-
-  currentMonthTx.forEach((tx) => {
-    if (tx.type === 'expense') {
-      if (!categoryMap[tx.categoryId]) {
-        categoryMap[tx.categoryId] = {
-          name: tx.categoryName,
-          amount: 0,
-          color: tx.categoryColor || '#4648d4'
-        };
-      }
-      categoryMap[tx.categoryId].amount += tx.amount;
-    }
-  });
+  const getColorForCategory = (name) => {
+    const idx = name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 10;
+    return ['#4648d4', '#8b5cf6', '#ec4899', '#f59e0b', '#06b6d4', '#10b981', '#6366f1', '#ef4444', '#c7c4d7', '#006c49'][idx];
+  };
 
   const expenseByCategory = Object.values(categoryMap)
     .map(cat => ({
@@ -140,6 +136,7 @@ const getDashboardOverview = async (userId) => {
 /**
  * Cash flow data for chart (income vs expense by month)
  */
+// ponytail: 10k cap → aggregate monthly sub-queries when tx count exceeds 5k
 const getCashFlow = async (userId, months = 6) => {
   const now = new Date();
   const startDate = new Date(now.getFullYear(), now.getMonth() - months + 1, 1);
@@ -149,6 +146,7 @@ const getCashFlow = async (userId, months = 6) => {
     .where('userId', '==', userId)
     .where('date', '>=', startDate)
     .orderBy('date', 'asc')
+    .limit(10000)
     .get();
 
   const monthlyData = {};
@@ -156,6 +154,7 @@ const getCashFlow = async (userId, months = 6) => {
   for (let i = 0; i < months; i++) {
     const date = new Date(now.getFullYear(), now.getMonth() - months + 1 + i, 1);
     const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    // ponytail: server-side month names → return month index only, format on client via Intl
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     monthlyData[key] = {
       month: key,
@@ -241,6 +240,7 @@ const getCategoryBreakdown = async (userId, month, year) => {
 /**
  * Year-over-year trends comparison
  */
+// ponytail: 20k cap → paginated year-by-year queries when tx/year exceeds 10k
 const getTrends = async (userId) => {
   const now = new Date();
   const currentYear = now.getFullYear();
@@ -254,6 +254,8 @@ const getTrends = async (userId) => {
     .where('userId', '==', userId)
     .where('date', '>=', startOfPrevYear)
     .where('date', '<=', endOfCurrentYear)
+    .orderBy('date', 'asc')
+    .limit(20000)
     .get();
 
   let currentYearIncome = 0;

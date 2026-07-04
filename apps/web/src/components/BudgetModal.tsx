@@ -7,6 +7,15 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Budget, Category, ApiResponse } from "@/types";
+
+interface BudgetPayload {
+  limitAmount: number;
+  categoryId: string;
+  categoryName: string;
+  categoryIcon: string;
+  month: number;
+  year: number;
+}
 import { formatWithDots, cleanAmountInput } from "@/lib/formatting";
 
 type BudgetModalProps = {
@@ -64,7 +73,7 @@ export default function BudgetModal({
   };
 
   const saveMutation = useMutation({
-    mutationFn: (payload: Record<string, unknown>) => {
+    mutationFn: (payload: BudgetPayload) => {
       if (budgetToEdit) {
         return api.put(`/budgets/${budgetToEdit.id}`, payload);
       }
@@ -92,8 +101,8 @@ export default function BudgetModal({
       categoryId: form.categoryId,
       categoryName: selectedCategory?.name || "Unknown",
       categoryIcon: selectedCategory?.icon || "category",
-      month: month || new Date().getMonth() + 1,
-      year: year || new Date().getFullYear(),
+      month: month ?? new Date().getMonth() + 1,
+      year: year ?? new Date().getFullYear(),
     };
 
     saveMutation.mutate(payload);
@@ -111,7 +120,7 @@ export default function BudgetModal({
   if (!isOpen) return null;
 
   return (
-    <div key={budgetToEdit?.id || 'new'} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+    <div key={budgetToEdit?.id || 'new'} role="dialog" aria-modal="true" aria-label={budgetToEdit ? t("common.edit") : t("budget_page.create_new")} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="bg-surface w-full max-w-md rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 border border-outline-variant/20">
         <div className="flex justify-between items-center p-6 border-b border-outline-variant/10">

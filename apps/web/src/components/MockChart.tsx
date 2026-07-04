@@ -1,26 +1,10 @@
 "use client";
 
 import React from "react";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Filler,
-} from "chart.js";
 import { Line } from "react-chartjs-2";
+import "@/lib/chart-register";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Filler
-);
-
+// ponytail: static mock → remove when real portfolio chart is implemented
 export function MockChart() {
   const data = {
     labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],

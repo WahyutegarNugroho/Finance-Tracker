@@ -3,21 +3,9 @@
 import React from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import type { DashboardOverview } from "@/types";
 
-interface SummaryCardsProps {
-  data: {
-    balance: number;
-    balanceChange: number;
-    income: number;
-    incomeChange: number;
-    expense: number;
-    expenseChange: number;
-    budgetUsage: number;
-    budgetLimit: number;
-  };
-}
-
-export default function SummaryCards({ data }: SummaryCardsProps) {
+export default function SummaryCards({ data }: { data: DashboardOverview }) {
   const { formatCurrency } = useAuth();
   const { t } = useLanguage();
 

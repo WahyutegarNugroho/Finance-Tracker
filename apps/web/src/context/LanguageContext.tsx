@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { translations } from "../lib/translations";
+import { translations, type Translations } from "../lib/translations";
 
 type Language = "en" | "id";
 
@@ -20,6 +20,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const savedLang = localStorage.getItem("language") as Language;
     if (savedLang && (savedLang === "en" || savedLang === "id")) {
+      // ponytail: setTimeout hydration hack → read lang from <html lang=...> attribute set server-side
       setTimeout(() => {
         setLanguageState(savedLang);
       }, 0);
@@ -33,24 +34,21 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
   const t = (keyPath: string): string => {
     const keys = keyPath.split(".");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let current: any = translations[language];
+    let current: string | Translations = translations[language];
 
     for (const key of keys) {
-      if (current && current[key]) {
+      if (current && typeof current === "object" && key in current) {
         current = current[key];
       } else {
-        // Fallback to English if key missing in current language
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let fallback: any = translations["en"];
+        let fallback: string | Translations = translations["en"];
         for (const fKey of keys) {
-          if (fallback && fallback[fKey]) {
+          if (fallback && typeof fallback === "object" && fKey in fallback) {
             fallback = fallback[fKey];
           } else {
-            return keyPath; // Return the path as last resort
+            return keyPath;
           }
         }
-        return fallback;
+        return typeof fallback === "string" ? fallback : keyPath;
       }
     }
 

@@ -51,7 +51,7 @@ export default function Register() {
 
     try {
       await signInWithPopup(auth, googleProvider);
-      await api.post("/auth/google", {});
+      await api.post("/auth/google");
       router.push("/dashboard");
     } catch (err: unknown) {
       const fbErr = err as FirebaseAuthError;

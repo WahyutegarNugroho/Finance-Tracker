@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -11,7 +12,7 @@ interface RecentTransactionsProps {
   formatDate: (date: string) => string;
 }
 
-export default function RecentTransactions({ transactions, formatDate }: RecentTransactionsProps) {
+const RecentTransactions = React.memo(function RecentTransactions({ transactions, formatDate }: RecentTransactionsProps) {
   const { formatCurrency } = useAuth();
   const { t, tCategory } = useLanguage();
 
@@ -21,12 +22,12 @@ export default function RecentTransactions({ transactions, formatDate }: RecentT
         <h3 className="font-headline-md text-headline-md text-on-surface">
           {t("dashboard_page.recent_transactions")}
         </h3>
-        <a
+        <Link
           className="text-primary hover:text-primary-container font-label-caps text-label-caps transition-colors text-[12px]"
           href="/transactions"
         >
           {t("common.view_all")}
-        </a>
+        </Link>
       </div>
       <div className="flex flex-col gap-2">
         {(!Array.isArray(transactions) || transactions.length === 0) ? (
@@ -66,4 +67,6 @@ export default function RecentTransactions({ transactions, formatDate }: RecentT
       </div>
     </div>
   );
-}
+});
+
+export default RecentTransactions;

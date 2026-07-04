@@ -51,8 +51,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }).format(amount);
   }, [currency]);
 
-  const setCurrency = useCallback((code: string) => {
+  const setCurrency = useCallback(async (code: string) => {
     setCurrencyState(code);
+    try {
+      await api.put("/users/profile", { currency: code });
+    } catch {
+      // Silent — profile fetch on next page load will restore
+    }
   }, []);
 
   useEffect(() => {

@@ -1,5 +1,9 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const translations: Record<string, any> = {
+// ponytail: monolithic blob → code-split by page/namespace when >500 keys
+export type Translations = {
+  [key: string]: string | Translations;
+};
+
+export const translations: Record<string, Translations> = {
   en: {
     common: {
       dashboard: "Dashboard",
@@ -16,6 +20,7 @@ export const translations: Record<string, any> = {
       loading: "Loading...",
       search: "Search...",
       all: "All",
+      select: "Select",
       income: "Income",
       expense: "Expense",
       categories: "Categories",
@@ -122,7 +127,6 @@ export const translations: Record<string, any> = {
       no_budgets: "No budgets created yet.",
       create_first: "Create your first budget to start tracking your spending limits.",
       only_remaining: "Only {remaining} remaining",
-      can_create: "You can create up to {max} budgets.",
       updated: "Budget updated successfully.",
       updated_success: "Budget updated!",
       created: "Budget created successfully.",
@@ -216,6 +220,7 @@ export const translations: Record<string, any> = {
       profile_updated: "Profile updated!",
       profile_error: "Failed to update profile.",
       category_added: "Category added!",
+      category_add_error: "Failed to add category.",
       category_updated: "Category updated!",
       category_deleted: "Category deleted!",
       category_delete_error: "Failed to delete category.",
@@ -225,8 +230,6 @@ export const translations: Record<string, any> = {
       reset_confirm_title: "Reset All Financial Data",
       reset_confirm_message: "Are you sure you want to reset all your financial data? This action cannot be undone.",
       reset_confirm_button: "Yes, Reset Now",
-      category_name_empty: "Category name cannot be empty",
-      category_placeholder: "Ex: Food, Rent...",
       }
     },
     error_page: {
@@ -257,6 +260,7 @@ export const translations: Record<string, any> = {
       loading: "Memuat...",
       search: "Cari...",
       all: "Semua",
+      select: "Pilih",
       income: "Pemasukan",
       expense: "Pengeluaran",
       categories: "Kategori",
@@ -363,7 +367,6 @@ export const translations: Record<string, any> = {
       no_budgets: "Belum ada anggaran yang dibuat.",
       create_first: "Buat anggaran pertama Anda untuk mulai melacak batas pengeluaran.",
       only_remaining: "Hanya {remaining} tersisa",
-      can_create: "Anda dapat membuat hingga {max} anggaran.",
       updated: "Anggaran berhasil diperbarui.",
       updated_success: "Budget updated!",
       created: "Anggaran berhasil dibuat.",
@@ -457,6 +460,7 @@ export const translations: Record<string, any> = {
       profile_updated: "Profil diperbarui!",
       profile_error: "Gagal memperbarui profil.",
       category_added: "Kategori ditambahkan!",
+      category_add_error: "Gagal menambahkan kategori.",
       category_updated: "Kategori diperbarui!",
       category_deleted: "Kategori dihapus!",
       category_delete_error: "Gagal menghapus kategori.",
@@ -466,8 +470,6 @@ export const translations: Record<string, any> = {
       reset_confirm_title: "Reset Semua Data Keuangan",
       reset_confirm_message: "Apakah Anda yakin ingin mereset semua data keuangan? Tindakan ini tidak dapat dibatalkan.",
       reset_confirm_button: "Ya, Reset Sekarang",
-      category_name_empty: "Nama kategori tidak boleh kosong",
-      category_placeholder: "Contoh: Makanan, Sewa...",
       }
     },
     error_page: {
@@ -481,5 +483,5 @@ export const translations: Record<string, any> = {
       description: "Maaf, halaman yang Anda cari tidak tersedia atau telah dipindahkan.",
       back_to_dashboard: "Ke Dashboard",
     },
-  }
+  },
 };

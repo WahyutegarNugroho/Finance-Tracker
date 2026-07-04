@@ -55,10 +55,10 @@ router.put(
 );
 
 /**
- * DELETE /api/users/reset
+ * POST /api/users/reset
  * Reset all user transactions, budgets, and custom categories
  */
-router.delete('/reset',
+router.post('/reset',
   resetLimiter,
   validate([
     body('confirm').equals('RESET').withMessage('Please send confirm="RESET" in request body to confirm data reset.'),

@@ -13,6 +13,9 @@ const logger = require('./utils/logger');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+if (process.env.NODE_ENV === 'production' && !process.env.FRONTEND_URL) {
+  throw new Error('FRONTEND_URL environment variable is required in production.');
+}
 
 // ─── Security Middleware ───
 app.use(helmet({
@@ -37,6 +40,7 @@ app.use(globalLimiter);
 // ─── CORS Configuration ───
 app.use(
   cors({
+    // ponytail: hardcoded CORS fallback → require FRONTEND_URL env in production startup check
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -45,7 +49,7 @@ app.use(
 );
 
 // ─── Body Parsing ───
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // ─── Correlation ID Middleware ───

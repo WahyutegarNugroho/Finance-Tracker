@@ -1,12 +1,23 @@
 "use client";
 
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Category, Transaction, ApiResponse } from "@/types";
+import { formatWithDots } from "@/lib/formatting";
+
+interface TransactionPayload {
+  type: "income" | "expense";
+  amount: number;
+  categoryId: string;
+  categoryName: string;
+  categoryIcon: string;
+  date: string;
+  note: string;
+}
 
 type TransactionModalProps = {
   isOpen: boolean;
@@ -49,24 +60,6 @@ export default function TransactionModal({
   const defaultDate = useMemo(() => new Date().toISOString().split("T")[0], []);
   const [form, setForm] = useState(() => initForm(transactionToEdit, defaultDate));
 
-  const formatWithDots = useCallback((val: string) => {
-    const isDecimalAllowed = currency !== "IDR" && currency !== "JPY";
-    
-    if (isDecimalAllowed) {
-      let cleaned = val.replace(/,/g, ".").replace(/[^0-9.]/g, "");
-      const parts = cleaned.split(".");
-      if (parts.length > 2) {
-        cleaned = parts[0] + "." + parts.slice(1).join("");
-      }
-      
-      const formattedInt = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-      const formattedDec = parts[1] !== undefined ? "." + parts[1] : "";
-      return formattedInt + formattedDec;
-    } else {
-      return val.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
-  }, [currency]);
-
   // Queries
   const { data: categoriesData, isLoading: fetchingCats } = useQuery<ApiResponse<Category[]>>({
     queryKey: ["categories"],
@@ -96,24 +89,16 @@ export default function TransactionModal({
         cleaned = parts[0] + "." + parts.slice(1).join("");
       }
       
-      setForm(f => ({ ...f, amount: cleaned, displayAmount: formatWithDots(cleaned) }));
+      setForm(f => ({ ...f, amount: cleaned, displayAmount: formatWithDots(cleaned, currency) }));
     } else {
       const raw = inputVal.replace(/\D/g, "");
-      setForm(f => ({ ...f, amount: raw, displayAmount: formatWithDots(raw) }));
+      setForm(f => ({ ...f, amount: raw, displayAmount: formatWithDots(raw, currency) }));
     }
   };
 
   // Mutation
   const saveMutation = useMutation({
-    mutationFn: (payload: {
-      type: "income" | "expense";
-      amount: number;
-      categoryId: string;
-      categoryName: string;
-      categoryIcon: string;
-      date: string;
-      note: string;
-    }) => {
+    mutationFn: (payload: TransactionPayload) => {
       if (transactionToEdit) {
         return api.put(`/transactions/${transactionToEdit.id}`, payload);
       }
@@ -160,7 +145,7 @@ export default function TransactionModal({
   if (!isOpen) return null;
 
   return (
-    <div key={transactionToEdit?.id || 'new'} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+    <div key={transactionToEdit?.id || 'new'} role="dialog" aria-modal="true" aria-label={transactionToEdit ? t("common.edit") : t("transactions_page.add_new")} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="bg-surface w-full max-w-md rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 border border-outline-variant/20">
         <div className="flex justify-between items-center p-6 border-b border-outline-variant/10">
@@ -239,11 +224,14 @@ export default function TransactionModal({
                 {fetchingCats ? (
                   <option>{t("common.loading")}</option>
                 ) : (
-                  filteredCategories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {tCategory(c.name)}
-                    </option>
-                  ))
+                  <>
+                    <option value="">{t("common.select") || "Select category"}</option>
+                    {filteredCategories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {tCategory(c.name)}
+                      </option>
+                    ))}
+                  </>
                 )}
               </select>
             </div>

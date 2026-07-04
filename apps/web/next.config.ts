@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // ponytail: hardcoded remotePatterns → env-driven when adding 3rd-party image sources
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "ui-avatars.com" },

@@ -35,14 +35,14 @@
 
 | Perintah | Fungsi |
 |----------|--------|
-| `npm run dev:web` | Next.js dev server (port 3000) |
-| `npm run dev:api` | Express API with nodemon (port 5000) |
-| `npm run build` | Build production (next build di apps/web) |
-| `npm run seed` | Seed demo data ke Firestore |
-| `npm run lint` | Lint semua workspace |
-| `npm run test` | Test API dengan Vitest |
+| `pnpm dev:web` | Next.js dev server (port 3000) |
+| `pnpm dev:api` | Express API with nodemon (port 5000) |
+| `pnpm build` | Build production (next build di apps/web) |
+| `pnpm seed` | Seed demo data ke Firestore |
+| `pnpm lint` | Lint semua workspace |
+| `pnpm test` | Test API dengan Vitest |
 
-### Project Structure (Monorepo — NPM Workspaces)
+### Project Structure (Monorepo — pnpm Workspaces)
 
 ```
 Finance-Tracker/
@@ -701,11 +701,11 @@ Agent wajib berhenti dan meminta konfirmasi user ketika:
 
 | Perintah | Efek |
 |----------|------|
-| `npm run dev:web` | Start Next.js frontend (port 3000) |
-| `npm run dev:api` | Start Express API with nodemon (port 5000) |
-| `npm run seed` | Seed Firestore with demo data |
-| `npm run test` | Run Vitest API tests |
-| `npm run lint` | Lint all workspaces |
+| `pnpm dev:web` | Start Next.js frontend (port 3000) |
+| `pnpm dev:api` | Start Express API with nodemon (port 5000) |
+| `pnpm seed` | Seed Firestore with demo data |
+| `pnpm test` | Run Vitest API tests |
+| `pnpm lint` | Lint all workspaces |
 
 | AI Command | Efek |
 |------------|------|

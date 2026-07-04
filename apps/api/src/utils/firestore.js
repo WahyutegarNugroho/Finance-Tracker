@@ -5,6 +5,7 @@ const fromFirestoreTimestamp = (ts) => {
   return ts.toDate ? ts.toDate() : new Date(ts);
 };
 
+// ponytail: hardcoded date list → schema-driven when adding 3+ more date fields
 const serializeDoc = (doc, extraDateFields = []) => {
   if (!doc.exists) return null;
   const data = doc.data();
@@ -22,11 +23,11 @@ const mapSnapshot = (snapshot, extraDateFields = []) => {
   return snapshot.docs.map(doc => serializeDoc(doc, extraDateFields));
 };
 
-const now = () => admin.firestore.FieldValue.serverTimestamp();
+const serverTimestamp = () => admin.firestore.FieldValue.serverTimestamp();
 
 module.exports = {
   fromFirestoreTimestamp,
   serializeDoc,
   mapSnapshot,
-  now,
+  serverTimestamp,
 };

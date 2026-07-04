@@ -2,14 +2,27 @@ const express = require('express');
 const { body, param, query } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate } = require('../middleware/auth');
-const { db } = require('../config/firebase');
 const transactionService = require('../services/transaction.service');
+const recurringService = require('../services/recurring.service');
 const response = require('../utils/response');
 
 const router = express.Router();
 
 // All transaction routes require authentication
 router.use(authenticate);
+
+/**
+ * POST /api/transactions/process-recurring
+ * Process due recurring transactions for the authenticated user
+ */
+router.post('/process-recurring', async (req, res, next) => {
+  try {
+    const result = await recurringService.processDueTransactions(req.user.uid);
+    return response.success(res, result, `${result.processed} recurring transactions processed.`);
+  } catch (error) {
+    next(error);
+  }
+});
 
 /**
  * GET /api/transactions/summary
@@ -73,6 +86,7 @@ router.get('/',
  * POST /api/transactions/batch
  * Create multiple transactions in a single batch
  */
+// ponytail: route limit 100 vs service allows 500 → raise route max to 500 when bulk import UI exists
 router.post('/batch',
   validate([
     body('transactions').isArray({ min: 1, max: 100 }).withMessage('transactions must be an array (1-100 items)'),
@@ -119,21 +133,7 @@ router.delete('/batch',
   ]),
   async (req, res, next) => {
     try {
-      const refs = req.body.ids.map(id => db.collection('transactions').doc(id));
-      const docs = await db.getAll(...refs);
-      const batch = db.batch();
-      let deletedCount = 0;
-
-      docs.forEach((doc) => {
-        if (doc.exists && doc.data().userId === req.user.uid) {
-          batch.delete(doc.ref);
-          deletedCount++;
-        }
-      });
-
-      if (deletedCount > 0) {
-        await batch.commit();
-      }
+      const deletedCount = await transactionService.batchDeleteTransactions(req.user.uid, req.body.ids);
       return response.success(res, { deleted: deletedCount }, `${deletedCount} transactions deleted.`);
     } catch (error) {
       next(error);

@@ -8,11 +8,13 @@ const STATIC_ASSETS = [
   '/settings',
   '/login',
   '/register',
+  '/offline.html',
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
+      // ponytail: silent catch → log to console.warn when debugging SW install failures
       return cache.addAll(STATIC_ASSETS).catch(() => {});
     })
   );
@@ -34,30 +36,24 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const { request } = event;
-  const url = new URL(request.url);
 
-  // Bypass caching for non-GET requests (e.g. POST, PUT, DELETE)
-  if (request.method !== 'GET') {
-    return;
-  }
+  // Only cache GET requests
+  if (request.method !== 'GET') return;
 
-  // Cache API responses (network first, cache fallback)
-  if (url.pathname.startsWith('/api/')) {
+  // Never cache API responses (financial data)
+  if (request.url.includes('/api/')) return;
+
+  // Navigation: network-first, fallback to cache, then offline page
+  if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, clone);
-          });
-          return response;
-        })
-        .catch(() => caches.match(request))
+      fetch(request).catch(() =>
+        caches.match(request).then((cached) => cached || caches.match('/offline.html'))
+      )
     );
     return;
   }
 
-  // Cache static assets (cache first)
+  // Static assets: cache-first
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) return cached;

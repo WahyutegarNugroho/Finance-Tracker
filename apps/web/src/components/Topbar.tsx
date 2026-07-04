@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { getAvatarUrl } from '@/lib/formatting';
 import { toast } from "sonner";
 
 export default function Topbar() {
@@ -43,16 +44,17 @@ export default function Topbar() {
             className="w-full pl-10 pr-4 py-2 bg-surface-variant/30 border border-outline-variant/30 rounded-full focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none font-body-sm text-body-sm transition-all text-on-surface placeholder:text-outline"
             placeholder={t("common.search")}
             type="text"
+            aria-label={t("common.search")}
           />
         </div>
       </div>
       <div className="flex items-center gap-4 text-on-surface-variant">
-        <button onClick={toggleTheme} className="hover:text-primary transition-colors cursor-pointer p-2 rounded-full hover:bg-surface-variant/50">
+        <button onClick={toggleTheme} aria-label={t("common.dark_mode")} className="hover:text-primary transition-colors cursor-pointer p-2 rounded-full hover:bg-surface-variant/50">
           <span className="material-symbols-outlined" data-icon={theme === 'dark' ? 'light_mode' : 'dark_mode'}>
             {theme === 'dark' ? 'light_mode' : 'dark_mode'}
           </span>
         </button>
-        <button onClick={() => toast.info(t("common.no_notifications"))} className="hover:text-primary transition-colors cursor-pointer p-2 rounded-full hover:bg-surface-variant/50 relative">
+        <button aria-label="Notifications" onClick={() => toast.info(t("common.no_notifications"))} className="hover:text-primary transition-colors cursor-pointer p-2 rounded-full hover:bg-surface-variant/50 relative">
           <span
             className="material-symbols-outlined"
             data-icon="notifications"
@@ -65,7 +67,7 @@ export default function Topbar() {
           <Image
             alt={user?.displayName || "User avatar"}
             className="w-full h-full object-cover"
-            src={user?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.displayName || "User")}&background=random`}
+            src={user?.photoURL || getAvatarUrl(user?.displayName)}
             width={32}
             height={32}
           />

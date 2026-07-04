@@ -5,8 +5,10 @@ const logger = require('../utils/logger');
  * Simple in-memory token cache (TTL: 5 minutes)
  * Reduces Firebase Auth verifyIdToken calls on every request
  */
+// ponytail: Map cache → switch to lru-cache with TTL when >1k daily active users
 const tokenCache = new Map();
 const TOKEN_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const MAX_CACHE_SIZE = 1000;
 
 const getCachedToken = (token) => {
   const cached = tokenCache.get(token);
@@ -18,6 +20,10 @@ const getCachedToken = (token) => {
 };
 
 const setCachedToken = (token, decodedToken) => {
+  if (tokenCache.size >= MAX_CACHE_SIZE) {
+    const oldest = tokenCache.keys().next().value;
+    tokenCache.delete(oldest);
+  }
   tokenCache.set(token, { decodedToken, ts: Date.now() });
 };
 
@@ -47,7 +53,7 @@ const authenticate = async (req, res, next) => {
       return next();
     }
 
-    const decodedToken = await auth.verifyIdToken(token);
+    const decodedToken = await auth.verifyIdToken(token, true);
 
     req.user = {
       uid: decodedToken.uid,

@@ -1,5 +1,6 @@
 const { db } = require('../config/firebase');
 const { now } = require('../utils/firestore');
+const { DuplicateBudgetError } = require('../utils/errors');
 
 const BUDGETS_COLLECTION = 'budgets';
 const TRANSACTIONS_COLLECTION = 'transactions';
@@ -64,6 +65,7 @@ const getBudgets = async (userId, month, year) => {
     if (range.end > globalEnd) globalEnd = range.end;
   });
 
+  // ponytail: N+1 spent calc → index by categoryId when budget count exceeds 10
   const txSnapshot = await db
     .collection(TRANSACTIONS_COLLECTION)
     .where('userId', '==', userId)
@@ -72,20 +74,28 @@ const getBudgets = async (userId, month, year) => {
     .where('date', '<=', globalEnd)
     .get();
 
+  // Group transactions by categoryId — O(allTx) instead of O(budgets × allTx)
+  const txByCategory = new Map();
+  txSnapshot.docs.forEach((doc) => {
+    const data = doc.data();
+    if (!txByCategory.has(data.categoryId)) {
+      txByCategory.set(data.categoryId, []);
+    }
+    const txDate = data.date?.toDate?.() || new Date(data.date);
+    txByCategory.get(data.categoryId).push({ date: txDate, amount: data.amount });
+  });
+
   // Calculate spent per budget considering its period date range
   const budgets = budgetsData.map((budget) => {
     const range = getDateRangeForPeriod(budget.period, m, y);
     let spent = 0;
+    const catTx = txByCategory.get(budget.categoryId) || [];
 
-    txSnapshot.docs.forEach((doc) => {
-      const data = doc.data();
-      if (data.categoryId === budget.categoryId) {
-        const txDate = data.date?.toDate?.() || new Date(data.date);
-        if (txDate >= range.start && txDate <= range.end) {
-          spent += data.amount;
-        }
+    for (const tx of catTx) {
+      if (tx.date >= range.start && tx.date <= range.end) {
+        spent += tx.amount;
       }
-    });
+    }
 
     const percentage = budget.limitAmount > 0 ? Math.round((spent / budget.limitAmount) * 100) : 0;
 
@@ -148,7 +158,7 @@ const createBudget = async (userId, data) => {
       );
 
       if (!existing.empty) {
-        throw new Error('DUPLICATE_BUDGET');
+        throw new DuplicateBudgetError('A budget for this category already exists this month.');
       }
 
       const budgetData = {
@@ -156,7 +166,7 @@ const createBudget = async (userId, data) => {
         categoryId: data.categoryId,
         categoryName: data.categoryName,
         categoryIcon: data.categoryIcon || 'category',
-        limitAmount: Math.abs(data.limitAmount),
+        limitAmount: data.limitAmount,
         period: data.period || 'monthly',
         month,
         year,
@@ -172,7 +182,7 @@ const createBudget = async (userId, data) => {
 
     return result;
   } catch (error) {
-    if (error.message === 'DUPLICATE_BUDGET') {
+    if (error instanceof DuplicateBudgetError) {
       return {
         success: false,
         reason: 'duplicate',

@@ -1,6 +1,7 @@
 const { db } = require('../config/firebase');
-const { serializeDoc, mapSnapshot, now } = require('../utils/firestore');
+const { serializeDoc, mapSnapshot, serverTimestamp } = require('../utils/firestore');
 const { parsePagination, encodeCursor, buildCursor } = require('../utils/pagination');
+const logger = require('../utils/logger');
 
 const COLLECTION = 'transactions';
 const USERS_COLLECTION = 'users';
@@ -51,13 +52,13 @@ const getTransactions = async (userId, queryParams) => {
         const sortValue = sortBy === 'amount' ? Number(cursor.sortValue) : new Date(cursor.sortValue);
         query = query.startAfter(sortValue, cursor.id);
       }
-    } catch {
-      // Invalid cursor, ignore and start from beginning
+    } catch (decodeError) {
+      logger.warn({ err: decodeError, cursor: queryParams.cursor }, 'Invalid cursor — resetting to start');
     }
   }
 
-  // When search is used, increase fetch size to compensate for client-side filtering
-  const searchMultiplier = queryParams.search ? 5 : 1;
+  // ponytail: 2x multiplier → add dedicated search service (Algolia/Typesense) when search precision matters
+  const searchMultiplier = queryParams.search ? 2 : 1;
   const fetchLimit = (limit + 1) * searchMultiplier;
   query = query.limit(fetchLimit);
 
@@ -80,7 +81,10 @@ const getTransactions = async (userId, queryParams) => {
   }
 
   const nextCursor = hasMore && snapshot.docs.length > 0
-    ? encodeCursor(buildCursor(snapshot.docs[Math.min(limit - 1, snapshot.docs.length - 1)], sortBy))
+    ? encodeCursor(buildCursor(
+        snapshot.docs.find(d => d.id === transactions[limit - 1]?.id) || snapshot.docs[snapshot.docs.length - 1],
+        sortBy
+      ))
     : null;
 
   return {
@@ -110,13 +114,16 @@ const createTransaction = async (userId, data) => {
   const userDoc = await db.collection(USERS_COLLECTION).doc(userId).get();
   const userCurrency = userDoc.exists ? (userDoc.data().currency || 'IDR') : 'IDR';
 
+  if (data.amount < 0) {
+    throw new Error('Amount must be a positive number.');
+  }
   const transactionData = {
     userId,
     categoryId: data.categoryId,
     categoryName: data.categoryName,
     categoryIcon: data.categoryIcon,
     type: data.type,
-    amount: Math.abs(data.amount),
+    amount: data.amount,
     currency: data.currency || userCurrency,
     note: data.note || '',
     date: data.date ? new Date(data.date) : new Date(),
@@ -163,10 +170,13 @@ const updateTransaction = async (userId, transactionId, data) => {
 
   const updateData = {};
 
+  if (data.amount !== undefined && data.amount < 0) {
+    throw new Error('Amount must be a positive number.');
+  }
   for (const field of allowedFields) {
     if (data[field] !== undefined) {
       if (field === 'amount') {
-        updateData[field] = Math.abs(data[field]);
+        updateData[field] = data[field];
       } else if (field === 'date') {
         updateData[field] = new Date(data[field]);
       } else {
@@ -259,13 +269,16 @@ const batchCreateTransactions = async (userId, transactionsData) => {
 
   for (const tx of transactionsData) {
     const docRef = db.collection(COLLECTION).doc();
+    if (tx.amount < 0) {
+      throw new Error('Amount must be a positive number.');
+    }
     const data = {
       userId,
       categoryId: tx.categoryId,
       categoryName: tx.categoryName,
       categoryIcon: tx.categoryIcon || '',
       type: tx.type,
-      amount: Math.abs(tx.amount),
+      amount: tx.amount,
       currency: tx.currency || userCurrency,
       note: tx.note || '',
       date: tx.date ? new Date(tx.date) : new Date(),
@@ -293,6 +306,26 @@ const batchCreateTransactions = async (userId, transactionsData) => {
   return created;
 };
 
+const batchDeleteTransactions = async (userId, ids) => {
+  // ponytail: unbounded batch delete → chunk into 500-doc batches when max ID list exceeds 500
+  const refs = ids.map(id => db.collection(COLLECTION).doc(id));
+  const docs = await db.getAll(...refs);
+  const batch = db.batch();
+  let deletedCount = 0;
+
+  docs.forEach((doc) => {
+    if (doc.exists && doc.data().userId === userId) {
+      batch.delete(doc.ref);
+      deletedCount++;
+    }
+  });
+
+  if (deletedCount > 0) {
+    await batch.commit();
+  }
+  return deletedCount;
+};
+
 module.exports = {
   getTransactions,
   getTransactionById,
@@ -301,4 +334,5 @@ module.exports = {
   deleteTransaction,
   getTransactionSummary,
   batchCreateTransactions,
+  batchDeleteTransactions,
 };

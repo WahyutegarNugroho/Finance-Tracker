@@ -6,32 +6,17 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { ApiResponse, CashFlowEntry } from "@/types";
 import { useAuth } from "@/context/AuthContext";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Tooltip,
-  Legend,
-  TooltipItem,
-} from "chart.js";
+import "@/lib/chart-register";
 import { Bar } from "react-chartjs-2";
 import { chartColors } from "@/lib/colors";
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Tooltip,
-  Legend
-);
+import { TooltipItem } from "chart.js";
 
 export default function CashFlowChart() {
   const { t } = useLanguage();
   const { formatCurrency } = useAuth();
 
   const { data: cashflowData, isLoading } = useQuery<ApiResponse<CashFlowEntry[]>>({
-    queryKey: ["analytics-cashflow"],
+    queryKey: ["dashboard-cashflow"],
     queryFn: () => api.get("/analytics/cashflow", { params: { months: 6 } }),
   });
 
@@ -55,6 +40,7 @@ export default function CashFlowChart() {
     ]
   };
 
+  // ponytail: duplicated chart tooltip config → extract sharedChartOptions factory when 3rd chart is added
   const barChartOptions = {
     responsive: true,
     maintainAspectRatio: false,

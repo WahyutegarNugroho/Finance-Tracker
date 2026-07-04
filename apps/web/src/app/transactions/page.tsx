@@ -46,23 +46,22 @@ function TransactionsContent() {
     }
   }, [user, authLoading, router]);
 
-  // Debounce search query — reset cursor on new search
+  // Debounce search query
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearch(searchQuery);
-      setCursor(null);
-      setCursorStack([]);
-    }, 500);
+    const handler = setTimeout(() => setDebouncedSearch(searchQuery), 500);
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
+  // Reset pagination on new search
+  useEffect(() => {
+    setCursor(null);
+    setCursorStack([]);
+  }, [debouncedSearch]);
+
   // Reset cursor when type filter changes
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setCursor(null);
-      setCursorStack([]);
-    }, 0);
-    return () => clearTimeout(timer);
+    setCursor(null);
+    setCursorStack([]);
   }, [typeFilter]);
 
   // Query
@@ -242,8 +241,12 @@ function TransactionsContent() {
           </div>
 
           {isError && (
-            <div className="p-4 bg-error-container text-error rounded-xl">
-              {t("transactions_page.error_load")}
+            <div className="p-4 bg-error-container text-error rounded-xl flex items-center justify-between gap-4">
+              <span>{t("transactions_page.error_load")}</span>
+              <button onClick={() => queryClient.invalidateQueries({ queryKey: ["transactions"] })}
+                className="bg-error text-on-error px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-error/90 transition-colors shrink-0">
+                {t("error_page.try_again")}
+              </button>
             </div>
           )}
 
@@ -264,6 +267,12 @@ function TransactionsContent() {
               setIsModalOpen(true);
             }}
             onDelete={handleDeleteClick}
+            onBatchDelete={(ids) => {
+              Promise.all(ids.map((id) => api.delete(`/transactions/${id}`))).then(() => {
+                queryClient.invalidateQueries({ queryKey: ["transactions"] });
+                toast.success(`${ids.length} transactions deleted.`);
+              }).catch(() => toast.error(t("transactions_page.delete_error")));
+            }}
             formatDate={formatDate}
           />
 

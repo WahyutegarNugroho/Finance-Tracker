@@ -6,7 +6,7 @@ const { validationResult } = require('express-validator');
  */
 const validate = (validations) => {
   return async (req, res, next) => {
-    // Run all validations
+    // Run all validations in parallel — express-validator.run is async-safe
     await Promise.all(validations.map((validation) => validation.run(req)));
 
     const errors = validationResult(req);

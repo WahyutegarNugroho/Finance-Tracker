@@ -13,39 +13,15 @@ import { useQuery } from "@tanstack/react-query";
 import { ApiResponse, CashFlowEntry, AnalyticsOverview, AnalyticsCategories } from "@/types";
 import Link from "next/link";
 
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Legend,
-  ArcElement,
-  BarElement,
-  Title,
-  Filler
-} from "chart.js";
+import "@/lib/chart-register";
 import { Line, Doughnut } from "react-chartjs-2";
 import { chartColors, chartColorWithOpacity, getCategoryColor } from "@/lib/colors";
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Legend,
-  ArcElement,
-  BarElement,
-  Title,
-  Filler
-);
 
 export default function Analytics() {
   const { user, loading: authLoading, formatCurrency } = useAuth();
   const { t, tCategory } = useLanguage();
   const router = useRouter();
+  const [monthsRange, setMonthsRange] = useState(6);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -54,19 +30,19 @@ export default function Analytics() {
   }, [user, authLoading, router]);
 
   // Queries
-  const { data: overviewData, isLoading: overviewLoading } = useQuery<ApiResponse<AnalyticsOverview>>({
+  const { data: overviewData, isLoading: overviewLoading, isError: overviewError } = useQuery<ApiResponse<AnalyticsOverview>>({
     queryKey: ["analytics-overview"],
     queryFn: () => api.get("/analytics/overview"),
     enabled: !!user,
   });
 
-  const { data: cashflowData, isLoading: cashflowLoading } = useQuery<ApiResponse<CashFlowEntry[]>>({
-    queryKey: ["analytics-cashflow"],
-    queryFn: () => api.get("/analytics/cashflow", { params: { months: 6 } }),
+  const { data: cashflowData, isLoading: cashflowLoading, isError: cashflowError } = useQuery<ApiResponse<CashFlowEntry[]>>({
+    queryKey: ["analytics-cashflow", monthsRange],
+    queryFn: () => api.get("/analytics/cashflow", { params: { months: monthsRange } }),
     enabled: !!user,
   });
 
-  const { data: categoryData, isLoading: categoryLoading } = useQuery<ApiResponse<AnalyticsCategories>>({
+  const { data: categoryData, isLoading: categoryLoading, isError: categoryError } = useQuery<ApiResponse<AnalyticsCategories>>({
     queryKey: ["analytics-categories"],
     queryFn: () => api.get("/analytics/categories"),
     enabled: !!user,
@@ -125,6 +101,7 @@ export default function Analytics() {
         bodyColor: "#ffffff",
         padding: 10,
         callbacks: {
+          // ponytail: any chart callback → use TooltipItem<'line'> generic (already done in CashFlowChart.tsx)
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           label: function(context: any) {
             return ` ${context.dataset.label}: ${formatCurrency(context.raw)}`;
@@ -211,6 +188,7 @@ export default function Analytics() {
   }
 
   const isLoading = overviewLoading || cashflowLoading || categoryLoading;
+  const anyError = overviewError || cashflowError || categoryError;
 
   return (
     <div className="text-on-background font-body-lg min-h-screen bg-background antialiased flex flex-col">
@@ -219,12 +197,25 @@ export default function Analytics() {
 
       <main className="pt-[88px] pb-[88px] md:pb-8 px-4 md:pl-[284px] md:pr-8 min-h-screen w-full flex-1">
         <div className="max-w-[1440px] mx-auto w-full h-full">
+          {anyError && (
+            <div className="mb-4 p-4 bg-error-container/50 text-error rounded-xl border border-error/20">
+              {t("dashboard_page.load_error")}
+            </div>
+          )}
           {isLoading ? (
             <AnalyticsSkeleton />
           ) : (
             <div className="flex flex-col gap-6 md:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-              <div className="flex justify-between items-center md:hidden mb-2">
-                <h1 className="font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface">{t("analytics_page.title")}</h1>
+              <div className="flex justify-between items-center gap-4 mb-2">
+                <h1 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg font-bold text-on-surface">{t("analytics_page.title")}</h1>
+                <div className="flex items-center gap-1 bg-surface-container-high/60 border border-outline-variant/30 rounded-lg p-1">
+                  {[3, 6, 12].map((m) => (
+                    <button key={m} onClick={() => setMonthsRange(m)}
+                      className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${monthsRange === m ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'}`}>
+                      {m}m
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Summary Stats */}
@@ -325,6 +316,7 @@ export default function Analytics() {
                     </div>
 
                     <div className="flex flex-col gap-3 w-full sm:w-auto overflow-y-auto max-h-[160px] pr-2 custom-scrollbar">
+                      {/* ponytail: hardcoded top-5 → add config MAX_VISIBLE_CATEGORIES when UI needs to vary */}
                       {Array.isArray(categories) ? categories.slice(0, 5).map((cat, idx) => (
                         <div key={cat.categoryId} className="flex items-center justify-between gap-4">
                           <div className="flex items-center gap-2">

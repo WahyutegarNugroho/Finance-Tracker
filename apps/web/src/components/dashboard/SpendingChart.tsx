@@ -27,7 +27,7 @@ interface SpendingChartProps {
   totalExpense: number;
 }
 
-export default function SpendingChart({ expenseByCategory, totalExpense }: SpendingChartProps) {
+const SpendingChart = React.memo(function SpendingChart({ expenseByCategory, totalExpense }: SpendingChartProps) {
   const { formatCurrency } = useAuth();
   const { t, tCategory } = useLanguage();
 
@@ -88,6 +88,7 @@ export default function SpendingChart({ expenseByCategory, totalExpense }: Spend
             </div>
 
             <div className="mt-8 w-full flex flex-col gap-2.5 overflow-y-auto max-h-[140px] pr-1 custom-scrollbar">
+              {/* ponytail: hardcoded top-5 → share MAX_VISIBLE_CATEGORIES with analytics page */}
               {Array.isArray(expenseByCategory) ? expenseByCategory.slice(0, 5).map((cat, idx) => (
                 <div key={cat.name} className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5 min-w-0">
@@ -119,4 +120,6 @@ export default function SpendingChart({ expenseByCategory, totalExpense }: Spend
       </div>
     </div>
   );
-}
+});
+
+export default SpendingChart;

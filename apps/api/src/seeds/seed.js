@@ -11,6 +11,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 const { db, auth, admin } = require('../config/firebase');
 const { DEFAULT_CATEGORIES } = require('../services/auth.service');
 
+// ponytail: hardcoded demo credentials → require env vars (crash if unset) for production seed
 const SEED_EMAIL = process.env.SEED_USER_EMAIL || 'demo@fintrack.com';
 const SEED_PASSWORD = process.env.SEED_USER_PASSWORD || 'Demo123456!';
 const SEED_NAME = 'John Doe';
@@ -48,6 +49,7 @@ const INCOME_TRANSACTIONS = [
   { catIndex: 9, note: 'Crypto gains', minAmount: 100000, maxAmount: 1000000 },
 ];
 
+// ponytail: 4th copy of magic 500 → import FIRESTORE_BATCH_LIMIT from utils/firestore when shared config exists
 const BATCH_LIMIT = 500;
 
 function randomBetween(min, max) {
@@ -290,4 +292,6 @@ async function seed() {
   }
 }
 
-seed();
+if (require.main === module) {
+  seed();
+}

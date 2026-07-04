@@ -32,8 +32,8 @@ export default function Dashboard() {
   }, [user, authLoading, router]);
 
   // Query
-  const { data: dashboardData, isLoading: dashboardLoading, error: queryError } = useQuery({
-    queryKey: ["dashboard-overview"],
+  const { data: dashboardData, isLoading: dashboardLoading, error: queryError, refetch } = useQuery({
+    queryKey: ["dashboard-overview", user?.uid],
     queryFn: () => api.get("/analytics/overview"),
     enabled: !!user,
   });
@@ -120,8 +120,14 @@ export default function Dashboard() {
           </div>
 
           {queryError && (
-            <div className="mb-4 p-4 bg-error-container text-error rounded-xl">
-              {t("dashboard_page.load_error")}
+            <div className="mb-4 p-4 bg-error-container text-error rounded-xl flex items-center justify-between gap-4">
+              <span>{t("dashboard_page.load_error")}</span>
+              <button
+                onClick={() => refetch()}
+                className="bg-error text-on-error px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-error/90 transition-colors shrink-0"
+              >
+                {t("error_page.try_again")}
+              </button>
             </div>
           )}
 

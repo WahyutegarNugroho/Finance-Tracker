@@ -12,7 +12,7 @@ interface FilterBarProps {
   onResetPagination: () => void;
 }
 
-export default function FilterBar({
+const FilterBar = React.memo(function FilterBar({
   searchQuery,
   setSearchQuery,
   typeFilter,
@@ -35,6 +35,7 @@ export default function FilterBar({
           className="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-sm font-body-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-on-background placeholder:text-outline"
           placeholder={t("transactions_page.search_placeholder")}
           type="text"
+          aria-label={t("common.search")}
         />
       </div>
 
@@ -74,4 +75,6 @@ export default function FilterBar({
       </div>
     </div>
   );
-}
+});
+
+export default FilterBar;

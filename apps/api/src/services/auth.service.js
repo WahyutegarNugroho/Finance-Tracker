@@ -1,23 +1,8 @@
 const { db, auth } = require('../config/firebase');
-const { serializeDoc, now } = require('../utils/firestore');
+const { serializeDoc, serverTimestamp } = require('../utils/firestore');
+const { DEFAULT_CATEGORIES } = require('../utils/constants');
 
 const USERS_COLLECTION = 'users';
-
-/**
- * Default categories seeded for new users
- */
-const DEFAULT_CATEGORIES = [
-  { name: 'Food & Dining', icon: 'restaurant', color: '#4648d4', type: 'expense' },
-  { name: 'Transportation', icon: 'directions_car', color: '#8b5cf6', type: 'expense' },
-  { name: 'Groceries', icon: 'shopping_cart', color: '#ec4899', type: 'expense' },
-  { name: 'Rent & Utilities', icon: 'home', color: '#f59e0b', type: 'expense' },
-  { name: 'Entertainment', icon: 'sports_esports', color: '#c7c4d7', type: 'expense' },
-  { name: 'Healthcare', icon: 'local_hospital', color: '#ef4444', type: 'expense' },
-  { name: 'Shopping', icon: 'shopping_bag', color: '#06b6d4', type: 'expense' },
-  { name: 'Salary', icon: 'payments', color: '#006c49', type: 'income' },
-  { name: 'Freelance', icon: 'work', color: '#10b981', type: 'income' },
-  { name: 'Investment', icon: 'trending_up', color: '#6366f1', type: 'income' },
-];
 
 /**
  * Register a new user with email and password
@@ -32,32 +17,38 @@ const registerUser = async (email, password, displayName) => {
     emailVerified: false,
   });
 
-  // Create user document in Firestore
-  const userData = {
-    displayName,
-    email,
-    photoURL: null,
-    currency: 'IDR',
-    darkMode: false,
-    createdAt: now(),
-    updatedAt: now(),
-  };
-
-  await db.collection(USERS_COLLECTION).doc(userRecord.uid).set(userData);
-
-  // Seed default categories for the new user
-  const batch = db.batch();
-  for (const category of DEFAULT_CATEGORIES) {
-    const catRef = db.collection('categories').doc();
-    batch.set(catRef, {
-      ...category,
-      userId: userRecord.uid,
-      isDefault: true,
+  try {
+    // Create user document in Firestore
+    const userData = {
+      displayName,
+      email,
+      photoURL: null,
+      currency: 'IDR',
+      darkMode: false,
       createdAt: now(),
       updatedAt: now(),
-    });
+    };
+
+    await db.collection(USERS_COLLECTION).doc(userRecord.uid).set(userData);
+
+    // Seed default categories for the new user
+    const batch = db.batch();
+    for (const category of DEFAULT_CATEGORIES) {
+      const catRef = db.collection('categories').doc();
+      batch.set(catRef, {
+        ...category,
+        userId: userRecord.uid,
+        isDefault: true,
+        createdAt: now(),
+        updatedAt: now(),
+      });
+    }
+    await batch.commit();
+  } catch (err) {
+    // Rollback: delete Firebase Auth user since Firestore side failed
+    await auth.deleteUser(userRecord.uid).catch(() => {});
+    throw err;
   }
-  await batch.commit();
 
   return {
     uid: userRecord.uid,
@@ -86,31 +77,38 @@ const handleGoogleSignIn = async (uid, email, displayName, photoURL) => {
       updatedAt: now(),
     };
 
-    await userRef.set(userData);
+    try {
+      await userRef.set(userData);
 
-    // Seed default categories
-    const batch = db.batch();
-    for (const category of DEFAULT_CATEGORIES) {
-      const catRef = db.collection('categories').doc();
-      batch.set(catRef, {
-        ...category,
-        userId: uid,
-        isDefault: true,
-        createdAt: now(),
-        updatedAt: now(),
-      });
+      // Seed default categories
+      const batch = db.batch();
+      for (const category of DEFAULT_CATEGORIES) {
+        const catRef = db.collection('categories').doc();
+        batch.set(catRef, {
+          ...category,
+          userId: uid,
+          isDefault: true,
+          createdAt: now(),
+          updatedAt: now(),
+        });
+      }
+      await batch.commit();
+    } catch (err) {
+      // Rollback: delete Firestore user doc if categories seed failed
+      await userRef.delete().catch(() => {});
+      throw err;
     }
-    await batch.commit();
 
     return { ...userData, uid, isNewUser: true };
   }
 
-  // Existing user — update last login info
-  await userRef.update({
-    updatedAt: now(),
-  });
+  // Existing user — update profile + last login
+  const profileUpdate = { updatedAt: now() };
+  if (displayName) profileUpdate.displayName = displayName;
+  if (photoURL) profileUpdate.photoURL = photoURL;
+  await userRef.update(profileUpdate);
 
-  return { uid, ...userDoc.data(), isNewUser: false };
+  return { uid, ...userDoc.data(), ...profileUpdate, isNewUser: false };
 };
 
 /**

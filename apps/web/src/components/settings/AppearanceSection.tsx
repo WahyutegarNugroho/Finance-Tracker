@@ -55,7 +55,7 @@ export default function AppearanceSection() {
             onChange={(e) => setLanguage(e.target.value as 'en' | 'id')}
             className="appearance-none bg-surface-variant/30 border border-outline-variant/30 rounded-lg px-4 py-2 font-body-sm text-body-sm text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all cursor-pointer pr-10"
           >
-            <option value="en">English (US)</option>
+            <option value="en">English</option>
             <option value="id">Bahasa Indonesia</option>
           </select>
           <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-outline text-[18px]">expand_more</span>

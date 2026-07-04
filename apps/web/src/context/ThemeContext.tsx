@@ -24,6 +24,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       document.documentElement.classList.add("dark");
     }
 
+    // ponytail: setTimeout hydration hack → read theme from <html data-theme=...> attribute set by inline script
     setTimeout(() => {
       setTheme(initialTheme);
     }, 0);

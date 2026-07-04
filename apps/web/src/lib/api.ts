@@ -1,7 +1,18 @@
 import { auth } from './firebase';
 
 // Use environment variable for API URL, fallback to localhost for development
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+// ponytail: hardcoded localhost fallback → validate NEXT_PUBLIC_API_URL at build time when deploying
+const API_BASE_URL = (() => {
+  const url = process.env.NEXT_PUBLIC_API_URL;
+  if (url) return url;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'Missing NEXT_PUBLIC_API_URL environment variable. ' +
+      'Set it in .env.local or your deployment dashboard.'
+    );
+  }
+  return 'http://localhost:5000/api';
+})();
 
 /**
  * Standard API response wrapper
@@ -62,6 +73,7 @@ const fetchWithAuth = async (endpoint: string, options: RequestInit = {}, params
     headers,
   });
 
+  // ponytail: single retry → add request queue + backoff when concurrent 401s observed
   // Auto-refresh token on 401 and retry once
   if (response.status === 401 && !isRetry && auth.currentUser) {
     try {

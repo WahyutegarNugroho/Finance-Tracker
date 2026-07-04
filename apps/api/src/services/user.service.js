@@ -1,7 +1,8 @@
 const { db } = require('../config/firebase');
-const { serializeDoc, now } = require('../utils/firestore');
+const { serializeDoc, serverTimestamp } = require('../utils/firestore');
 
 const USERS_COLLECTION = 'users';
+// ponytail: magic 500 in 3 files → centralize as FIRESTORE_BATCH_LIMIT in utils/firestore.js
 const BATCH_LIMIT = 500;
 
 /**
@@ -61,12 +62,19 @@ const updateProfile = async (uid, data) => {
  * Reset all user data (transactions, budgets, custom categories)
  * Uses batched writes to avoid Firestore write rate limits
  */
+const logger = require('../utils/logger');
+
 const resetUserData = async (uid) => {
-  await Promise.all([
+  const results = await Promise.allSettled([
     deleteCollectionInBatches('transactions', uid),
     deleteCollectionInBatches('budgets', uid),
     deleteCollectionInBatches('categories', uid, doc => !doc.data().isDefault),
   ]);
+
+  const failures = results.filter(r => r.status === 'rejected');
+  if (failures.length > 0) {
+    logger.error({ uid, failures: failures.map(f => f.reason) }, 'resetUserData partial failures');
+  }
 };
 
 module.exports = { getProfile, updateProfile, resetUserData };

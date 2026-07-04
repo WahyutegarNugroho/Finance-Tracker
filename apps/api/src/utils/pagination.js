@@ -1,16 +1,13 @@
-const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 100;
 
 const parsePagination = (query) => {
-  let page = parseInt(query.page, 10) || DEFAULT_PAGE;
   let limit = parseInt(query.limit, 10) || DEFAULT_LIMIT;
 
-  if (page < 1) page = 1;
   if (limit < 1) limit = DEFAULT_LIMIT;
   if (limit > MAX_LIMIT) limit = MAX_LIMIT;
 
-  return { page, limit };
+  return { limit };
 };
 
 const buildCursor = (doc, sortBy = 'date') => {
@@ -43,16 +40,9 @@ const decodeCursor = (encoded) => {
   }
 };
 
-const parseCursor = (query) => {
-  const cursorStr = query.cursor;
-  if (!cursorStr) return {};
-  return decodeCursor(cursorStr) || {};
-};
-
 module.exports = {
   parsePagination,
   buildCursor,
   encodeCursor,
   decodeCursor,
-  parseCursor,
 };

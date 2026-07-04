@@ -17,7 +17,7 @@ const errorHandler = (err, req, res, _next) => {
   }
 
   // Firestore errors
-  if (err.code && (err.code === 'not-found' || err.code === 5)) {
+  if (err.code === 'not-found') {
     return res.status(404).json({
       success: false,
       error: 'Not Found',
@@ -25,7 +25,7 @@ const errorHandler = (err, req, res, _next) => {
     });
   }
 
-  if (err.code && (err.code === 'permission-denied' || err.code === 7)) {
+  if (err.code === 'permission-denied') {
     return res.status(403).json({
       success: false,
       error: 'Permission Denied',
@@ -50,6 +50,7 @@ const errorHandler = (err, req, res, _next) => {
     message: process.env.NODE_ENV === 'production'
       ? 'An unexpected error occurred.'
       : err.message,
+    ...(statusCode === 500 && req.correlationId ? { correlationId: req.correlationId } : {}),
   });
 };
 
