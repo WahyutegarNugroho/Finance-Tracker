@@ -46,23 +46,15 @@ function TransactionsContent() {
     }
   }, [user, authLoading, router]);
 
-  // Debounce search query
+  // Debounce search query + reset pagination
   useEffect(() => {
-    const handler = setTimeout(() => setDebouncedSearch(searchQuery), 500);
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setCursor(null);
+      setCursorStack([]);
+    }, 500);
     return () => clearTimeout(handler);
   }, [searchQuery]);
-
-  // Reset pagination on new search
-  useEffect(() => {
-    setCursor(null);
-    setCursorStack([]);
-  }, [debouncedSearch]);
-
-  // Reset cursor when type filter changes
-  useEffect(() => {
-    setCursor(null);
-    setCursorStack([]);
-  }, [typeFilter]);
 
   // Query
   const { data: transactionsData, isLoading: transactionsLoading, isError } = useQuery<ApiResponse<Transaction[]>>({
@@ -144,8 +136,8 @@ function TransactionsContent() {
 
   const sanitizeCSV = (value: string): string => {
     const s = String(value);
-    const dangerousChars = ['=', '+', '-', '@', '|', '%'];
-    if (dangerousChars.some(c => s.trimStart().startsWith(c))) {
+    const dangerousChars = ['=', '+', '-', '@', '|', '%', '\t', '\r'];
+    if (dangerousChars.some(c => s.trimStart().startsWith(c)) || s.includes('\n')) {
       return `"'${s.replace(/"/g, '""')}`;
     }
     return s.replace(/"/g, '""');
@@ -191,8 +183,7 @@ function TransactionsContent() {
       document.body.removeChild(link);
       
       toast.success(t("transactions_page.export_success"), { id: "export-csv" });
-    } catch (err) {
-      console.error("Export failed", err);
+    } catch {
       toast.error(t("transactions_page.export_error"), { id: "export-csv" });
     }
   };

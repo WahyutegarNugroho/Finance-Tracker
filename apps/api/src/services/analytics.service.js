@@ -71,6 +71,11 @@ const getDashboardOverview = async (userId) => {
   // Derive recent 5 from the main snapshot (already sorted desc by date with limit)
   const recentTransactions = mapSnapshot(bothSnapshots).slice(0, 5);
 
+  const getColorForCategory = (name) => {
+    const idx = name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 10;
+    return ['#4648d4', '#8b5cf6', '#ec4899', '#f59e0b', '#06b6d4', '#10b981', '#6366f1', '#ef4444', '#c7c4d7', '#006c49'][idx];
+  };
+
   // Build category spending from current month transactions
   const categoryMap = {};
   bothSnapshots.docs.forEach((doc) => {
@@ -104,11 +109,6 @@ const getDashboardOverview = async (userId) => {
   const budgetUsage = totalBudgetLimit > 0
     ? Math.round((currentExpense / totalBudgetLimit) * 100)
     : 0;
-
-  const getColorForCategory = (name) => {
-    const idx = name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 10;
-    return ['#4648d4', '#8b5cf6', '#ec4899', '#f59e0b', '#06b6d4', '#10b981', '#6366f1', '#ef4444', '#c7c4d7', '#006c49'][idx];
-  };
 
   const expenseByCategory = Object.values(categoryMap)
     .map(cat => ({

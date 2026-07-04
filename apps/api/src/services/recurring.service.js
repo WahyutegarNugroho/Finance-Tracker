@@ -24,7 +24,8 @@ const processDueTransactions = async (userId) => {
         .where('recurringNextDate', '<=', nowDate)
     : db.collection(COLLECTION)
         .where('isRecurring', '==', true)
-        .where('recurringNextDate', '<=', nowDate);
+        .where('recurringNextDate', '<=', nowDate)
+        .limit(500);
 
   const snapshot = await dueQuery.get();
   if (snapshot.empty) return { processed: 0 };

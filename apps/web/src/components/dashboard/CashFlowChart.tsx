@@ -9,6 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import "@/lib/chart-register";
 import { Bar } from "react-chartjs-2";
 import { chartColors } from "@/lib/colors";
+import { chartTooltip, chartScales } from "@/lib/chart-config";
 import { TooltipItem } from "chart.js";
 
 export default function CashFlowChart() {
@@ -40,19 +41,13 @@ export default function CashFlowChart() {
     ]
   };
 
-  // ponytail: duplicated chart tooltip config → extract sharedChartOptions factory when 3rd chart is added
   const barChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: {
-        display: false,
-      },
+      legend: { display: false },
       tooltip: {
-        backgroundColor: "rgba(30, 30, 40, 0.9)",
-        titleColor: "#ffffff",
-        bodyColor: "#ffffff",
-        padding: 10,
+        ...chartTooltip,
         callbacks: {
           label: function(context: TooltipItem<'bar'>) {
             return ` ${context.dataset.label}: ${formatCurrency(context.raw as number)}`;
@@ -60,27 +55,7 @@ export default function CashFlowChart() {
         }
       }
     },
-    scales: {
-      x: {
-        grid: {
-          display: false,
-        },
-        ticks: {
-          color: "rgba(150, 150, 150, 0.8)",
-        }
-      },
-      y: {
-        grid: {
-          color: "rgba(150, 150, 150, 0.1)",
-        },
-        ticks: {
-          color: "rgba(150, 150, 150, 0.8)",
-          callback: function(value: string | number) {
-            return formatCurrency(Number(value));
-          }
-        }
-      }
-    }
+    scales: chartScales(formatCurrency)
   };
 
   return (

@@ -27,6 +27,8 @@ export default React.memo(function TransactionTable({
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
+  const [pendingBatchDelete, setPendingBatchDelete] = useState(false);
+
   const allSelected = transactions.length > 0 && transactions.every((tx) => selectedIds.has(tx.id));
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
@@ -48,13 +50,31 @@ export default React.memo(function TransactionTable({
       {selectedIds.size > 0 && onBatchDelete && (
         <div className="px-4 py-2 bg-error-container/20 border-b border-error/20 flex items-center justify-between">
           <span className="text-sm text-error font-medium">{selectedIds.size} selected</span>
-          <button
-            onClick={() => { onBatchDelete(Array.from(selectedIds)); setSelectedIds(new Set()); }}
-            className="text-sm text-error font-semibold hover:bg-error/10 px-3 py-1 rounded-lg transition-colors flex items-center gap-1"
-          >
-            <span className="material-symbols-outlined text-[16px]">delete</span>
-            Delete Selected
-          </button>
+          {pendingBatchDelete ? (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-error">{t("common.confirm")}?</span>
+              <button
+                onClick={() => { onBatchDelete(Array.from(selectedIds)); setSelectedIds(new Set()); setPendingBatchDelete(false); }}
+                className="text-sm bg-error text-white font-semibold px-3 py-1 rounded-lg transition-colors"
+              >
+                {t("common.delete")}
+              </button>
+              <button
+                onClick={() => setPendingBatchDelete(false)}
+                className="text-sm text-on-surface-variant font-semibold px-2 py-1 rounded-lg hover:bg-surface-variant/50 transition-colors"
+              >
+                {t("common.cancel")}
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setPendingBatchDelete(true)}
+              className="text-sm text-error font-semibold hover:bg-error/10 px-3 py-1 rounded-lg transition-colors flex items-center gap-1"
+            >
+              <span className="material-symbols-outlined text-[16px]">delete</span>
+              Delete Selected
+            </button>
+          )}
         </div>
       )}
       <div className="overflow-x-auto flex-1">

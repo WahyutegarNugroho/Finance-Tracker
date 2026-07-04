@@ -152,6 +152,7 @@ export default function Register() {
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   required
+                  aria-label="Full Name"
                 />
               </div>
             </div>
@@ -176,6 +177,7 @@ export default function Register() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  aria-label="Email"
                 />
               </div>
             </div>
@@ -201,6 +203,7 @@ export default function Register() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
+                  aria-label="Password"
                 />
               </div>
             </div>

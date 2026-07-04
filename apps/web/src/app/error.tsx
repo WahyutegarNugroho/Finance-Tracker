@@ -13,7 +13,7 @@ export default function Error({
   const { t } = useLanguage();
 
   useEffect(() => {
-    console.error(error);
+    // Error is logged by the framework; no need for console.error here
   }, [error]);
 
   return (

@@ -3,20 +3,11 @@ import React from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { getCategoryColor } from "@/lib/colors";
-import {
-  Chart as ChartJS,
-  ArcElement,
-  Tooltip,
-  Legend,
-  TooltipItem,
-} from "chart.js";
+import { chartTooltip } from "@/lib/chart-config";
+import { TooltipItem } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 
-ChartJS.register(
-  ArcElement,
-  Tooltip,
-  Legend
-);
+// Components registered globally in lib/chart-register.ts
 
 interface SpendingChartProps {
   expenseByCategory: Array<{
@@ -52,10 +43,7 @@ const SpendingChart = React.memo(function SpendingChart({ expenseByCategory, tot
         display: false,
       },
       tooltip: {
-        backgroundColor: "rgba(30, 30, 40, 0.9)",
-        titleColor: "#ffffff",
-        bodyColor: "#ffffff",
-        padding: 10,
+        ...chartTooltip,
         callbacks: {
           label: function(context: TooltipItem<'doughnut'>) {
             return ` ${context.label}: ${context.raw}%`;

@@ -9,7 +9,8 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 const { db, auth, admin } = require('../config/firebase');
-const { DEFAULT_CATEGORIES } = require('../services/auth.service');
+const { BATCH_LIMIT } = require('../utils/firestore');
+const { DEFAULT_CATEGORIES } = require('../utils/constants');
 
 // ponytail: hardcoded demo credentials → require env vars (crash if unset) for production seed
 const SEED_EMAIL = process.env.SEED_USER_EMAIL || 'demo@fintrack.com';
@@ -49,8 +50,6 @@ const INCOME_TRANSACTIONS = [
   { catIndex: 9, note: 'Crypto gains', minAmount: 100000, maxAmount: 1000000 },
 ];
 
-// ponytail: 4th copy of magic 500 → import FIRESTORE_BATCH_LIMIT from utils/firestore when shared config exists
-const BATCH_LIMIT = 500;
 
 function randomBetween(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -150,6 +149,8 @@ async function seed() {
 
     // Generate 8-15 transactions per month for last 6 months
     for (let monthBack = 0; monthBack < 6; monthBack++) {
+      const batch = db.batch();
+      let batchTxCount = 0;
       const txPerMonth = randomBetween(8, 15);
       const now = new Date();
       const targetMonth = new Date(now.getFullYear(), now.getMonth() - monthBack, 1);
@@ -162,7 +163,7 @@ async function seed() {
       );
       if (salaryDate <= now) {
         const salaryCat = categoryIds[7]; // Salary
-        await db.collection('transactions').add({
+        batch.set(db.collection('transactions').doc(), {
           userId,
           categoryId: salaryCat.id,
           categoryName: salaryCat.name,
@@ -174,7 +175,7 @@ async function seed() {
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         });
-        txCount++;
+        batchTxCount++;
       }
 
       // Add random expense transactions
@@ -188,7 +189,7 @@ async function seed() {
         );
 
         if (txDate <= now) {
-          await db.collection('transactions').add({
+          batch.set(db.collection('transactions').doc(), {
             userId,
             categoryId: cat.id,
             categoryName: cat.name,
@@ -200,7 +201,7 @@ async function seed() {
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
           });
-          txCount++;
+          batchTxCount++;
         }
       }
 
@@ -216,7 +217,7 @@ async function seed() {
         );
 
         if (txDate <= now) {
-          await db.collection('transactions').add({
+          batch.set(db.collection('transactions').doc(), {
             userId,
             categoryId: cat.id,
             categoryName: cat.name,
@@ -228,8 +229,13 @@ async function seed() {
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
           });
-          txCount++;
+          batchTxCount++;
         }
+      }
+
+      if (batchTxCount > 0) {
+        await batch.commit();
+        txCount += batchTxCount;
       }
     }
     console.log(`   ✓ Created ${txCount} transactions (spanning 6 months)`);
@@ -250,9 +256,10 @@ async function seed() {
       { catIndex: 6, limit: 500000 },  // Shopping
     ];
 
+    const budgetBatch = db.batch();
     for (const budget of budgetData) {
       const cat = categoryIds[budget.catIndex];
-      await db.collection('budgets').add({
+      budgetBatch.set(db.collection('budgets').doc(), {
         userId,
         categoryId: cat.id,
         categoryName: cat.name,
@@ -265,6 +272,7 @@ async function seed() {
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
     }
+    await budgetBatch.commit();
     console.log(`   ✓ Created ${budgetData.length} budgets for ${currentMonth}/${currentYear}`);
 
     // ─── Done ───

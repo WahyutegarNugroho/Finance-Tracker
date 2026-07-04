@@ -1,5 +1,5 @@
 const { db, auth } = require('../config/firebase');
-const { serializeDoc, serverTimestamp } = require('../utils/firestore');
+const { serializeDoc, now } = require('../utils/firestore');
 const { DEFAULT_CATEGORIES } = require('../utils/constants');
 
 const USERS_COLLECTION = 'users';

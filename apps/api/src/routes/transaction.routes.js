@@ -15,14 +15,17 @@ router.use(authenticate);
  * POST /api/transactions/process-recurring
  * Process due recurring transactions for the authenticated user
  */
-router.post('/process-recurring', async (req, res, next) => {
-  try {
-    const result = await recurringService.processDueTransactions(req.user.uid);
-    return response.success(res, result, `${result.processed} recurring transactions processed.`);
-  } catch (error) {
-    next(error);
+router.post('/process-recurring',
+  validate([]),
+  async (req, res, next) => {
+    try {
+      const result = await recurringService.processDueTransactions(req.user.uid);
+      return response.success(res, result, `${result.processed} recurring transactions processed.`);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 /**
  * GET /api/transactions/summary
@@ -86,10 +89,9 @@ router.get('/',
  * POST /api/transactions/batch
  * Create multiple transactions in a single batch
  */
-// ponytail: route limit 100 vs service allows 500 → raise route max to 500 when bulk import UI exists
 router.post('/batch',
   validate([
-    body('transactions').isArray({ min: 1, max: 100 }).withMessage('transactions must be an array (1-100 items)'),
+    body('transactions').isArray({ min: 1, max: 500 }).withMessage('transactions must be an array (1-500 items)'),
     body('transactions.*.categoryId').notEmpty().withMessage('Each transaction needs a categoryId'),
     body('transactions.*.categoryName').notEmpty().trim().withMessage('Each transaction needs a categoryName'),
     body('transactions.*.categoryIcon').optional().trim(),
@@ -105,7 +107,7 @@ router.post('/batch',
     body('transactions.*.attachments.*.name').optional().isString().trim(),
     body('transactions.*.attachments.*.url').optional().isString(),
     body('transactions.*.attachments.*.type').optional().isString(),
-    body('transactions.*.note').optional().trim(),
+    body('transactions.*.note').optional().trim().isLength({ max: 1000 }).withMessage('Note must be at most 1000 characters'),
     body('transactions.*.date').optional().isISO8601().withMessage('Date must be a valid ISO date'),
   ]),
   async (req, res, next) => {
@@ -194,7 +196,7 @@ router.post(
     body('attachments.*.name').optional().isString().trim(),
     body('attachments.*.url').optional().isString(),
     body('attachments.*.type').optional().isString(),
-    body('note').optional().trim(),
+    body('note').optional().trim().isLength({ max: 1000 }).withMessage('Note must be at most 1000 characters'),
     body('date').optional().isISO8601().withMessage('Date must be a valid ISO date'),
   ]),
   async (req, res, next) => {
@@ -234,7 +236,7 @@ router.put(
     body('attachments.*.name').optional().isString().trim(),
     body('attachments.*.url').optional().isString(),
     body('attachments.*.type').optional().isString(),
-    body('note').optional().trim(),
+    body('note').optional().trim().isLength({ max: 1000 }).withMessage('Note must be at most 1000 characters'),
     body('date').optional().isISO8601(),
   ]),
   async (req, res, next) => {

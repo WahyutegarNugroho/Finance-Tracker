@@ -1,9 +1,7 @@
 const { db } = require('../config/firebase');
-const { serializeDoc, serverTimestamp } = require('../utils/firestore');
+const { serializeDoc, now, BATCH_LIMIT } = require('../utils/firestore');
 
 const USERS_COLLECTION = 'users';
-// ponytail: magic 500 in 3 files → centralize as FIRESTORE_BATCH_LIMIT in utils/firestore.js
-const BATCH_LIMIT = 500;
 
 /**
  * Delete all documents in a collection for a user in batches of 500

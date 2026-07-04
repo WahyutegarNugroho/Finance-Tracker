@@ -7,7 +7,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Category, Transaction, ApiResponse } from "@/types";
-import { formatWithDots } from "@/lib/formatting";
+import { formatWithDots, cleanAmountInput } from "@/lib/formatting";
 
 interface TransactionPayload {
   type: "income" | "expense";
@@ -78,22 +78,8 @@ export default function TransactionModal({
   );
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const isDecimalAllowed = currency !== "IDR" && currency !== "JPY";
-    let inputVal = e.target.value;
-    
-    if (isDecimalAllowed) {
-      inputVal = inputVal.replace(/,/g, ".");
-      let cleaned = inputVal.replace(/[^0-9.]/g, "");
-      const parts = cleaned.split(".");
-      if (parts.length > 2) {
-        cleaned = parts[0] + "." + parts.slice(1).join("");
-      }
-      
-      setForm(f => ({ ...f, amount: cleaned, displayAmount: formatWithDots(cleaned, currency) }));
-    } else {
-      const raw = inputVal.replace(/\D/g, "");
-      setForm(f => ({ ...f, amount: raw, displayAmount: formatWithDots(raw, currency) }));
-    }
+    const cleaned = cleanAmountInput(e.target.value, currency);
+    setForm(f => ({ ...f, amount: cleaned, displayAmount: formatWithDots(cleaned, currency) }));
   };
 
   // Mutation

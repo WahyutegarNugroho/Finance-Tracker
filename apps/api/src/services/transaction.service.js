@@ -1,5 +1,5 @@
 const { db } = require('../config/firebase');
-const { serializeDoc, mapSnapshot, serverTimestamp } = require('../utils/firestore');
+const { serializeDoc, mapSnapshot, now } = require('../utils/firestore');
 const { parsePagination, encodeCursor, buildCursor } = require('../utils/pagination');
 const logger = require('../utils/logger');
 

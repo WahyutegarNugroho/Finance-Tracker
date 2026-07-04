@@ -7,6 +7,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Budget, Category, ApiResponse } from "@/types";
+import { formatWithDots, cleanAmountInput } from "@/lib/formatting";
 
 interface BudgetPayload {
   limitAmount: number;
@@ -16,7 +17,6 @@ interface BudgetPayload {
   month: number;
   year: number;
 }
-import { formatWithDots, cleanAmountInput } from "@/lib/formatting";
 
 type BudgetModalProps = {
   isOpen: boolean;
@@ -65,7 +65,10 @@ export default function BudgetModal({
     return all.filter((c: Category) => c.type === "expense");
   }, [categoriesData]);
 
-  const [form, setForm] = useState(() => initForm(budgetToEdit, categories.length > 0 ? categories[0]?.id : ""));
+  const [form, setForm] = useState(() => initForm(budgetToEdit, ""));
+
+  const resolvedCategoryId = form.categoryId ||
+    (!fetchingCats && categories.length > 0 ? categories[0].id : "");
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const cleaned = cleanAmountInput(e.target.value, currency);
@@ -93,12 +96,12 @@ export default function BudgetModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.limitAmount || !form.categoryId) return;
+    if (!form.limitAmount || !resolvedCategoryId) return;
 
-    const selectedCategory = categories.find((c) => c.id === form.categoryId) || null;
+    const selectedCategory = categories.find((c) => c.id === resolvedCategoryId) || null;
     const payload = {
       limitAmount: parseFloat(form.limitAmount),
-      categoryId: form.categoryId,
+      categoryId: resolvedCategoryId,
       categoryName: selectedCategory?.name || "Unknown",
       categoryIcon: selectedCategory?.icon || "category",
       month: month ?? new Date().getMonth() + 1,
@@ -142,7 +145,7 @@ export default function BudgetModal({
             </label>
             <select
               required
-              value={form.categoryId}
+              value={resolvedCategoryId}
               onChange={(e) => setForm(f => ({ ...f, categoryId: e.target.value }))}
               disabled={fetchingCats || !!budgetToEdit}
               className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none appearance-none disabled:opacity-50"
@@ -161,7 +164,7 @@ export default function BudgetModal({
 
           <div>
             <label className="block text-sm font-medium text-on-surface-variant mb-1">
-              {t("budget_page.title")}
+              {t("budget_page.limit_label")}
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant font-medium">

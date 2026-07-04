@@ -17,7 +17,7 @@ const validate = (validations) => {
     const extractedErrors = errors.array().map((err) => ({
       field: err.path,
       message: err.msg,
-      value: err.value,
+      ...(process.env.NODE_ENV !== 'production' && { value: err.value }),
     }));
 
     return res.status(400).json({

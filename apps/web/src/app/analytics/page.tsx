@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import Sidebar from "@/components/Sidebar";
 import Topbar from "@/components/Topbar";
 import BottomNav from "@/components/BottomNav";
@@ -16,6 +16,7 @@ import Link from "next/link";
 import "@/lib/chart-register";
 import { Line, Doughnut } from "react-chartjs-2";
 import { chartColors, chartColorWithOpacity, getCategoryColor } from "@/lib/colors";
+import { chartTooltip, chartScales } from "@/lib/chart-config";
 
 export default function Analytics() {
   const { user, loading: authLoading, formatCurrency } = useAuth();
@@ -96,12 +97,8 @@ export default function Analytics() {
         display: false,
       },
       tooltip: {
-        backgroundColor: "rgba(30, 30, 40, 0.9)",
-        titleColor: "#ffffff",
-        bodyColor: "#ffffff",
-        padding: 10,
+        ...chartTooltip,
         callbacks: {
-          // ponytail: any chart callback → use TooltipItem<'line'> generic (already done in CashFlowChart.tsx)
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           label: function(context: any) {
             return ` ${context.dataset.label}: ${formatCurrency(context.raw)}`;
@@ -109,28 +106,7 @@ export default function Analytics() {
         }
       }
     },
-    scales: {
-      x: {
-        grid: {
-          display: false,
-        },
-        ticks: {
-          color: "rgba(150, 150, 150, 0.8)",
-        }
-      },
-      y: {
-        grid: {
-          color: "rgba(150, 150, 150, 0.1)",
-        },
-        ticks: {
-          color: "rgba(150, 150, 150, 0.8)",
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          callback: function(value: any) {
-            return formatCurrency(value);
-          }
-        }
-      }
-    }
+    scales: chartScales(formatCurrency)
   }), [formatCurrency]);
 
   const doughnutData = useMemo(() => {
@@ -160,10 +136,7 @@ export default function Analytics() {
         display: false,
       },
       tooltip: {
-        backgroundColor: "rgba(30, 30, 40, 0.9)",
-        titleColor: "#ffffff",
-        bodyColor: "#ffffff",
-        padding: 10,
+        ...chartTooltip,
         callbacks: {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           label: function(context: any) {
@@ -329,7 +302,7 @@ export default function Analytics() {
                       {Array.isArray(categories) && categories.length > 5 && (
                         <div className="flex items-center justify-center pt-1">
                           <span className="text-xs text-on-surface-variant font-medium bg-surface-variant/50 px-2 py-0.5 rounded-full">
-                            +{categories.length - 5} more
+                            {t("analytics_page.more_categories").replace("{count}", String(categories.length - 5))}
                           </span>
                         </div>
                       )}

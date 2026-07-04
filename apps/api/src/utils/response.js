@@ -47,8 +47,4 @@ const notFound = (res, resource = 'Resource') => {
   return error(res, `${resource} not found.`, 404);
 };
 
-const forbidden = (res, message = 'You do not have permission to access this resource.') => {
-  return error(res, message, 403);
-};
-
-module.exports = { success, created, paginated, error, notFound, forbidden };
+module.exports = { success, created, paginated, error, notFound };

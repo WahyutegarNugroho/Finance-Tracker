@@ -63,10 +63,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
-      setLoading(false);
 
-      // Fetch user profile to get currency preference
       if (firebaseUser) {
+        // Fetch profile first so currency is resolved before children render
         try {
           const json = await api.get("/users/profile");
           const userCurrency = json?.data?.currency || "IDR";
@@ -75,6 +74,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           // Keep default currency on error
         }
       }
+
+      setLoading(false);
     });
 
     return () => unsubscribe();
@@ -84,8 +85,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       await firebaseSignOut(auth);
       router.push("/login");
-    } catch (error) {
-      console.error("Error signing out:", error);
+    } catch {
+      // Silent — redirect handles unauthenticated state
     }
   };
 

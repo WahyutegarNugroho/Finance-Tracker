@@ -102,6 +102,15 @@
         { "fieldPath": "month", "order": "ASCENDING" },
         { "fieldPath": "year", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "transactions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "isRecurring", "order": "ASCENDING" },
+        { "fieldPath": "recurringNextDate", "order": "ASCENDING" }
+      ]
     }
   ]
 }

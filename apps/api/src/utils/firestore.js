@@ -24,10 +24,13 @@ const mapSnapshot = (snapshot, extraDateFields = []) => {
 };
 
 const serverTimestamp = () => admin.firestore.FieldValue.serverTimestamp();
+const now = () => new Date();
 
 module.exports = {
   fromFirestoreTimestamp,
   serializeDoc,
   mapSnapshot,
   serverTimestamp,
+  now,
+  BATCH_LIMIT: 500,
 };

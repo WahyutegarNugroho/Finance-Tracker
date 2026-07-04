@@ -1,9 +1,7 @@
 const { db } = require('../config/firebase');
-const { serializeDoc, now } = require('../utils/firestore');
+const { serializeDoc, now, BATCH_LIMIT } = require('../utils/firestore');
 
 const COLLECTION = 'categories';
-// ponytail: magic 500 repeated → import FIRESTORE_BATCH_LIMIT from utils/firestore
-const BATCH_LIMIT = 500;
 
 /**
  * Get all categories for a user (including defaults)
@@ -140,7 +138,6 @@ const deleteCategory = async (userId, categoryId) => {
 
 module.exports = {
   getCategories,
-  getCategoryById,
   createCategory,
   updateCategory,
   deleteCategory,

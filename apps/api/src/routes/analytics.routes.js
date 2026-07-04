@@ -14,14 +14,17 @@ router.use(authenticate);
  * GET /api/analytics/overview
  * Dashboard summary: balance, income, expense, budget usage, recent transactions
  */
-router.get('/overview', async (req, res, next) => {
-  try {
-    const overview = await analyticsService.getDashboardOverview(req.user.uid);
-    return response.success(res, overview);
-  } catch (error) {
-    next(error);
+router.get('/overview',
+  validate([]),
+  async (req, res, next) => {
+    try {
+      const overview = await analyticsService.getDashboardOverview(req.user.uid);
+      return response.success(res, overview);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 /**
  * GET /api/analytics/cashflow
@@ -75,13 +78,16 @@ router.get('/categories',
  * GET /api/analytics/trends
  * Year-over-year comparison
  */
-router.get('/trends', async (req, res, next) => {
-  try {
-    const trends = await analyticsService.getTrends(req.user.uid);
-    return response.success(res, trends);
-  } catch (error) {
-    next(error);
+router.get('/trends',
+  validate([]),
+  async (req, res, next) => {
+    try {
+      const trends = await analyticsService.getTrends(req.user.uid);
+      return response.success(res, trends);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 module.exports = router;
