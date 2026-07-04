@@ -31,7 +31,7 @@ app.use(helmet({
       objectSrc: ["'none'"],
     },
   },
-  crossOriginEmbedderPolicy: { policy: 'require-corp' },
+  crossOriginEmbedderPolicy: false,
 }));
 
 // ─── Global Rate Limiter ───
