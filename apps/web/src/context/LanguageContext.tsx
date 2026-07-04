@@ -56,15 +56,16 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const tCategory = (name: string): string => {
-    const localizedName = translations[language]?.category_names?.[name];
+    const dict = translations[language] as Record<string, Record<string, string>>;
+    const localizedName = dict?.category_names?.[name];
     if (localizedName) return localizedName;
-    
-    // Fallback to English mapping if current language is not English
+
     if (language !== "en") {
-      const fallbackName = translations["en"]?.category_names?.[name];
+      const enDict = translations["en"] as Record<string, Record<string, string>>;
+      const fallbackName = enDict?.category_names?.[name];
       if (fallbackName) return fallbackName;
     }
-    
+
     return name;
   };
 

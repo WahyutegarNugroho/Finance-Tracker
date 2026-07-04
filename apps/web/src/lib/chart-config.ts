@@ -14,7 +14,9 @@ export const chartScales = (formatCurrency?: (v: number) => string) => ({
     grid: { color: "rgba(150, 150, 150, 0.1)" },
     ticks: {
       color: "rgba(150, 150, 150, 0.8)",
-      ...(formatCurrency ? { callback: (value: number) => formatCurrency(value) } : {}),
+      ...(formatCurrency
+        ? { callback: (tickValue: string | number) => formatCurrency(Number(tickValue)) as string }
+        : {}),
     },
   },
 });
