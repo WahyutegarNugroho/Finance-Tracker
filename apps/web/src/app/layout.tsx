@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import Providers from "@/components/Providers";
 import Script from "next/script";
+import "material-symbols/outlined.css";
 import "./globals.css";
-
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -33,12 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable} antialiased`} suppressHydrationWarning>
       <head>
-        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block"
-          rel="stylesheet"
-          precedence="default"
-        />
+
         <Script
           id="theme-script"
           strategy="beforeInteractive"

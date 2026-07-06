@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "@/lib/firebase";
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 import { api } from "@/lib/api";
 import type { FirebaseAuthError } from "@/types";
 import { FIREBASE_ERRORS } from "@/lib/constants";
@@ -50,14 +50,25 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const result = await signInWithPopup(auth, googleProvider);
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      const result = await signInWithPopup(auth, provider);
+      
+      // Add slight delay to ensure Firebase auth state is fully synced
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       const token = await result.user.getIdToken();
       await api.post("/auth/google", undefined, { headers: { Authorization: `Bearer ${token}` } });
       router.push("/dashboard");
-    } catch (err: unknown) {
-      const fbErr = err as FirebaseAuthError;
-      const code = fbErr?.code || '';
-      setError(FIREBASE_ERRORS[code] || 'Google sign up failed.');
+    } catch (err: any) {
+      console.error("Google sign up error:", err);
+      if (err?.code === 'auth/popup-closed-by-user') {
+        setError("Sign up cancelled.");
+        return;
+      }
+      const code = err?.code || '';
+      const msg = err?.message || 'Google sign up failed.';
+      setError(FIREBASE_ERRORS[code] || msg);
     } finally {
       setLoading(false);
     }
