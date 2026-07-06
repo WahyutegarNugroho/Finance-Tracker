@@ -212,6 +212,7 @@ export const translations: Record<string, Translations> = {
         title: "Danger Zone",
         desc: "Warning: These actions are irreversible and may affect your account data.",
         reset_all: "Reset All Data",
+      },
       reset_success: "All your data has been successfully reset!",
       reset_error: "Failed to reset data.",
       profile_updated: "Profile updated!",
@@ -227,7 +228,6 @@ export const translations: Record<string, Translations> = {
       reset_confirm_title: "Reset All Financial Data",
       reset_confirm_message: "Are you sure you want to reset all your financial data? This action cannot be undone.",
       reset_confirm_button: "Yes, Reset Now",
-      }
     },
     error_page: {
       title: "Oops! Something went wrong",
@@ -449,6 +449,7 @@ export const translations: Record<string, Translations> = {
         title: "Zona Berbahaya",
         desc: "Peringatan: Tindakan ini tidak dapat dibatalkan dan dapat mempengaruhi data akun Anda.",
         reset_all: "Reset Semua Data",
+      },
       reset_success: "Seluruh data Anda telah berhasil direset!",
       reset_error: "Gagal mereset data.",
       profile_updated: "Profil diperbarui!",
@@ -464,7 +465,6 @@ export const translations: Record<string, Translations> = {
       reset_confirm_title: "Reset Semua Data Keuangan",
       reset_confirm_message: "Apakah Anda yakin ingin mereset semua data keuangan? Tindakan ini tidak dapat dibatalkan.",
       reset_confirm_button: "Ya, Reset Sekarang",
-      }
     },
     error_page: {
       title: "Ups! Terjadi Kesalahan",
