@@ -18,8 +18,8 @@ const getDateRangeForPeriod = (period, month, year) => {
     };
   }
   if (periodKey === 'weekly') {
-    const now = new Date();
-    const dayOfMonth = now.getDate();
+    const currentDate = new Date();
+    const dayOfMonth = currentDate.getDate();
     const weekNumber = Math.ceil(dayOfMonth / 7);
     const startDay = (weekNumber - 1) * 7 + 1;
     const lastDay = new Date(year, month, 0).getDate();
@@ -38,9 +38,9 @@ const getDateRangeForPeriod = (period, month, year) => {
 
 const getBudgets = async (userId, month, year) => {
   // Default to current month/year
-  const now = new Date();
-  const m = month || now.getMonth() + 1;
-  const y = year || now.getFullYear();
+  const currentDate = new Date();
+  const m = month || currentDate.getMonth() + 1;
+  const y = year || currentDate.getFullYear();
 
   // Get budgets
   const budgetSnapshot = await db
@@ -142,9 +142,9 @@ const getBudgetSummary = async (userId, month, year) => {
  * Create a new budget (atomic check+insert via Firestore transaction)
  */
 const createBudget = async (userId, data) => {
-  const now = new Date();
-  const month = data.month || now.getMonth() + 1;
-  const year = data.year || now.getFullYear();
+  const currentDate = new Date();
+  const month = data.month || currentDate.getMonth() + 1;
+  const year = data.year || currentDate.getFullYear();
 
   try {
     const result = await db.runTransaction(async (transaction) => {
