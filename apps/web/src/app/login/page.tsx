@@ -60,8 +60,9 @@ export default function Login() {
     setLoading(true);
 
     try {
-      await signInWithPopup(auth, googleProvider);
-      await api.post("/auth/google");
+      const result = await signInWithPopup(auth, googleProvider);
+      const token = await result.user.getIdToken();
+      await api.post("/auth/google", undefined, { headers: { Authorization: `Bearer ${token}` } });
       router.push("/dashboard");
     } catch (err: unknown) {
       const fbErr = err as FirebaseAuthError;
