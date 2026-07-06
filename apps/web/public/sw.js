@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fintrack-v1';
+const CACHE_NAME = 'fintrack-v2';
 const STATIC_ASSETS = [
   '/',
   '/dashboard',
@@ -42,6 +42,12 @@ self.addEventListener('fetch', (event) => {
 
   // Never cache API responses (financial data)
   if (request.url.includes('/api/')) return;
+
+  // Do not intercept cross-origin requests (e.g. Google Auth APIs, external fonts)
+  // This prevents the SW from applying outdated CSP headers to them
+  if (!request.url.startsWith(self.location.origin)) {
+    return;
+  }
 
   // Navigation: network-first, fallback to cache, then offline page
   if (request.mode === 'navigate') {
