@@ -79,8 +79,8 @@ export default function Register() {
       {/* Left Panel: Hero/Gradient Illustration */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center p-12">
         {/* Hero Background Gradient */}
-        <div className="absolute inset-0 z-0 bg-gradient-to-br from-primary/30 via-primary-fixed/20 to-transparent"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent z-10"></div>
+        <div className="absolute inset-0 z-0 bg-gradient-to-br from-primary/70 via-primary/40 to-primary/20"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-background/10 to-transparent z-10"></div>
 
         {/* Hero Content */}
         <div className="relative z-20 max-w-lg text-left">
