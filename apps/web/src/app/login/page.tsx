@@ -67,7 +67,7 @@ export default function Login() {
   return (
     <AuthLayout
       heroTitle="Smart money management starts here."
-      heroSubtitle="Track your income, control expenses, and stay on budget — all from one clean dashboard."
+      heroSubtitle="Track your income, control expenses, and stay on budget â€” all from one clean dashboard."
     >
       <div className="mb-10 text-center lg:text-left">
         <div className="flex items-center justify-center lg:justify-start gap-2 mb-8">
@@ -107,7 +107,7 @@ export default function Login() {
           <div className="relative">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">lock</span>
             <input className="w-full pl-12 pr-4 py-3 bg-surface border border-outline/40 rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-200"
-              id="password" placeholder="••••••••" type="password" value={password}
+              id="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" type="password" value={password}
               onChange={(e) => setPassword(e.target.value)} required aria-label="Password" />
           </div>
         </div>

@@ -93,7 +93,7 @@ export default function Register() {
           <div className="relative">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">lock</span>
             <input className="w-full pl-12 pr-4 py-3 bg-surface border border-outline/40 rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-200"
-              id="password" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022" type="password" value={password}
+              id="password" placeholder="••••••••" type="password" value={password}
               onChange={(e) => setPassword(e.target.value)} required minLength={6} aria-label="Password" />
           </div>
         </div>
