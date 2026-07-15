@@ -102,7 +102,7 @@ export default function Register() {
       </div>
 
       {/* Right Panel: Register Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 lg:p-24 bg-surface relative">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 lg:p-24 bg-surface-container-low relative">
         {/* Subtle background ambient blob for depth */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
 
@@ -114,7 +114,7 @@ export default function Register() {
           Back to Home
         </Link>
 
-        <div className="w-full max-w-md relative z-10 mt-8 sm:mt-0">
+        <div className="w-full max-w-md relative z-10 mt-8 sm:mt-0 bg-surface rounded-2xl shadow-xl border border-outline-variant/20 p-8 sm:p-10">
           {/* Header */}
           <div className="mb-10 text-center lg:text-left">
             <div className="flex items-center justify-center lg:justify-start gap-2 mb-8">
@@ -157,7 +157,7 @@ export default function Register() {
                   person
                 </span>
                 <input
-                  className="w-full pl-12 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-200"
+                  className="w-full pl-12 pr-4 py-3 bg-surface border border-outline/40 rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-200"
                   id="name"
                   placeholder="John Doe"
                   type="text"
@@ -182,7 +182,7 @@ export default function Register() {
                   mail
                 </span>
                 <input
-                  className="w-full pl-12 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-200"
+                  className="w-full pl-12 pr-4 py-3 bg-surface border border-outline/40 rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-200"
                   id="email"
                   placeholder="name@company.com"
                   type="email"
@@ -207,7 +207,7 @@ export default function Register() {
                   lock
                 </span>
                 <input
-                  className="w-full pl-12 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-200"
+                  className="w-full pl-12 pr-4 py-3 bg-surface border border-outline/40 rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-200"
                   id="password"
                   placeholder="••••••••"
                   type="password"
@@ -242,7 +242,7 @@ export default function Register() {
 
             <div className="w-full">
               <button
-                className="w-full bg-surface border border-outline-variant text-on-surface font-body-sm text-body-sm font-medium py-3 rounded-lg hover:bg-surface-variant/50 transition-colors duration-200 flex items-center justify-center gap-3 disabled:opacity-70"
+                className="w-full bg-surface border border-outline/30 text-on-surface font-body-sm text-body-sm font-medium py-3 rounded-lg hover:bg-surface-variant/50 transition-colors duration-200 flex items-center justify-center gap-3 disabled:opacity-70"
                 type="button"
                 onClick={handleGoogleRegister}
                 disabled={loading}
