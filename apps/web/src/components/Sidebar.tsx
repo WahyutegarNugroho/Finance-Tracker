@@ -13,7 +13,7 @@ interface SidebarProps {
 
 export default function Sidebar({ activePath }: SidebarProps) {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const menuItems = [
     { name: t("common.dashboard"), icon: 'dashboard', path: '/dashboard' },
     { name: t("common.transactions"), icon: 'receipt_long', path: '/transactions' },
