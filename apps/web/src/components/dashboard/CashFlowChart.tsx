@@ -6,13 +6,13 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { ApiResponse, CashFlowEntry } from "@/types";
 import { useAuth } from "@/context/AuthContext";
-import "@/lib/chart-register";
+import "@/lib/register-bar";
 import { Bar } from "react-chartjs-2";
 import { chartColors } from "@/lib/colors";
 import { chartTooltip, chartScales } from "@/lib/chart-config";
 import { TooltipItem } from "chart.js";
 
-export default function CashFlowChart() {
+const CashFlowChart = React.memo(function CashFlowChart() {
   const { t } = useLanguage();
   const { formatCurrency } = useAuth();
 
@@ -99,4 +99,6 @@ export default function CashFlowChart() {
       </div>
     </div>
   );
-}
+});
+
+export default CashFlowChart;

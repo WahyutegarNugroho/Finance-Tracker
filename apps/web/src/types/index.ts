@@ -71,6 +71,13 @@ export interface DashboardOverview {
   year: number;
 }
 
+export interface BudgetWithSpent extends Budget {
+  spent: number;
+  remaining: number;
+  percentage: number;
+  status: "good" | "warning" | "critical";
+}
+
 export interface FirebaseAuthError {
   code?: string;
   message?: string;

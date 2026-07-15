@@ -62,13 +62,13 @@ export default function ConfirmDialog({
             onClick={onCancel}
             className="font-body-sm text-body-sm font-semibold text-on-surface-variant hover:bg-surface-variant/50 px-4 py-2 rounded-lg transition-colors"
           >
-            {cancelText || t("common.cancel") || "Cancel"}
+            {cancelText || t("common.cancel")}
           </button>
           <button
             onClick={onConfirm}
             className={`font-body-sm text-body-sm font-semibold text-white px-5 py-2 rounded-lg transition-all hover:scale-[1.02] shadow-sm ${isDestructive ? 'bg-error hover:bg-error/95' : 'bg-primary hover:bg-primary/95'}`}
           >
-            {confirmText || t("common.confirm") || "Confirm"}
+            {confirmText || t("common.confirm")}
           </button>
         </div>
       </div>

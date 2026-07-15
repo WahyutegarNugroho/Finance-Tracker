@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import Image from "next/image";
 import { useAuth } from '@/context/AuthContext';
@@ -13,13 +13,13 @@ interface SidebarProps {
 
 export default function Sidebar({ activePath }: SidebarProps) {
   const { user } = useAuth();
-  const { t, language } = useLanguage();
-  const menuItems = useMemo(() => [
+  const { t } = useLanguage();
+  const menuItems = [
     { name: t("common.dashboard"), icon: 'dashboard', path: '/dashboard' },
     { name: t("common.transactions"), icon: 'receipt_long', path: '/transactions' },
     { name: t("common.budget"), icon: 'account_balance_wallet', path: '/budget' },
     { name: t("common.analytics"), icon: 'analytics', path: '/analytics' },
-  ], [t]);
+  ];
 
   return (
     <aside className="bg-surface/95 backdrop-blur-xl fixed left-0 top-0 h-screen w-[260px] hidden md:flex flex-col border-r border-outline-variant/20 shadow-sm z-50 p-6 gap-4">

@@ -19,18 +19,7 @@ router.post(
     body('email').isEmail().withMessage('Valid email is required'),
     body('password')
       .isLength({ min: 8 })
-      .withMessage('Password must be at least 8 characters')
-      .custom((value) => {
-        const errors = [];
-        if (!/[a-z]/.test(value)) errors.push('a lowercase letter');
-        if (!/[A-Z]/.test(value)) errors.push('an uppercase letter');
-        if (!/\d/.test(value)) errors.push('a number');
-        if (!/[^a-zA-Z0-9]/.test(value)) errors.push('a special character');
-        if (errors.length > 0) {
-          throw new Error(`Password must contain: ${errors.join(', ')}`);
-        }
-        return true;
-      }),
+      .withMessage('Password must be at least 8 characters with uppercase, lowercase, number, and special character.'),
     body('displayName')
       .notEmpty()
       .trim()

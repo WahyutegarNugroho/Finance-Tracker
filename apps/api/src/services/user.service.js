@@ -63,6 +63,7 @@ const updateProfile = async (uid, data) => {
 const logger = require('../utils/logger');
 
 const resetUserData = async (uid) => {
+  const collections = ['transactions', 'budgets', 'categories'];
   const results = await Promise.allSettled([
     deleteCollectionInBatches('transactions', uid),
     deleteCollectionInBatches('budgets', uid),
@@ -73,6 +74,19 @@ const resetUserData = async (uid) => {
   if (failures.length > 0) {
     logger.error({ uid, failures: failures.map(f => f.reason) }, 'resetUserData partial failures');
   }
+
+  const statusByCollection = collections.reduce((acc, name, i) => {
+    acc[name] = results[i].status;
+    return acc;
+  }, {});
+
+  return {
+    success: failures.length === 0,
+    collections: statusByCollection,
+    message: failures.length === 0
+      ? 'All user data reset successfully.'
+      : `Failed to reset: ${failures.length} of ${collections.length} collections.`,
+  };
 };
 
 module.exports = { getProfile, updateProfile, resetUserData };

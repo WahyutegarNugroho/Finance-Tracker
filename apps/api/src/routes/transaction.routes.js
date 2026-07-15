@@ -2,6 +2,7 @@ const express = require('express');
 const { body, param, query } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate } = require('../middleware/auth');
+const { batchLimiter } = require('../middleware/rateLimiter');
 const transactionService = require('../services/transaction.service');
 const recurringService = require('../services/recurring.service');
 const response = require('../utils/response');
@@ -90,6 +91,7 @@ router.get('/',
  * Create multiple transactions in a single batch
  */
 router.post('/batch',
+  batchLimiter,
   validate([
     body('transactions').isArray({ min: 1, max: 500 }).withMessage('transactions must be an array (1-500 items)'),
     body('transactions.*.categoryId').notEmpty().withMessage('Each transaction needs a categoryId'),
@@ -97,7 +99,7 @@ router.post('/batch',
     body('transactions.*.categoryIcon').optional().trim(),
     body('transactions.*.type').isIn(['income', 'expense']).withMessage('Type must be income or expense'),
     body('transactions.*.amount').isFloat({ min: 0.01 }).withMessage('Amount must be a positive number'),
-    body('transactions.*.currency').optional().isString().isLength({ min: 3, max: 3 }).withMessage('Currency must be a 3-letter code'),
+    body('transactions.*.currency').optional().isString().isLength({ min: 3, max: 3 }).isIn(['IDR', 'USD', 'EUR', 'GBP', 'JPY', 'SGD']).withMessage('Currency must be a valid code (IDR, USD, EUR, GBP, JPY, SGD)'),
     body('transactions.*.isRecurring').optional().isBoolean(),
     body('transactions.*.recurringFrequency').optional().isIn(['daily', 'weekly', 'monthly', 'yearly']),
     body('transactions.*.recurringEndDate').optional().isISO8601(),
@@ -129,6 +131,7 @@ router.post('/batch',
  * Delete multiple transactions by ID (ownership verified)
  */
 router.delete('/batch',
+  batchLimiter,
   validate([
     body('ids').isArray({ min: 1, max: 100 }).withMessage('ids must be an array (1-100 items)'),
     body('ids.*').isString().notEmpty().withMessage('Each ID must be a valid string'),
@@ -186,7 +189,7 @@ router.post(
     body('amount')
       .isFloat({ min: 0.01 })
       .withMessage('Amount must be a positive number'),
-    body('currency').optional().isString().isLength({ min: 3, max: 3 }).withMessage('Currency must be a 3-letter code'),
+    body('currency').optional().isString().isLength({ min: 3, max: 3 }).isIn(['IDR', 'USD', 'EUR', 'GBP', 'JPY', 'SGD']).withMessage('Currency must be a valid code (IDR, USD, EUR, GBP, JPY, SGD)'),
     body('isRecurring').optional().isBoolean().withMessage('isRecurring must be a boolean'),
     body('recurringFrequency').optional().isIn(['daily', 'weekly', 'monthly', 'yearly']).withMessage('Frequency must be daily, weekly, monthly, or yearly'),
     body('recurringEndDate').optional().isISO8601().withMessage('recurringEndDate must be a valid ISO date'),
@@ -226,7 +229,7 @@ router.put(
     body('categoryIcon').optional().trim(),
     body('type').optional().isIn(['income', 'expense']),
     body('amount').optional().isFloat({ min: 0.01 }),
-    body('currency').optional().isString().isLength({ min: 3, max: 3 }).withMessage('Currency must be a 3-letter code'),
+    body('currency').optional().isString().isLength({ min: 3, max: 3 }).isIn(['IDR', 'USD', 'EUR', 'GBP', 'JPY', 'SGD']).withMessage('Currency must be a valid code (IDR, USD, EUR, GBP, JPY, SGD)'),
     body('isRecurring').optional().isBoolean().withMessage('isRecurring must be a boolean'),
     body('recurringFrequency').optional().isIn(['daily', 'weekly', 'monthly', 'yearly']).withMessage('Frequency must be daily, weekly, monthly, or yearly'),
     body('recurringEndDate').optional().isISO8601().withMessage('recurringEndDate must be a valid ISO date'),

@@ -1,28 +1,23 @@
-function normalizeNumberInput(val: string, currency: string, keepFormatting: boolean): string {
-  // ponytail: inline zero-decimal list → use Intl.NumberFormat resolvedOptions when supporting 10+ currencies
+export function cleanAmount(val: string, currency: string): string {
   const isDecimalAllowed = currency !== "IDR" && currency !== "JPY";
-
   if (isDecimalAllowed) {
-    let cleaned = val.replace(/,/g, ".").replace(/[^0-9.]/g, "");
+    const cleaned = val.replace(/,/g, ".").replace(/[^0-9.]/g, "");
     const parts = cleaned.split(".");
-    if (parts.length > 2) {
-      cleaned = parts[0] + "." + parts.slice(1).join("");
-    }
-
-    if (keepFormatting) {
-      const formattedInt = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-      const formattedDec = parts[1] !== undefined ? "." + parts[1] : "";
-      return formattedInt + formattedDec;
-    }
-    return cleaned;
+    return parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : cleaned;
   }
-
-  const cleaned = val.replace(/\D/g, "");
-  return keepFormatting ? cleaned.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : cleaned;
+  return val.replace(/\D/g, "");
 }
 
-export const formatWithDots = (val: string, currency: string) => normalizeNumberInput(val, currency, true);
-export const cleanAmountInput = (val: string, currency: string) => normalizeNumberInput(val, currency, false);
+export function formatAmount(val: string, currency: string): string {
+  const cleaned = cleanAmount(val, currency);
+  const isDecimalAllowed = currency !== "IDR" && currency !== "JPY";
+  if (isDecimalAllowed) {
+    const parts = cleaned.split(".");
+    const formattedInt = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts[1] !== undefined ? formattedInt + "." + parts[1] : formattedInt;
+  }
+  return cleaned.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
 
 export const formatDate = (dateString: string, language: string) => {
   const date = new Date(dateString);

@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import type { DashboardOverview } from "@/types";
 
-export default function SummaryCards({ data }: { data: DashboardOverview }) {
+export default React.memo(function SummaryCards({ data }: { data: DashboardOverview }) {
   const { formatCurrency } = useAuth();
   const { t } = useLanguage();
 
@@ -127,4 +127,4 @@ export default function SummaryCards({ data }: { data: DashboardOverview }) {
       </div>
     </div>
   );
-}
+});

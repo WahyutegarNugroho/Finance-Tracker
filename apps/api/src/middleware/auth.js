@@ -7,14 +7,12 @@ const logger = require('../utils/logger');
  */
 // ponytail: Map cache → switch to lru-cache npm package when >1k daily active users
 const tokenCache = new Map();
-const TOKEN_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const TOKEN_CACHE_TTL = 60 * 1000; // 1 minute
 const MAX_CACHE_SIZE = 1000;
 
 const getCachedToken = (token) => {
   const cached = tokenCache.get(token);
   if (cached && Date.now() - cached.ts < TOKEN_CACHE_TTL) {
-    // Refresh access time so active users are evicted last
-    cached.ts = Date.now();
     return cached.decodedToken;
   }
   tokenCache.delete(token);

@@ -65,8 +65,8 @@ router.post('/reset',
   ]),
   async (req, res, next) => {
     try {
-      await userService.resetUserData(req.user.uid);
-      return response.success(res, null, 'User data reset successfully.');
+      const result = await userService.resetUserData(req.user.uid);
+      return response.success(res, result.collections, result.message);
     } catch (error) {
       next(error);
     }

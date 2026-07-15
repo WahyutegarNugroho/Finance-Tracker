@@ -6,8 +6,7 @@ import { getCategoryColor } from "@/lib/colors";
 import { chartTooltip } from "@/lib/chart-config";
 import { TooltipItem } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
-
-// Components registered globally in lib/chart-register.ts
+import "@/lib/register-doughnut";
 
 interface SpendingChartProps {
   expenseByCategory: Array<{

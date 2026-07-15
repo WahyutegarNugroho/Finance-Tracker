@@ -3,7 +3,6 @@ import {
   parsePagination,
   buildCursor,
   encodeCursor,
-  decodeCursor,
 } from '../utils/pagination.js';
 
 describe('Pagination Utils', () => {
@@ -24,22 +23,17 @@ describe('Pagination Utils', () => {
     });
   });
 
-  describe('cursor encoding/decoding', () => {
-    it('encodes and decodes a cursor', () => {
+  describe('cursor encoding', () => {
+    it('encodes a cursor to base64', () => {
       const cursor = { sortValue: '2026-05-22T00:00:00.000Z', sortField: 'date', id: 'abc123' };
       const encoded = encodeCursor(cursor);
       expect(encoded).toBeTruthy();
-      const decoded = decodeCursor(encoded);
+      const decoded = JSON.parse(Buffer.from(encoded, 'base64').toString('utf8'));
       expect(decoded).toEqual(cursor);
     });
 
-    it('returns null for null/undefined input', () => {
+    it('returns null for null input', () => {
       expect(encodeCursor(null)).toBeNull();
-      expect(decodeCursor(null)).toBeNull();
-    });
-
-    it('returns null for invalid base64', () => {
-      expect(decodeCursor('not-valid-base64!!')).toBeNull();
     });
   });
 

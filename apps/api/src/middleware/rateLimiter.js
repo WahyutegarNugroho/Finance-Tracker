@@ -37,4 +37,16 @@ const resetLimiter = rateLimit({
   },
 });
 
-module.exports = { globalLimiter, authLimiter, resetLimiter };
+const batchLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: 'Too Many Requests',
+    message: 'Batch operations limited to 10 requests per 15 minutes.',
+  },
+});
+
+module.exports = { globalLimiter, authLimiter, resetLimiter, batchLimiter };

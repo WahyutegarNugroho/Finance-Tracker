@@ -1,14 +1,17 @@
-// ponytail: SSR blind spot → inject CSS var values via inline <script> if SSR deployment needed
-function getCSSVar(name: string): string {
-  if (typeof document === "undefined") return "";
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const cssVarCache = new Map<string, string>();
+function getCSSVar(name: string, fallback: string): string {
+  if (typeof document === "undefined") return fallback;
+  if (!cssVarCache.has(name)) {
+    cssVarCache.set(name, getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback);
+  }
+  return cssVarCache.get(name)!;
 }
 
 export const chartColors = {
-  get primary() { return getCSSVar("--color-primary") || "#4648d4"; },
-  get error() { return getCSSVar("--color-error") || "#ba1a1a"; },
-  get secondary() { return getCSSVar("--color-secondary") || "#49a454"; },
-  get tertiary() { return getCSSVar("--color-tertiary") || "#b07b10"; },
+  get primary() { return getCSSVar("--color-primary", "#4648d4"); },
+  get error() { return getCSSVar("--color-error", "#ba1a1a"); },
+  get secondary() { return getCSSVar("--color-secondary", "#49a454"); },
+  get tertiary() { return getCSSVar("--color-tertiary", "#b07b10"); },
 };
 
 export function chartColorWithOpacity(color: string, opacity: number): string {
@@ -19,22 +22,18 @@ export function chartColorWithOpacity(color: string, opacity: number): string {
   return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 }
 
-// ponytail: dual-language map → store color on Firestore category doc, remove client-side map
 const categoryColorMap: Record<string, string> = {
-  // English Default Categories
-  "Food & Dining": "#4648d4",      // Indigo
+  "Food & Dining": "#4648d4",
   "Food": "#4648d4",
-  "Transportation": "#8b5cf6",     // Violet/Purple
-  "Groceries": "#ec4899",          // Pink/Rose
-  "Rent & Utilities": "#f59e0b",   // Amber/Orange
-  "Entertainment": "#b07b10",      // Gold/Ochre
-  "Healthcare": "#ef4444",         // Terracotta Red
-  "Shopping": "#06b6d4",           // Cyan/Teal
-  "Salary": "#006c49",             // Sage Green
-  "Freelance": "#10b981",          // Mint
-  "Investment": "#6366f1",         // Slate Blue
-
-  // Indonesian Default Categories
+  "Transportation": "#8b5cf6",
+  "Groceries": "#ec4899",
+  "Rent & Utilities": "#f59e0b",
+  "Entertainment": "#b07b10",
+  "Healthcare": "#ef4444",
+  "Shopping": "#06b6d4",
+  "Salary": "#006c49",
+  "Freelance": "#10b981",
+  "Investment": "#6366f1",
   "Makanan & Minuman": "#4648d4",
   "Transportasi": "#8b5cf6",
   "Belanja Bulanan": "#ec4899",
@@ -47,29 +46,14 @@ const categoryColorMap: Record<string, string> = {
   "Investasi": "#6366f1",
 };
 
-// ponytail: 10-color cycle → generate via HSL stepping when custom categories exceed palette length
-// Premium, modern, and harmonious dark/light mode palette (avoiding eye-searing colors)
 const premiumPalette = [
-  "#4648d4", // Indigo
-  "#006c49", // Sage Green
-  "#b07b10", // Gold/Ochre
-  "#8b5cf6", // Soft Violet
-  "#06b6d4", // Cyan
-  "#ec4899", // Dusty Rose
-  "#ef4444", // Terracotta Red
-  "#6366f1", // Slate Blue
-  "#f59e0b", // Warm Amber
-  "#10b981", // Mint Green
+  "#4648d4", "#006c49", "#b07b10", "#8b5cf6", "#06b6d4",
+  "#ec4899", "#ef4444", "#6366f1", "#f59e0b", "#10b981",
 ];
 
 export function getCategoryColor(name: string, index: number): string {
   if (!name) return premiumPalette[index % premiumPalette.length];
-  
   const trimmed = name.trim();
-  if (categoryColorMap[trimmed]) {
-    return categoryColorMap[trimmed];
-  }
-  
-  // Custom categories get diverse sequential colors from the premium palette
+  if (categoryColorMap[trimmed]) return categoryColorMap[trimmed];
   return premiumPalette[index % premiumPalette.length];
 }

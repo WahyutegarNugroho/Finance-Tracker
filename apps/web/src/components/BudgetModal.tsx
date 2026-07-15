@@ -7,7 +7,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Budget, Category, ApiResponse } from "@/types";
-import { formatWithDots, cleanAmountInput } from "@/lib/formatting";
+import { formatAmount, cleanAmount } from "@/lib/formatting";
 
 interface BudgetPayload {
   limitAmount: number;
@@ -71,8 +71,8 @@ export default function BudgetModal({
     (!fetchingCats && categories.length > 0 ? categories[0].id : "");
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const cleaned = cleanAmountInput(e.target.value, currency);
-    setForm(f => ({ ...f, limitAmount: cleaned, displayAmount: formatWithDots(cleaned, currency) }));
+    const cleaned = cleanAmount(e.target.value, currency);
+    setForm(f => ({ ...f, limitAmount: cleaned, displayAmount: formatAmount(cleaned, currency) }));
   };
 
   const saveMutation = useMutation({

@@ -31,18 +31,8 @@ const encodeCursor = (cursor) => {
   return Buffer.from(JSON.stringify(cursor)).toString('base64');
 };
 
-const decodeCursor = (encoded) => {
-  if (!encoded) return null;
-  try {
-    return JSON.parse(Buffer.from(encoded, 'base64').toString('utf8'));
-  } catch {
-    return null;
-  }
-};
-
 module.exports = {
   parsePagination,
   buildCursor,
   encodeCursor,
-  decodeCursor,
 };

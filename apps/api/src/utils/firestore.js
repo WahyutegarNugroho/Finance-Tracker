@@ -1,5 +1,3 @@
-const { admin } = require('../config/firebase');
-
 const fromFirestoreTimestamp = (ts) => {
   if (!ts) return ts;
   return ts.toDate ? ts.toDate() : new Date(ts);
@@ -23,14 +21,12 @@ const mapSnapshot = (snapshot, extraDateFields = []) => {
   return snapshot.docs.map(doc => serializeDoc(doc, extraDateFields));
 };
 
-const serverTimestamp = () => admin.firestore.FieldValue.serverTimestamp();
 const now = () => new Date();
 
 module.exports = {
   fromFirestoreTimestamp,
   serializeDoc,
   mapSnapshot,
-  serverTimestamp,
   now,
   BATCH_LIMIT: 500,
 };
