@@ -31,9 +31,8 @@ export default function Home() {
         <section className="px-gutter md:px-container-margin max-w-[1440px] mx-auto flex flex-col items-center text-center mb-24">
           <h1 className="font-display text-display text-on-background max-w-4xl mb-6 tracking-tight">
             Control your spending. <br className="hidden md:block" />
-            <span className="text-primary relative inline-block">
+            <span className="text-primary">
               Grow your savings.
-              <div className="absolute bottom-1 left-0 w-full h-3 bg-primary/20 -z-10 rounded-full"></div>
             </span>
           </h1>
           <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mb-10 leading-relaxed">
@@ -76,8 +75,7 @@ export default function Home() {
             <div className="p-6 sm:p-8 flex flex-col gap-6">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="font-label-caps text-label-caps text-on-surface-variant">October 2026</p>
-                  <p className="font-headline-md text-headline-md text-on-background mt-1">FinTrack overview</p>
+                  <p className="font-headline-md text-headline-md text-on-background">FinTrack overview</p>
                 </div>
                 <div className="hidden sm:flex items-center gap-3 font-body-sm text-body-sm text-on-surface-variant">
                   <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-primary"></span>Income</span>
