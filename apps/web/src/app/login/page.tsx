@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signInWithEmailAndPassword, signInWithRedirect, sendPasswordResetEmail, GoogleAuthProvider } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, sendPasswordResetEmail, GoogleAuthProvider } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { api } from "@/lib/api";
 import { getFirebaseErrorMessage } from "@/lib/constants";
@@ -69,8 +69,17 @@ const handleGoogleLogin = async () => {
       sessionStorage.setItem('fintrackGooglePending', '1');
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-      await signInWithRedirect(auth, provider);
+      await signInWithPopup(auth, provider);
     } catch (err: unknown) {
+      const code = (err as { code?: string }).code;
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+        setError("Sign in cancelled.");
+        return;
+      }
+      if (code === 'auth/popup-blocked' || code === 'auth/operation-not-allowed') {
+        setError("Popup was blocked by the browser. Allow popups for this site and try again.");
+        return;
+      }
       setError(getFirebaseErrorMessage(err) || "Google sign-in failed. If the window was blocked, try again.");
     } finally { setLoading(false); }
   };
