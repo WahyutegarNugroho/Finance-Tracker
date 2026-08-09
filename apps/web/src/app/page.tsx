@@ -86,17 +86,14 @@ export default function Home() {
               </div>
 
               <div className="grid grid-cols-3 gap-4">
-                <div className="rounded-xl border border-outline-variant/25 p-4">
-                  <p className="font-label-caps text-label-caps text-on-surface-variant mb-1">Balance</p>
-                  <p className="font-headline-md text-headline-md text-on-background">Rp24.6M</p>
+                <div className="rounded-xl border border-outline-variant/25 p-4 flex items-center justify-center">
+                  <p className="font-label-caps text-label-caps text-white">Balance</p>
                 </div>
-                <div className="rounded-xl border border-outline-variant/25 p-4">
-                  <p className="font-label-caps text-label-caps text-on-surface-variant mb-1">Income</p>
-                  <p className="font-headline-md text-headline-md text-secondary">Rp41.2M</p>
+                <div className="rounded-xl border border-outline-variant/25 p-4 flex items-center justify-center">
+                  <p className="font-label-caps text-label-caps text-green-500">Income</p>
                 </div>
-                <div className="rounded-xl border border-outline-variant/25 p-4">
-                  <p className="font-label-caps text-label-caps text-on-surface-variant mb-1">Spent</p>
-                  <p className="font-headline-md text-headline-md text-error">Rp16.6M</p>
+                <div className="rounded-xl border border-outline-variant/25 p-4 flex items-center justify-center">
+                  <p className="font-label-caps text-label-caps text-orange-500">Spent</p>
                 </div>
               </div>
 
@@ -107,7 +104,9 @@ export default function Home() {
               <div className="flex flex-col">
                 <div className="flex items-center py-3 border-b border-outline-variant/20">
                   <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center flex-shrink-0 leading-none text-[20px]">restaurant</span>
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+                      <span className="material-symbols-outlined text-[20px]">restaurant</span>
+                    </div>
                     <div>
                       <p className="font-body-sm text-body-sm text-on-background">Grocery Store</p>
                       <p className="text-xs text-on-surface-variant">Food &amp; Drink</p>
@@ -116,7 +115,9 @@ export default function Home() {
                 </div>
                 <div className="flex items-center py-3 border-b border-outline-variant/20">
                   <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined w-9 h-9 rounded-lg bg-tertiary/10 text-tertiary flex items-center justify-center flex-shrink-0 leading-none text-[20px]">bolt</span>
+                    <div className="w-9 h-9 rounded-lg bg-tertiary/10 text-tertiary flex items-center justify-center flex-shrink-0">
+                      <span className="material-symbols-outlined text-[20px]">bolt</span>
+                    </div>
                     <div>
                       <p className="font-body-sm text-body-sm text-on-background">Electricity Bill</p>
                       <p className="text-xs text-on-surface-variant">Utilities</p>
@@ -125,7 +126,9 @@ export default function Home() {
                 </div>
                 <div className="flex items-center py-3">
                   <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined w-9 h-9 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center flex-shrink-0 leading-none text-[20px]">payments</span>
+                    <div className="w-9 h-9 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center flex-shrink-0">
+                      <span className="material-symbols-outlined text-[20px]">payments</span>
+                    </div>
                     <div>
                       <p className="font-body-sm text-body-sm text-on-background">Monthly Salary</p>
                       <p className="text-xs text-on-surface-variant">Income</p>
