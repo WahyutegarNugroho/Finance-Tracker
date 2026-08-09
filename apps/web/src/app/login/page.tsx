@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signInWithEmailAndPassword, signInWithPopup, sendPasswordResetEmail, GoogleAuthProvider } from "firebase/auth";
+import { signInWithEmailAndPassword, getRedirectResult, signInWithRedirect, sendPasswordResetEmail, GoogleAuthProvider } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { api } from "@/lib/api";
 import { getFirebaseErrorMessage } from "@/lib/constants";
@@ -16,8 +16,22 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [forgotPwdMsg, setForgotPwdMsg] = useState("");
+const [forgotPwdMsg, setForgotPwdMsg] = useState("");
   const [forgotPwdLoading, setForgotPwdLoading] = useState(false);
+
+  useEffect(() => {
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (!result) return;
+        const token = await result.user.getIdToken();
+        await api.post("/auth/google", undefined, { headers: { Authorization: `Bearer ${token}` } });
+        router.push("/dashboard");
+      })
+      .catch((err: unknown) => {
+        if (['auth/redirect-operation-in-progress', 'auth/popup-closed-by-user'].includes((err as { code?: string }).code || '')) return;
+        setError(getFirebaseErrorMessage(err) || "Google sign-in failed.");
+      });
+  }, [router]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,22 +58,14 @@ setForgotPwdMsg("Password reset email sent. Check your inbox.");
     } finally { setForgotPwdLoading(false); }
   };
 
-  const handleGoogleLogin = async () => {
+const handleGoogleLogin = async () => {
     setError(""); setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-      const result = await signInWithPopup(auth, provider);
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const token = await result.user.getIdToken();
-      await api.post("/auth/google", undefined, { headers: { Authorization: `Bearer ${token}` } });
-router.push("/dashboard");
+      await signInWithRedirect(auth, provider);
     } catch (err: unknown) {
-      if (err && typeof err === "object" && (err as { code?: string }).code === "auth/popup-closed-by-user") {
-        setError("Sign in cancelled.");
-        return;
-      }
-      setError(getFirebaseErrorMessage(err) || "Google sign-in failed.");
+      setError(getFirebaseErrorMessage(err) || "Google sign-in failed. If the window was blocked, try again.");
     } finally { setLoading(false); }
   };
 
