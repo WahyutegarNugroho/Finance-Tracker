@@ -10,16 +10,23 @@ const parsePagination = (query) => {
   return { limit };
 };
 
+const toDate = (value) => {
+  if (value && typeof value.toDate === 'function') return value.toDate();
+  return value;
+};
+
 const buildCursor = (doc, sortBy = 'date') => {
-  const data = doc.data();
+  const data = typeof doc.data === 'function' ? doc.data() : doc.data;
   const cursor = { id: doc.id };
+  const dateValue = toDate(data.date);
+  const isoDate = dateValue instanceof Date ? dateValue.toISOString() : dateValue;
 
   if (sortBy === 'amount') {
     cursor.sortValue = data.amount;
     cursor.sortField = 'amount';
-    cursor.date = data.date instanceof Date ? data.date.toISOString() : data.date;
+    cursor.date = isoDate;
   } else {
-    cursor.sortValue = data.date instanceof Date ? data.date.toISOString() : data.date;
+    cursor.sortValue = isoDate;
     cursor.sortField = 'date';
   }
 

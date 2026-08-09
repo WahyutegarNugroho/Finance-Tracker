@@ -1,11 +1,13 @@
 const { db } = require('../config/firebase');
-const { serializeDoc, mapSnapshot, now } = require('../utils/firestore');
+const { serializeDoc, mapSnapshot, now, fromFirestoreTimestamp } = require('../utils/firestore');
 const { parsePagination, encodeCursor, buildCursor } = require('../utils/pagination');
+const { scanForMatches } = require('../utils/search');
 const { calculateNextRecurringDate } = require('../utils/recurring');
 const logger = require('../utils/logger');
 
 const COLLECTION = 'transactions';
 const USERS_COLLECTION = 'users';
+const TX_DATE_FIELDS = ['date', 'createdAt', 'updatedAt'];
 
 /**
  * Get transactions with server-side filtering, search, and cursor-based pagination
@@ -47,23 +49,14 @@ const getTransactions = async (userId, queryParams) => {
     }
   }
 
-  // ponytail: 2x multiplier → add dedicated search service (Algolia/Typesense) when search precision matters
-  const searchMultiplier = queryParams.search ? 2 : 1;
-  const fetchLimit = (limit + 1) * searchMultiplier;
-  query = query.limit(fetchLimit);
+  const searchTerm = queryParams.search ? String(queryParams.search) : '';
+  if (searchTerm) {
+    return findTransactionsWithSearch(query, limit, sortBy, searchTerm);
+  }
 
-  const snapshot = await query.get();
+  const snapshot = await query.limit(limit + 1).get();
 
   let transactions = mapSnapshot(snapshot);
-
-  // Apply search filter before pagination to ensure correct hasMore detection
-  if (queryParams.search) {
-    const searchLower = queryParams.search.toLowerCase();
-    transactions = transactions.filter((tx) =>
-      (tx.note && tx.note.toLowerCase().includes(searchLower)) ||
-      (tx.categoryName && tx.categoryName.toLowerCase().includes(searchLower))
-    );
-  }
 
   const hasMore = transactions.length > limit;
   if (hasMore) {
@@ -80,6 +73,48 @@ const getTransactions = async (userId, queryParams) => {
   return {
     transactions,
     pagination: { hasMore, nextCursor, itemsPerPage: limit },
+  };
+};
+
+/**
+ * Search + cursor-paginate by scanning raw Firestore pages until enough matches
+ * are found (bounded by SCAN cap) — substring search has no native Firestore query.
+ */
+const findTransactionsWithSearch = async (baseQuery, limit, sortBy, searchTerm) => {
+  let query = baseQuery;
+
+  const result = await scanForMatches({
+    searchTerm,
+    limit,
+    fetchPage: async (count) => {
+      const snapshot = await query.limit(count).get();
+      if (snapshot.empty) return null;
+      const docs = snapshot.docs.map((doc) => ({ id: doc.id, data: doc.data() }));
+      query = query.startAfter(snapshot.docs[snapshot.docs.length - 1]);
+      return docs;
+    },
+  });
+
+  const transactions = result.transactions.map(({ id, data }) => {
+    const doc = { id, ...data };
+    for (const field of TX_DATE_FIELDS) {
+      if (doc[field] !== undefined) doc[field] = fromFirestoreTimestamp(doc[field]);
+    }
+    return doc;
+  });
+
+  const nextCursor = result.nextCursorDoc
+    ? encodeCursor(buildCursor(result.nextCursorDoc, sortBy))
+    : null;
+
+  return {
+    transactions,
+    pagination: {
+      hasMore: result.hasMore,
+      nextCursor,
+      itemsPerPage: limit,
+      ...(result.truncated ? { searchTruncated: true } : {}),
+    },
   };
 };
 

@@ -65,6 +65,20 @@ describe('Pagination Utils', () => {
       expect(cursor.sortField).toBe('amount');
       expect(cursor.sortValue).toBe(75000);
     });
+
+    it('serializes Firestore-like Timestamps to ISO before encoding', () => {
+      const ts = { toDate: () => new Date('2026-05-22T00:00:00.000Z'), _seconds: 1, _nanoseconds: 0 };
+      const doc = { id: 'doc3', data: () => ({ date: ts, amount: 10 }) };
+      const cursor = buildCursor(doc, 'date');
+      expect(cursor.sortValue).toBe('2026-05-22T00:00:00.000Z');
+    });
+
+    it('accepts plain { id, data } docs (search scan output)', () => {
+      const doc = { id: 'doc4', data: { date: new Date('2026-05-22'), amount: 5 } };
+      const cursor = buildCursor(doc, 'amount');
+      expect(cursor.sortField).toBe('amount');
+      expect(cursor.sortValue).toBe(5);
+    });
   });
 
 });
