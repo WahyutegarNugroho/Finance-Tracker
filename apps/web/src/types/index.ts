@@ -128,5 +128,6 @@ export interface ApiResponse<T> {
     hasMore: boolean;
     nextCursor?: string | null;
     itemsPerPage: number;
+    searchTruncated?: boolean;
   };
 }

@@ -2,5 +2,14 @@
   "$schema": "https://opencode.ai/config.json",
   "plugin": [
     "@dietrichgeber/ponytail"
-  ]
+  ],
+  "permission": {
+    "bash": {
+      "git *": "allow",
+      "pnpm *": "allow",
+      "npm *": "allow",
+      "node *": "allow",
+      "*": "ask"
+    }
+  }
 }

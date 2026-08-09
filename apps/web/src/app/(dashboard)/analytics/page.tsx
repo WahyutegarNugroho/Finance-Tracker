@@ -12,6 +12,7 @@ import Link from "next/link";
 import "@/lib/register-line";
 import "@/lib/register-doughnut";
 import { Line, Doughnut } from "react-chartjs-2";
+import type { TooltipItem } from "chart.js";
 import { chartColors, chartColorWithOpacity, getCategoryColor } from "@/lib/colors";
 import { chartTooltip, chartScales } from "@/lib/chart-config";
 
@@ -78,8 +79,7 @@ export default function Analytics() {
     responsive: true, maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      tooltip: { ...chartTooltip, callbacks: { label: function(context: any) { return ` ${context.dataset.label}: ${formatCurrency(context.raw)}`; } } }
+      tooltip: { ...chartTooltip, callbacks: { label: (context: TooltipItem<"line">) => ` ${context.dataset.label}: ${formatCurrency(context.raw)}` } }
     },
     scales: chartScales(formatCurrency)
   }), [formatCurrency]);
@@ -95,8 +95,7 @@ export default function Analytics() {
     responsive: true, maintainAspectRatio: false, cutout: "75%",
     plugins: {
       legend: { display: false },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      tooltip: { ...chartTooltip, callbacks: { label: function(context: any) { return ` ${context.label}: ${formatCurrency(context.raw)}`; } } }
+      tooltip: { ...chartTooltip, callbacks: { label: (context: TooltipItem<"doughnut">) => ` ${context.label}: ${formatCurrency(context.raw)}` } }
     }
   }), [formatCurrency]);
 

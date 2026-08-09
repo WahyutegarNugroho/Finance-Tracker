@@ -6,8 +6,7 @@ import Link from "next/link";
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { api } from "@/lib/api";
-import type { FirebaseAuthError } from "@/types";
-import { FIREBASE_ERRORS } from "@/lib/constants";
+import { getFirebaseErrorMessage } from "@/lib/constants";
 import AuthLayout from "@/components/auth/AuthLayout";
 import GoogleButton from "@/components/auth/GoogleButton";
 
@@ -28,9 +27,7 @@ export default function Register() {
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/dashboard");
     } catch (err: unknown) {
-      const fbErr = err as FirebaseAuthError;
-      const msg = fbErr?.data?.message || fbErr?.message || '';
-      setError(FIREBASE_ERRORS[fbErr?.code || ''] || msg || 'Failed to register.');
+      setError(getFirebaseErrorMessage(err) || 'Failed to register.');
     } finally { setLoading(false); }
   };
 
@@ -44,10 +41,12 @@ export default function Register() {
       const token = await result.user.getIdToken();
       await api.post("/auth/google", undefined, { headers: { Authorization: `Bearer ${token}` } });
       router.push("/dashboard");
-    } catch (err: any) {
-      console.error("Google sign up error:", err);
-      if (err?.code === 'auth/popup-closed-by-user') { setError("Sign up cancelled."); return; }
-      setError(FIREBASE_ERRORS[err?.code || ''] || err?.message || 'Google sign up failed.');
+    } catch (err: unknown) {
+      if (err && typeof err === "object" && (err as { code?: string }).code === "auth/popup-closed-by-user") {
+        setError("Sign up cancelled.");
+        return;
+      }
+      setError(getFirebaseErrorMessage(err) || "Google sign-up failed.");
     } finally { setLoading(false); }
   };
 

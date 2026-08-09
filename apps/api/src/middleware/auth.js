@@ -2,7 +2,7 @@ const { auth } = require('../config/firebase');
 const logger = require('../utils/logger');
 
 /**
- * Simple in-memory token cache (TTL: 5 minutes)
+ * Simple in-memory token cache (TTL: 1 minute)
  * Reduces Firebase Auth verifyIdToken calls on every request
  */
 // ponytail: Map cache → switch to lru-cache npm package when >1k daily active users

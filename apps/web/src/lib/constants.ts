@@ -1,4 +1,6 @@
-// ponytail: incomplete error map → use fbErr.message as final fallback (already done at login:32, register:42)
+import type { FirebaseAuthError } from "@/types";
+
+// ponytail: incomplete error map → use err.message as final fallback (done in login/register)
 export const FIREBASE_ERRORS: Record<string, string> = {
   'auth/user-not-found': 'Email not registered. Please sign up.',
   'auth/wrong-password': 'Incorrect password. Please try again.',
@@ -12,4 +14,12 @@ export const FIREBASE_ERRORS: Record<string, string> = {
   'auth/popup-closed-by-user': 'Sign-in popup was closed before completing.',
   'auth/cancelled-popup-request': 'Sign-in was cancelled.',
   'auth/requires-recent-login': 'Please sign in again to perform this action.',
+};
+
+export const getFirebaseErrorMessage = (err: unknown): string => {
+  if (err && typeof err === "object") {
+    const fbErr = err as FirebaseAuthError;
+    return FIREBASE_ERRORS[fbErr.code || ""] || fbErr.message || "";
+  }
+  return "";
 };

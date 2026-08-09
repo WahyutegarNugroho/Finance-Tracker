@@ -58,6 +58,7 @@ function TransactionsContent() {
   const pagination = transactionsData?.pagination;
   const hasMore = pagination?.hasMore ?? false;
   const canGoBack = cursorStack.length > 0;
+  const searchTruncated = !!transactionsData?.pagination?.searchTruncated;
   const filteredTransactions = Array.isArray(transactions) ? transactions : [];
 
   const resetPagination = useCallback(() => {
@@ -227,6 +228,11 @@ function TransactionsContent() {
             ? t("transactions_page.transaction_count").replace("{count}", String(filteredTransactions.length))
             : ''}
         </span>
+        {searchTruncated && (
+          <span className="font-body-sm text-body-sm text-error">
+            {t("transactions_page.search_truncated")}
+          </span>
+        )}
         <div className="flex items-center gap-2">
           <button onClick={() => { const prev = cursorStack[cursorStack.length - 1] || null; if (prev !== undefined) { setCursorStack(prev => prev.slice(0, -1)); setCursor(prev); } }}
             disabled={!canGoBack}

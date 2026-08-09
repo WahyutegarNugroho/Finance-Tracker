@@ -6,8 +6,7 @@ import Link from "next/link";
 import { signInWithEmailAndPassword, signInWithPopup, sendPasswordResetEmail, GoogleAuthProvider } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { api } from "@/lib/api";
-import type { FirebaseAuthError } from "@/types";
-import { FIREBASE_ERRORS } from "@/lib/constants";
+import { getFirebaseErrorMessage } from "@/lib/constants";
 import AuthLayout from "@/components/auth/AuthLayout";
 import GoogleButton from "@/components/auth/GoogleButton";
 
@@ -25,11 +24,10 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+await signInWithEmailAndPassword(auth, email, password);
       router.push("/dashboard");
     } catch (err: unknown) {
-      const fbErr = err as FirebaseAuthError;
-      setError(FIREBASE_ERRORS[fbErr?.code || ''] || 'Login failed. Please try again.');
+      setError(getFirebaseErrorMessage(err) || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -40,10 +38,9 @@ export default function Login() {
     setError(""); setForgotPwdMsg(""); setForgotPwdLoading(true);
     try {
       await sendPasswordResetEmail(auth, email);
-      setForgotPwdMsg("Password reset email sent. Check your inbox.");
+setForgotPwdMsg("Password reset email sent. Check your inbox.");
     } catch (err: unknown) {
-      const fbErr = err as FirebaseAuthError;
-      setForgotPwdMsg(FIREBASE_ERRORS[fbErr?.code || ''] || 'Failed to send reset email.');
+      setForgotPwdMsg(getFirebaseErrorMessage(err) || 'Failed to send reset email.');
     } finally { setForgotPwdLoading(false); }
   };
 
@@ -56,11 +53,13 @@ export default function Login() {
       await new Promise(resolve => setTimeout(resolve, 500));
       const token = await result.user.getIdToken();
       await api.post("/auth/google", undefined, { headers: { Authorization: `Bearer ${token}` } });
-      router.push("/dashboard");
-    } catch (err: any) {
-      console.error("Google sign in error:", err);
-      if (err?.code === 'auth/popup-closed-by-user') { setError("Sign in cancelled."); return; }
-      setError(FIREBASE_ERRORS[err?.code || ''] || err?.message || 'Google sign in failed.');
+router.push("/dashboard");
+    } catch (err: unknown) {
+      if (err && typeof err === "object" && (err as { code?: string }).code === "auth/popup-closed-by-user") {
+        setError("Sign in cancelled.");
+        return;
+      }
+      setError(getFirebaseErrorMessage(err) || "Google sign-in failed.");
     } finally { setLoading(false); }
   };
 
