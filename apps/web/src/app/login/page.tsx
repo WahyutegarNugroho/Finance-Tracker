@@ -19,7 +19,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-const [forgotPwdMsg, setForgotPwdMsg] = useState("");
+  const [forgotPwdMsg, setForgotPwdMsg] = useState("");
   const [forgotPwdLoading, setForgotPwdLoading] = useState(false);
 
   useEffect(() => {
@@ -43,7 +43,7 @@ const [forgotPwdMsg, setForgotPwdMsg] = useState("");
     setError("");
     setLoading(true);
     try {
-await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, email, password);
       router.push("/dashboard");
     } catch (err: unknown) {
       setError(getFirebaseErrorMessage(err) || 'Login failed. Please try again.');
@@ -57,13 +57,13 @@ await signInWithEmailAndPassword(auth, email, password);
     setError(""); setForgotPwdMsg(""); setForgotPwdLoading(true);
     try {
       await sendPasswordResetEmail(auth, email);
-setForgotPwdMsg("Password reset email sent. Check your inbox.");
+      setForgotPwdMsg("Password reset email sent. Check your inbox.");
     } catch (err: unknown) {
       setForgotPwdMsg(getFirebaseErrorMessage(err) || 'Failed to send reset email.');
     } finally { setForgotPwdLoading(false); }
   };
 
-const handleGoogleLogin = async () => {
+  const handleGoogleLogin = async () => {
     setError(""); setLoading(true);
     try {
       sessionStorage.setItem('fintrackGooglePending', '1');
@@ -87,9 +87,9 @@ const handleGoogleLogin = async () => {
   return (
     <AuthLayout
       heroTitle="Smart money management starts here."
-      heroSubtitle="Track your income, control expenses, and stay on budget — all from one clean dashboard."
+      heroSubtitle="Track your income, control expenses and stay on budget all from one clean dashboard."
     >
-<div className="mb-10 lg:hidden">
+      <div className="mb-10 lg:hidden">
         <div className="flex items-center gap-2 mb-8">
           <span className="material-symbols-outlined text-primary text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
           <span className="font-headline-md text-headline-md font-bold text-primary tracking-tight">FinTrack</span>
@@ -135,7 +135,7 @@ const handleGoogleLogin = async () => {
         </div>
 
         <div className="pt-2 space-y-4">
-<button className="w-full bg-primary text-on-primary font-label-caps text-label-caps py-4 rounded-lg shadow-sm hover:bg-primary/90 transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-70"
+          <button className="w-full bg-primary text-on-primary font-label-caps text-label-caps py-4 rounded-lg shadow-sm hover:bg-primary/90 transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-70"
             type="submit" disabled={loading}>
             {loading ? "Signing In..." : "Sign In"}
             {!loading && <span className="material-symbols-outlined text-sm">arrow_forward</span>}
