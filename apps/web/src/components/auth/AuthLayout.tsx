@@ -34,33 +34,7 @@ export default function AuthLayout({ children, heroTitle, heroSubtitle }: AuthLa
             {heroSubtitle}
           </p>
 
-          <div className="mt-12 rounded-2xl bg-white/[0.03] backdrop-blur-3xl border border-white/[0.08] p-6 max-w-sm shadow-2xl relative overflow-hidden group">
-            {/* Glossy hover effect */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/[0.05] to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-            
-            <div className="flex items-center justify-between mb-5 pb-5 border-b border-white/[0.08]">
-              <span className="font-label-caps text-label-caps text-white/60">
-                This month&apos;s balance
-              </span>
-              <div className="w-8 h-8 rounded-full bg-white/[0.08] flex items-center justify-center">
-                <span className="material-symbols-outlined text-white/90 text-[18px]">trending_up</span>
-              </div>
-            </div>
-            <dl className="flex flex-col gap-3 font-body-sm text-body-sm">
-              <div className="flex items-center justify-between">
-                <dt className="text-white/60">Income</dt>
-                <dd className="font-medium text-white text-base">Rp41,200,000</dd>
-              </div>
-              <div className="flex items-center justify-between">
-                <dt className="text-white/60">Expenses</dt>
-                <dd className="font-medium text-white text-base">Rp16,620,000</dd>
-              </div>
-              <div className="flex items-center justify-between pt-2 mt-2 border-t border-white/[0.08]">
-                <dt className="text-white/60">Saved</dt>
-                <dd className="font-medium text-emerald-400 bg-emerald-400/10 px-2.5 py-1 rounded-md">59%</dd>
-              </div>
-            </dl>
-          </div>
+
         </div>
 
         <p className="font-body-sm text-body-sm text-white/40 relative z-10">Track your account. Grow your savings.</p>
