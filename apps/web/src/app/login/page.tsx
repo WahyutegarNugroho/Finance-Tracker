@@ -89,11 +89,13 @@ const handleGoogleLogin = async () => {
       heroTitle="Smart money management starts here."
       heroSubtitle="Track your income, control expenses, and stay on budget — all from one clean dashboard."
     >
-      <div className="mb-10 text-center lg:text-left">
-        <div className="flex items-center justify-center lg:justify-start gap-2 mb-8">
+<div className="mb-10 lg:hidden">
+        <div className="flex items-center gap-2 mb-8">
           <span className="material-symbols-outlined text-primary text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
           <span className="font-headline-md text-headline-md font-bold text-primary tracking-tight">FinTrack</span>
         </div>
+      </div>
+      <div className="mb-10">
         <h2 className="font-headline-lg text-headline-lg text-on-background mb-2">Welcome back</h2>
         <p className="font-body-sm text-body-sm text-on-surface-variant">Please enter your details to access your dashboard.</p>
       </div>
@@ -133,7 +135,7 @@ const handleGoogleLogin = async () => {
         </div>
 
         <div className="pt-2 space-y-4">
-          <button className="w-full bg-primary text-on-primary font-label-caps text-label-caps py-4 rounded-lg shadow-sm hover:bg-primary-container hover:scale-[1.02] active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-70 disabled:hover:scale-100"
+<button className="w-full bg-primary text-on-primary font-label-caps text-label-caps py-4 rounded-lg shadow-sm hover:bg-primary/90 transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-70"
             type="submit" disabled={loading}>
             {loading ? "Signing In..." : "Sign In"}
             {!loading && <span className="material-symbols-outlined text-sm">arrow_forward</span>}

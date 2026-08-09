@@ -20,7 +20,7 @@ export default function Home() {
             <Link href="/login" className="font-label-caps text-label-caps px-3 md:px-4 py-2 rounded-lg text-on-surface-variant hover:text-primary transition-colors">
               Log In
             </Link>
-            <Link href="/register" className="font-label-caps text-label-caps bg-primary text-on-primary px-4 md:px-5 py-2 md:py-2.5 rounded-lg hover:bg-primary/90 hover:scale-[1.02] transition-all shadow-sm">
+            <Link href="/register" className="font-label-caps text-label-caps bg-primary text-on-primary px-4 md:px-5 py-2 md:py-2.5 rounded-lg hover:bg-primary/90 transition-colors shadow-sm">
               Get Started
             </Link>
           </div>
@@ -41,107 +41,99 @@ export default function Home() {
             and set budgets without the complexity.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 mb-20 w-full sm:w-auto">
-            <Link href="/register" className="font-label-caps text-label-caps bg-primary text-on-primary px-8 py-4 rounded-xl hover:bg-primary/90 hover:scale-[1.02] transition-all shadow-[0_8px_20px_rgba(70,72,212,0.25)] w-full sm:w-auto text-center flex items-center justify-center">
+            <Link href="/register" className="font-label-caps text-label-caps bg-primary text-on-primary px-8 py-4 rounded-xl hover:bg-primary/90 transition-colors w-full sm:w-auto text-center">
               Get Started
             </Link>
-            <Link href="/dashboard" className="font-label-caps text-label-caps glass-panel text-on-surface-variant px-8 py-4 rounded-xl hover:text-primary hover:scale-[1.02] transition-all w-full sm:w-auto text-center flex items-center justify-center">
+            <Link href="/dashboard" className="font-label-caps text-label-caps border border-outline-variant/40 text-on-surface-variant px-8 py-4 rounded-xl hover:text-primary hover:border-primary/50 transition-colors w-full sm:w-auto text-center">
               View Demo
             </Link>
           </div>
 
-          <div className="w-full max-w-5xl relative rounded-[2rem] p-3 bg-gradient-to-b from-primary/10 to-transparent">
-            <div className="w-full min-h-[500px] md:h-[600px] bg-surface/90 backdrop-blur-xl border border-outline-variant/30 rounded-3xl shadow-[0_24px_48px_-12px_rgba(70,72,212,0.15)] flex overflow-hidden">
-              <div className="w-[240px] border-r border-outline-variant/15 hidden md:flex flex-col p-6 gap-2 bg-surface-container-lowest/50">
-                <div className="w-28 h-6 bg-primary/20 rounded-md mb-8"></div>
-                <div className="w-full h-11 bg-primary/10 rounded-lg flex items-center px-4 gap-3">
-                  <span
-                    className="material-symbols-outlined text-primary text-[20px]"
-                    style={{ fontVariationSettings: "'FILL' 1" }}
-                  >
-                    dashboard
-                  </span>
-                  <div className="w-20 h-2.5 bg-primary/40 rounded-full"></div>
+          <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-[240px_1fr] rounded-2xl border border-outline-variant/25 bg-surface overflow-hidden text-left">
+            <aside className="hidden lg:flex flex-col gap-1 p-4 bg-surface-container-low border-b lg:border-b-0 lg:border-r border-outline-variant/20">
+              <div className="flex items-center gap-2.5 px-3 h-10 rounded-lg bg-surface border border-outline-variant/25 font-body-sm text-body-sm font-medium">
+                <span className="material-symbols-outlined text-primary text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>dashboard</span>
+                Dashboard
+              </div>
+              <div className="flex items-center gap-2.5 px-3 h-10 rounded-lg font-body-sm text-body-sm text-on-surface-variant">
+                <span className="material-symbols-outlined text-[20px]">receipt_long</span>
+                Transactions
+              </div>
+              <div className="flex items-center gap-2.5 px-3 h-10 rounded-lg font-body-sm text-body-sm text-on-surface-variant">
+                <span className="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+                Budgets
+              </div>
+              <div className="flex items-center gap-2.5 px-3 h-10 rounded-lg font-body-sm text-body-sm text-on-surface-variant">
+                <span className="material-symbols-outlined text-[20px]">insights</span>
+                Analytics
+              </div>
+              <div className="mt-auto flex items-center gap-2.5 px-3 h-10 rounded-lg font-body-sm text-body-sm text-on-surface-variant">
+                <span className="material-symbols-outlined text-[20px]">settings</span>
+                Settings
+              </div>
+            </aside>
+
+            <div className="p-6 sm:p-8 flex flex-col gap-6">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="font-label-caps text-label-caps text-on-surface-variant">October 2026</p>
+                  <p className="font-headline-md text-headline-md text-on-background mt-1">FinTrack overview</p>
                 </div>
-                <div className="w-full h-11 flex items-center px-4 gap-3 opacity-60">
-                  <span className="material-symbols-outlined text-[20px]">
-                    receipt_long
-                  </span>
-                  <div className="w-24 h-2.5 bg-on-surface-variant/40 rounded-full"></div>
-                </div>
-                <div className="w-full h-11 flex items-center px-4 gap-3 opacity-60">
-                  <span className="material-symbols-outlined text-[20px]">
-                    account_balance_wallet
-                  </span>
-                  <div className="w-16 h-2.5 bg-on-surface-variant/40 rounded-full"></div>
-                </div>
-                <div className="mt-auto w-full h-11 flex items-center px-4 gap-3 opacity-60">
-                  <span className="material-symbols-outlined text-[20px]">
-                    settings
-                  </span>
-                  <div className="w-14 h-2.5 bg-on-surface-variant/40 rounded-full"></div>
+                <div className="hidden sm:flex items-center gap-3 font-body-sm text-body-sm text-on-surface-variant">
+                  <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-primary"></span>Income</span>
+                  <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-secondary"></span>Expense</span>
                 </div>
               </div>
 
-              <div className="flex-1 p-6 md:p-10 flex flex-col gap-8 bg-surface/40">
-                <div className="flex justify-between items-center w-full">
-                  <div>
-                    <div className="w-24 sm:w-40 h-6 bg-on-surface-variant/20 rounded-md mb-2"></div>
-                    <div className="w-full max-w-[200px] sm:max-w-none sm:w-64 h-3 bg-on-surface-variant/10 rounded-full"></div>
-                  </div>
-                  <div className="flex gap-4 items-center">
-                    <div className="w-10 h-10 bg-surface border border-outline-variant/30 shadow-sm rounded-full sm:flex items-center justify-center hidden">
-                      <span className="material-symbols-outlined text-on-surface-variant text-[20px]">
-                        notifications
-                      </span>
-                    </div>
-                    <div className="w-10 h-10 bg-primary/20 border border-primary/30 rounded-full"></div>
-                  </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="rounded-xl border border-outline-variant/25 p-4">
+                  <p className="font-label-caps text-label-caps text-on-surface-variant mb-1">Balance</p>
+                  <p className="font-headline-md text-headline-md text-on-background">Rp24.6M</p>
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
-                  <div className="h-36 glass-panel rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full"></div>
-                    <div className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
-                      <span className="material-symbols-outlined text-[20px]">
-                        trending_up
-                      </span>
-                    </div>
-                    <div>
-                      <div className="w-20 h-3 bg-on-surface-variant/20 rounded-full mb-3"></div>
-                      <div className="w-32 h-6 bg-primary/20 rounded-md"></div>
-                    </div>
-                  </div>
-                  <div className="h-36 glass-panel rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-secondary/5 rounded-bl-full"></div>
-                    <div className="w-10 h-10 bg-secondary-container/30 text-secondary rounded-xl flex items-center justify-center">
-                      <span className="material-symbols-outlined text-[20px]">
-                        pie_chart
-                      </span>
-                    </div>
-                    <div>
-                      <div className="w-24 h-3 bg-on-surface-variant/20 rounded-full mb-3"></div>
-                      <div className="w-28 h-6 bg-on-surface-variant/20 rounded-md"></div>
-                    </div>
-                  </div>
-                  <div className="h-36 glass-panel rounded-2xl p-5 flex-col justify-between relative overflow-hidden hidden sm:flex">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-tertiary/5 rounded-bl-full"></div>
-                    <div className="w-10 h-10 bg-tertiary-container/20 text-tertiary rounded-xl flex items-center justify-center">
-                      <span className="material-symbols-outlined text-[20px]">
-                        flag
-                      </span>
-                    </div>
-                    <div>
-                      <div className="w-16 h-3 bg-on-surface-variant/20 rounded-full mb-3"></div>
-                      <div className="w-24 h-6 bg-on-surface-variant/20 rounded-md"></div>
-                    </div>
-                  </div>
+                <div className="rounded-xl border border-outline-variant/25 p-4">
+                  <p className="font-label-caps text-label-caps text-on-surface-variant mb-1">Income</p>
+                  <p className="font-headline-md text-headline-md text-secondary">Rp41.2M</p>
                 </div>
+                <div className="rounded-xl border border-outline-variant/25 p-4">
+                  <p className="font-label-caps text-label-caps text-on-surface-variant mb-1">Spent</p>
+                  <p className="font-headline-md text-headline-md text-error">Rp16.6M</p>
+                </div>
+              </div>
 
-                <div className="h-64 sm:flex-1 glass-panel rounded-2xl p-6 relative overflow-hidden flex flex-col">
-                  <div className="w-32 h-4 bg-on-surface-variant/20 rounded-full mb-6 z-10"></div>
-                  <div className="flex-1 relative">
-                    <MockChart />
+              <div className="relative h-48">
+                <MockChart />
+              </div>
+
+              <div className="flex flex-col">
+                <div className="flex items-center justify-between py-3 border-b border-outline-variant/20">
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-[20px]">restaurant</span>
+                    <div>
+                      <p className="font-body-sm text-body-sm text-on-background">Grocery Store</p>
+                      <p className="text-xs text-on-surface-variant">Food &amp; Drink</p>
+                    </div>
                   </div>
+                  <p className="font-body-sm text-body-sm text-on-surface-variant">– Rp285,000</p>
+                </div>
+                <div className="flex items-center justify-between py-3 border-b border-outline-variant/20">
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined w-9 h-9 rounded-lg bg-tertiary/10 text-tertiary flex items-center justify-center text-[20px]">bolt</span>
+                    <div>
+                      <p className="font-body-sm text-body-sm text-on-background">Electricity Bill</p>
+                      <p className="text-xs text-on-surface-variant">Utilities</p>
+                    </div>
+                  </div>
+                  <p className="font-body-sm text-body-sm text-on-surface-variant">– Rp412,750</p>
+                </div>
+                <div className="flex items-center justify-between py-3">
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined w-9 h-9 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center text-[20px]">payments</span>
+                    <div>
+                      <p className="font-body-sm text-body-sm text-on-background">Monthly Salary</p>
+                      <p className="text-xs text-on-surface-variant">Income</p>
+                    </div>
+                  </div>
+                  <p className="font-body-sm text-body-sm text-secondary font-medium">+ Rp12,000,000</p>
                 </div>
               </div>
             </div>
@@ -160,9 +152,9 @@ export default function Home() {
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-              <div className="glass-panel rounded-2xl p-8 hover:shadow-[0_12px_40px_rgba(70,72,212,0.12)] transition-all duration-300 hover:-translate-y-1 group">
-                <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300">
-                  <span className="material-symbols-outlined text-primary text-[28px]">
+              <div className="rounded-2xl border border-outline-variant/20 bg-surface p-8">
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-6">
+                  <span className="material-symbols-outlined text-primary text-[26px]">
                     analytics
                   </span>
                 </div>
@@ -175,9 +167,9 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="glass-panel rounded-2xl p-8 hover:shadow-[0_12px_40px_rgba(70,72,212,0.12)] transition-all duration-300 hover:-translate-y-1 group">
-                <div className="w-14 h-14 bg-secondary-container/30 border border-secondary/20 rounded-xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300">
-                  <span className="material-symbols-outlined text-secondary text-[28px]">
+              <div className="rounded-2xl border border-outline-variant/20 bg-surface p-8">
+                <div className="w-14 h-14 bg-secondary/10 border border-secondary/25 rounded-xl flex items-center justify-center mb-6">
+                  <span className="material-symbols-outlined text-secondary text-[26px]">
                     account_balance_wallet
                   </span>
                 </div>
@@ -190,9 +182,9 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="glass-panel rounded-2xl p-8 hover:shadow-[0_12px_40px_rgba(70,72,212,0.12)] transition-all duration-300 hover:-translate-y-1 group">
-                <div className="w-14 h-14 bg-tertiary-container/20 border border-tertiary/20 rounded-xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300">
-                  <span className="material-symbols-outlined text-tertiary text-[28px]">
+              <div className="rounded-2xl border border-outline-variant/20 bg-surface p-8">
+                <div className="w-14 h-14 bg-tertiary/10 border border-tertiary/25 rounded-xl flex items-center justify-center mb-6">
+                  <span className="material-symbols-outlined text-tertiary text-[26px]">
                     smartphone
                   </span>
                 </div>
@@ -210,18 +202,10 @@ export default function Home() {
 
         {/* Footer / Watermark */}
         <footer className="w-full max-w-5xl mx-auto mt-32 pb-12 border-t border-outline-variant/10 pt-12 flex flex-col items-center gap-4">
-          <div className="flex items-center gap-2 opacity-60">
-            <div className="w-6 h-6 bg-on-surface-variant/20 rounded flex items-center justify-center">
-              <span className="material-symbols-outlined text-on-surface-variant text-[14px]">account_balance_wallet</span>
-            </div>
-            <span className="font-display-sm text-[16px] tracking-tight text-on-surface-variant">FinTrack</span>
-          </div>
-
-          <div className="text-center">
-            <p className="font-body-sm text-body-sm text-on-surface-variant opacity-80">
-              © {new Date().getFullYear()} FinTrack. All rights reserved.
-            </p>
-          </div>
+          <span className="font-headline-md text-headline-md font-bold text-primary tracking-tight">FinTrack</span>
+          <p className="font-body-sm text-body-sm text-on-surface-variant opacity-80">
+            © {new Date().getFullYear()} FinTrack. All rights reserved.
+          </p>
         </footer>
       </main>
     </>

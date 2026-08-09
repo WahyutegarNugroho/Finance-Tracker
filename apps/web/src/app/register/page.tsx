@@ -76,11 +76,13 @@ export default function Register() {
       heroTitle="Take control of your money."
       heroSubtitle="Sign up in seconds and start tracking your income, expenses, and budgets."
     >
-      <div className="mb-10 text-center lg:text-left">
-        <div className="flex items-center justify-center lg:justify-start gap-2 mb-8">
+      <div className="mb-10 lg:hidden">
+        <div className="flex items-center gap-2 mb-8">
           <span className="material-symbols-outlined text-primary text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
           <span className="font-headline-md text-headline-md font-bold text-primary tracking-tight">FinTrack</span>
         </div>
+      </div>
+      <div className="mb-10">
         <h2 className="font-headline-lg text-headline-lg text-on-background mb-2">Create an account</h2>
         <p className="font-body-sm text-body-sm text-on-surface-variant">Enter your details to get started.</p>
       </div>
@@ -118,7 +120,7 @@ export default function Register() {
           </div>
         </div>
 
-        <button className="w-full bg-primary text-on-primary font-label-caps text-label-caps py-3 rounded-lg hover:bg-primary/90 hover:scale-[1.02] transition-all shadow-sm disabled:opacity-70 mt-4 flex items-center justify-center gap-2"
+        <button className="w-full bg-primary text-on-primary font-label-caps text-label-caps py-4 rounded-lg shadow-sm hover:bg-primary/90 transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-70 mt-4"
           type="submit" disabled={loading}>
           {loading ? (
             <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
