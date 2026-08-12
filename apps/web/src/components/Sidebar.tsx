@@ -12,7 +12,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ activePath }: SidebarProps) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { t, language } = useLanguage();
   const menuItems = [
     { name: t("common.dashboard"), icon: 'dashboard', path: '/dashboard' },
@@ -66,7 +66,7 @@ export default function Sidebar({ activePath }: SidebarProps) {
       </nav>
 
       {/* Bottom Area */}
-      <div className="mt-auto">
+      <div className="mt-auto flex flex-col gap-2">
         {/* Settings */}
         <Link
           href="/settings"
@@ -81,8 +81,17 @@ export default function Sidebar({ activePath }: SidebarProps) {
           <span className="font-body-sm text-body-sm">{t("common.settings")}</span>
         </Link>
 
+        {/* Logout */}
+        <button
+          onClick={logout}
+          className="text-error/85 hover:text-error flex items-center gap-3 px-4 py-3 hover:bg-error/10 transition-all duration-200 hover:scale-[1.02] rounded-lg cursor-pointer text-left w-full border-none bg-transparent outline-none"
+        >
+          <span className="material-symbols-outlined">logout</span>
+          <span className="font-body-sm text-body-sm font-medium">{t("common.logout")}</span>
+        </button>
+
         {/* User Profile Snippet in Sidebar */}
-        <div className="mt-4 pt-4 border-t border-outline-variant/20 flex items-center gap-3 px-2">
+        <div className="mt-2 pt-4 border-t border-outline-variant/20 flex items-center gap-3 px-2">
           <div className="w-10 h-10 rounded-full overflow-hidden border border-primary/20 bg-surface-variant shrink-0">
             <Image
               alt={user?.displayName || "User Profile"}
