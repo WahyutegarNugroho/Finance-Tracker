@@ -53,6 +53,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const setCurrency = useCallback(async (code: string) => {
     setCurrencyState(code);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("currency", code);
+    }
     try {
       await api.put("/users/profile", { currency: code });
     } catch {
@@ -61,21 +64,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
+      setLoading(false);
 
       if (firebaseUser) {
-        // Fetch profile first so currency is resolved before children render
-        try {
-          const json = await api.get("/users/profile");
-          const userCurrency = json?.data?.currency || "IDR";
-          setCurrencyState(userCurrency);
-        } catch {
-          // Keep default currency on error
+        // Load cached currency immediately to prevent layout shifts
+        if (typeof window !== "undefined") {
+          const cached = localStorage.getItem("currency");
+          if (cached) {
+            setCurrencyState(cached);
+          }
         }
-      }
 
-      setLoading(false);
+        // Fetch fresh profile in the background
+        api.get("/users/profile")
+          .then((json) => {
+            const userCurrency = json?.data?.currency || "IDR";
+            setCurrencyState(userCurrency);
+            if (typeof window !== "undefined") {
+              localStorage.setItem("currency", userCurrency);
+            }
+          })
+          .catch(() => {
+            // Keep default/cached currency on error
+          });
+      }
     });
 
     return () => unsubscribe();
