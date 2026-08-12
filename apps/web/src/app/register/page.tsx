@@ -1,41 +1,22 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { api } from "@/lib/api";
 import { getFirebaseErrorMessage } from "@/lib/constants";
-import { useAuth } from "@/context/AuthContext";
 import AuthLayout from "@/components/auth/AuthLayout";
 import GoogleButton from "@/components/auth/GoogleButton";
 
 export default function Register() {
   const router = useRouter();
-  const { user } = useAuth();
-  const googleDoneRef = useRef(false);
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (!user) return;
-    const isGoogle = user.providerData.some((p) => p.providerId === 'google.com');
-    if (!isGoogle || sessionStorage.getItem('fintrackGooglePending') !== '1') return;
-    sessionStorage.removeItem('fintrackGooglePending');
-    if (googleDoneRef.current) return;
-    googleDoneRef.current = true;
-    user.getIdToken()
-      .then((token) => api.post("/auth/google", undefined, { headers: { Authorization: `Bearer ${token}` } }))
-      .then(() => router.push("/dashboard"))
-      .catch(() => {
-        googleDoneRef.current = false;
-        setError("Google sign-up failed. Please try again.");
-      });
-  }, [user, router]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,11 +34,14 @@ export default function Register() {
   const handleGoogleRegister = async () => {
     setError(""); setLoading(true);
     try {
-      sessionStorage.setItem('fintrackGooglePending', '1');
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      const token = await result.user.getIdToken();
+      await api.post("/auth/google", undefined, { headers: { Authorization: `Bearer ${token}` } });
+      router.push("/dashboard");
     } catch (err: unknown) {
+      setLoading(false);
       const code = (err as { code?: string }).code;
       if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
         setError("Sign up cancelled.");
@@ -68,7 +52,7 @@ export default function Register() {
         return;
       }
       setError(getFirebaseErrorMessage(err) || "Google sign-up failed. If the window was blocked, try again.");
-    } finally { setLoading(false); }
+    }
   };
 
   return (
