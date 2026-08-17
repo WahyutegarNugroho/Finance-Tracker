@@ -17,20 +17,29 @@ interface SpendingChartProps {
   totalExpense: number;
 }
 
-const SpendingChart = React.memo(function SpendingChart({ expenseByCategory, totalExpense }: SpendingChartProps) {
+const SpendingChart = React.memo(function SpendingChart({
+  expenseByCategory,
+  totalExpense,
+}: SpendingChartProps) {
   const { formatCurrency } = useAuth();
   const { t, tCategory } = useLanguage();
 
   const doughnutData = {
-    labels: Array.isArray(expenseByCategory) ? expenseByCategory.map((cat) => tCategory(cat.name)) : [],
+    labels: Array.isArray(expenseByCategory)
+      ? expenseByCategory.map((cat) => tCategory(cat.name))
+      : [],
     datasets: [
       {
-        data: Array.isArray(expenseByCategory) ? expenseByCategory.map((cat) => cat.percentage) : [],
-        backgroundColor: Array.isArray(expenseByCategory) ? expenseByCategory.map((cat, idx) => getCategoryColor(cat.name, idx)) : [],
+        data: Array.isArray(expenseByCategory)
+          ? expenseByCategory.map((cat) => cat.percentage)
+          : [],
+        backgroundColor: Array.isArray(expenseByCategory)
+          ? expenseByCategory.map((cat, idx) => getCategoryColor(cat.name, idx))
+          : [],
         borderWidth: 0,
         hoverOffset: 4,
-      }
-    ]
+      },
+    ],
   };
 
   const doughnutOptions = {
@@ -44,12 +53,12 @@ const SpendingChart = React.memo(function SpendingChart({ expenseByCategory, tot
       tooltip: {
         ...chartTooltip,
         callbacks: {
-          label: function(context: TooltipItem<'doughnut'>) {
+          label: function (context: TooltipItem<"doughnut">) {
             return ` ${context.label}: ${context.raw}%`;
-          }
-        }
-      }
-    }
+          },
+        },
+      },
+    },
   };
 
   return (
@@ -57,13 +66,20 @@ const SpendingChart = React.memo(function SpendingChart({ expenseByCategory, tot
       <h3 className="font-headline-md text-headline-md text-on-surface mb-6">
         {t("dashboard_page.charts.spending_by_category")}
       </h3>
-      
+
       <div className="relative flex-1 flex flex-col items-center justify-center min-h-[220px]">
         {expenseByCategory?.length > 0 ? (
           <>
-            <div className="relative w-40 h-40 flex items-center justify-center">
-              <Doughnut data={doughnutData} options={doughnutOptions} />
-              {/* Inner Circle for Doughnut Effect */}
+            <div
+              className="relative w-40 h-40 flex items-center justify-center"
+              role="region"
+              aria-label={t("dashboard_page.charts.spending_by_category")}
+            >
+              <Doughnut
+                data={doughnutData}
+                options={doughnutOptions}
+                aria-label={t("dashboard_page.charts.spending_by_category")}
+              />
               <div className="absolute w-28 h-28 flex flex-col items-center justify-center pointer-events-none">
                 <span className="font-label-caps text-label-caps text-outline text-[9px] uppercase tracking-tighter">
                   {t("dashboard_page.total_expense_short")}
@@ -75,24 +91,33 @@ const SpendingChart = React.memo(function SpendingChart({ expenseByCategory, tot
             </div>
 
             <div className="mt-8 w-full flex flex-col gap-2.5 overflow-y-auto max-h-[140px] pr-1 custom-scrollbar">
-              {/* ponytail: hardcoded top-5 → share MAX_VISIBLE_CATEGORIES with analytics page */}
-              {Array.isArray(expenseByCategory) ? expenseByCategory.slice(0, 5).map((cat, idx) => (
-                <div key={cat.name} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: getCategoryColor(cat.name, idx) }}></div>
-                    <span className="font-body-sm text-body-sm text-on-surface-variant truncate">
-                      {tCategory(cat.name)}
-                    </span>
-                  </div>
-                  <span className="font-numeric-data text-numeric-data text-on-surface text-xs font-medium ml-2">
-                    {cat.percentage}%
-                  </span>
-                </div>
-              )) : null}
+              {Array.isArray(expenseByCategory)
+                ? expenseByCategory.slice(0, 5).map((cat, idx) => (
+                    <div key={cat.name} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div
+                          className="w-2.5 h-2.5 rounded-full shrink-0"
+                          style={{ backgroundColor: getCategoryColor(cat.name, idx) }}
+                        ></div>
+                        <span className="font-body-sm text-body-sm text-on-surface-variant truncate">
+                          {tCategory(cat.name)}
+                        </span>
+                      </div>
+                      <span className="font-numeric-data text-numeric-data text-on-surface text-xs font-medium ml-2">
+                        {cat.percentage}%
+                      </span>
+                    </div>
+                  ))
+                : null}
               {Array.isArray(expenseByCategory) && expenseByCategory.length > 5 && (
                 <div className="flex items-center justify-center pt-1">
                   <span className="text-xs text-on-surface-variant font-medium bg-surface-variant/50 px-2 py-0.5 rounded-full">
-                    +{expenseByCategory.length - 5} more
+                    {t("analytics_page.more_categories")
+                      ? t("analytics_page.more_categories").replace(
+                          "{count}",
+                          String(expenseByCategory.length - 5)
+                        )
+                      : `+${expenseByCategory.length - 5} more`}
                   </span>
                 </div>
               )}

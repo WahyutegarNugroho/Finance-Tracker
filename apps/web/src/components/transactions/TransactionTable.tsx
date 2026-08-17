@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Transaction } from "@/types";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
@@ -26,17 +26,29 @@ export default React.memo(function TransactionTable({
   const { formatCurrency } = useAuth();
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-
   const [pendingBatchDelete, setPendingBatchDelete] = useState(false);
 
-  const allSelected = transactions.length > 0 && transactions.every((tx) => selectedIds.has(tx.id));
+  useEffect(() => {
+    if (!openMenuId) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenMenuId(null);
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [openMenuId]);
+
+  const allSelected =
+    transactions.length > 0 && transactions.every((tx) => selectedIds.has(tx.id));
+
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   };
+
   const toggleSelectAll = () => {
     if (allSelected) {
       setSelectedIds(new Set());
@@ -46,33 +58,42 @@ export default React.memo(function TransactionTable({
   };
 
   return (
-    <div className="bg-surface/80 backdrop-blur-[12px] border border-white/10 rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.02)] overflow-hidden flex-1 flex flex-col min-h-[400px]">
+    <div className="bg-surface/80 backdrop-blur-[12px] border border-outline-variant/20 rounded-xl shadow-sm overflow-hidden flex-1 flex flex-col min-h-[400px]">
       {selectedIds.size > 0 && onBatchDelete && (
         <div className="px-4 py-2 bg-error-container/20 border-b border-error/20 flex items-center justify-between">
-          <span className="text-sm text-error font-medium">{selectedIds.size} selected</span>
+          <span className="text-sm text-error font-medium">
+            {t("common.selected_count").replace("{count}", String(selectedIds.size))}
+          </span>
           {pendingBatchDelete ? (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-error">{t("common.confirm")}?</span>
+              <span className="text-sm text-error">{t("common.confirm_question")}</span>
               <button
-                onClick={() => { onBatchDelete(Array.from(selectedIds)); setSelectedIds(new Set()); setPendingBatchDelete(false); }}
-                className="text-sm bg-error text-white font-semibold px-3 py-1 rounded-lg transition-colors"
+                type="button"
+                onClick={() => {
+                  onBatchDelete(Array.from(selectedIds));
+                  setSelectedIds(new Set());
+                  setPendingBatchDelete(false);
+                }}
+                className="text-sm bg-error text-white font-semibold px-3 py-1 rounded-lg transition-colors cursor-pointer"
               >
                 {t("common.delete")}
               </button>
               <button
+                type="button"
                 onClick={() => setPendingBatchDelete(false)}
-                className="text-sm text-on-surface-variant font-semibold px-2 py-1 rounded-lg hover:bg-surface-variant/50 transition-colors"
+                className="text-sm text-on-surface-variant font-semibold px-2 py-1 rounded-lg hover:bg-surface-variant/50 transition-colors cursor-pointer"
               >
                 {t("common.cancel")}
               </button>
             </div>
           ) : (
             <button
+              type="button"
               onClick={() => setPendingBatchDelete(true)}
-              className="text-sm text-error font-semibold hover:bg-error/10 px-3 py-1 rounded-lg transition-colors flex items-center gap-1"
+              className="text-sm text-error font-semibold hover:bg-error/10 px-3 py-1 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px]">delete</span>
-              Delete Selected
+              {t("common.delete_selected")}
             </button>
           )}
         </div>
@@ -82,13 +103,29 @@ export default React.memo(function TransactionTable({
           <thead>
             <tr className="border-b border-outline-variant/20 bg-surface-container-low/50">
               <th className="px-2 py-4 w-10">
-                <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} className="accent-primary cursor-pointer" aria-label="Select all" />
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={toggleSelectAll}
+                  className="accent-primary cursor-pointer"
+                  aria-label={t("common.select_all")}
+                />
               </th>
-              <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider">{t("transactions_page.table.date")}</th>
-              <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider">{t("transactions_page.table.category")}</th>
-              <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider">{t("transactions_page.table.note")}</th>
-              <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider text-right">{t("transactions_page.table.amount")}</th>
-              <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider text-center">{t("common.type")}</th>
+              <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider">
+                {t("transactions_page.table.date")}
+              </th>
+              <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider">
+                {t("transactions_page.table.category")}
+              </th>
+              <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider">
+                {t("transactions_page.table.note")}
+              </th>
+              <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider text-right">
+                {t("transactions_page.table.amount")}
+              </th>
+              <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider text-center">
+                {t("common.type")}
+              </th>
               <th className="px-6 py-4 font-label-caps text-label-caps text-outline font-medium tracking-wider w-16"></th>
             </tr>
           </thead>
@@ -99,7 +136,7 @@ export default React.memo(function TransactionTable({
                   <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
                 </td>
               </tr>
-            ) : (!Array.isArray(transactions) || transactions.length === 0) ? (
+            ) : !Array.isArray(transactions) || transactions.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-6 py-12 text-center text-on-surface-variant">
                   {t("transactions_page.no_data")}
@@ -107,20 +144,35 @@ export default React.memo(function TransactionTable({
               </tr>
             ) : (
               transactions.map((tx) => (
-                <tr key={tx.id} className={`hover:bg-surface-variant/20 transition-colors group ${selectedIds.has(tx.id) ? 'bg-primary/5' : ''}`}>
+                <tr
+                  key={tx.id}
+                  className={`hover:bg-surface-variant/20 transition-colors group ${
+                    selectedIds.has(tx.id) ? "bg-primary/5" : ""
+                  }`}
+                >
                   <td className="px-2 py-4 w-10">
-                    <input type="checkbox" checked={selectedIds.has(tx.id)} onChange={() => toggleSelect(tx.id)} className="accent-primary cursor-pointer" aria-label={`Select ${tx.id}`} />
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(tx.id)}
+                      onChange={() => toggleSelect(tx.id)}
+                      className="accent-primary cursor-pointer"
+                      aria-label={t("transactions_page.select_transaction").replace("{id}", tx.note || tx.categoryName)}
+                    />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap font-body-sm text-body-sm text-on-surface">
                     {formatDate(tx.date, language)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-2">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        tx.type === 'income' ? 'bg-secondary/10 text-secondary' : 'bg-primary/10 text-primary'
-                      }`}>
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          tx.type === "income"
+                            ? "bg-secondary/10 text-secondary"
+                            : "bg-primary/10 text-primary"
+                        }`}
+                      >
                         <span className="material-symbols-outlined text-[16px]">
-                          {tx.categoryIcon || 'category'}
+                          {tx.categoryIcon || "category"}
                         </span>
                       </div>
                       <span className="font-body-sm text-body-sm text-on-surface">
@@ -131,49 +183,65 @@ export default React.memo(function TransactionTable({
                   <td className="px-6 py-4 font-body-sm text-body-sm text-on-surface-variant max-w-xs truncate">
                     {tx.note || "-"}
                   </td>
-                  <td className={`px-6 py-4 whitespace-nowrap font-numeric-data text-numeric-data text-right font-semibold ${
-                    tx.type === 'income' ? 'text-secondary' : 'text-on-surface'
-                  }`}>
-                    {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
+                  <td
+                    className={`px-6 py-4 whitespace-nowrap font-numeric-data text-numeric-data text-right font-semibold ${
+                      tx.type === "income" ? "text-secondary" : "text-on-surface"
+                    }`}
+                  >
+                    {tx.type === "income" ? "+" : "-"}
+                    {formatCurrency(tx.amount)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-md font-label-caps text-label-caps text-[10px] ${
-                      tx.type === 'income' 
-                        ? 'bg-secondary/10 text-secondary' 
-                        : 'bg-surface-variant/50 text-on-surface-variant'
-                    }`}>
-                      {tx.type === 'income' ? t("common.credit") : t("common.debit")}
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-md font-label-caps text-label-caps text-[10px] ${
+                        tx.type === "income"
+                          ? "bg-secondary/10 text-secondary"
+                          : "bg-surface-variant/50 text-on-surface-variant"
+                      }`}
+                    >
+                      {tx.type === "income" ? t("common.credit") : t("common.debit")}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-outline relative">
                     <div
-                      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setOpenMenuId(null); }}
+                      onBlur={(e) => {
+                        if (!e.currentTarget.contains(e.relatedTarget)) setOpenMenuId(null);
+                      }}
                       className="inline-flex"
                     >
                       <button
+                        type="button"
                         onClick={() => setOpenMenuId(openMenuId === tx.id ? null : tx.id)}
-                        className="p-1 hover:bg-surface-variant rounded-full transition-colors"
+                        className="p-1 hover:bg-surface-variant rounded-full transition-colors cursor-pointer"
                         aria-label={t("transactions_page.table.actions")}
                         aria-expanded={openMenuId === tx.id}
+                        aria-haspopup="true"
                       >
                         <span className="material-symbols-outlined text-[20px]">more_vert</span>
                       </button>
-                      
-                      {/* ponytail: absolute dropdown → use portal+flip logic when table has horizontal scroll */}
+
                       {openMenuId === tx.id && (
-                        <div className="absolute right-0 top-full mt-1 w-32 bg-surface border border-outline-variant/20 rounded-lg shadow-lg z-10 flex flex-col overflow-hidden text-left" role="menu">
-                          <button 
-                            onClick={() => { onEdit(tx); setOpenMenuId(null); }}
-                            className="w-full text-left px-4 py-2 text-sm text-on-surface hover:bg-surface-variant/50 flex items-center gap-2"
-                            role="menuitem"
+                        <div
+                          className="absolute right-0 top-full mt-1 w-32 bg-surface border border-outline-variant/20 rounded-lg shadow-lg z-10 flex flex-col overflow-hidden text-left"
+                        >
+                          <button
+                            type="button"
+                            onClick={() => {
+                              onEdit(tx);
+                              setOpenMenuId(null);
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm text-on-surface hover:bg-surface-variant/50 flex items-center gap-2 cursor-pointer"
                           >
                             <span className="material-symbols-outlined text-[18px]">edit</span>
                             {t("common.edit")}
                           </button>
-                          <button 
-                            onClick={() => { onDelete(tx.id); setOpenMenuId(null); }}
-                            className="w-full text-left px-4 py-2 text-sm text-error hover:bg-error-container/50 flex items-center gap-2"
-                            role="menuitem"
+                          <button
+                            type="button"
+                            onClick={() => {
+                              onDelete(tx.id);
+                              setOpenMenuId(null);
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm text-error hover:bg-error-container/50 flex items-center gap-2 cursor-pointer"
                           >
                             <span className="material-symbols-outlined text-[18px]">delete</span>
                             {t("common.delete")}

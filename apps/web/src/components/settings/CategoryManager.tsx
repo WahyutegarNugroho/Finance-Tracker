@@ -57,15 +57,16 @@ export default function CategoryManager({
   };
 
   return (
-    <section className="bg-surface/80 backdrop-blur-[12px] border border-white/10 border-outline-variant/20 rounded-xl p-6 shadow-sm">
+    <section className="bg-surface/80 backdrop-blur-[12px] border border-outline-variant/20 rounded-xl p-6 shadow-sm">
       <div className="flex justify-between items-center mb-6">
         <h3 className="font-headline-md text-headline-md text-on-background flex items-center gap-2">
           <span className="material-symbols-outlined text-primary">category</span>
           {t("settings_page.category_section.title")}
         </h3>
         <button 
+          type="button"
           onClick={() => setShowAddCat(!showAddCat)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-label-caps text-label-caps"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-label-caps text-label-caps cursor-pointer"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
           {t("settings_page.category_section.add_new")}
@@ -76,8 +77,9 @@ export default function CategoryManager({
         <div className="mb-6 p-4 border border-outline-variant/30 rounded-xl bg-surface-variant/10 animate-in slide-in-from-top-4 duration-300">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-xs font-medium text-outline mb-1 uppercase tracking-wider">{t("settings_page.category_section.name")}</label>
+              <label htmlFor="new-cat-name" className="block text-xs font-medium text-outline mb-1 uppercase tracking-wider">{t("settings_page.category_section.name")}</label>
               <input 
+                id="new-cat-name"
                 value={newCatName}
                 onChange={(e) => setNewCatName(e.target.value)}
                 className="w-full bg-surface border border-outline-variant/30 rounded-lg px-3 py-2 text-body-sm outline-none focus:border-primary"
@@ -86,11 +88,12 @@ export default function CategoryManager({
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-outline mb-1 uppercase tracking-wider">{t("common.type")}</label>
+              <label htmlFor="new-cat-type" className="block text-xs font-medium text-outline mb-1 uppercase tracking-wider">{t("common.type")}</label>
               <select 
+                id="new-cat-type"
                 value={newCatType}
                 onChange={(e) => setNewCatType(e.target.value as "expense" | "income")}
-                className="w-full bg-surface border border-outline-variant/30 rounded-lg px-3 py-2 text-body-sm outline-none focus:border-primary"
+                className="w-full bg-surface border border-outline-variant/30 rounded-lg px-3 py-2 text-body-sm outline-none focus:border-primary cursor-pointer"
               >
                 <option value="expense">{t("common.expense")}</option>
                 <option value="income">{t("common.income")}</option>
@@ -100,15 +103,17 @@ export default function CategoryManager({
           {catError && <p className="text-error text-[11px] mb-3">{catError}</p>}
           <div className="flex justify-end gap-3">
             <button 
+              type="button"
               onClick={() => setShowAddCat(false)}
-              className="px-4 py-1.5 text-body-sm text-on-surface-variant hover:text-on-surface transition-colors"
+              className="px-4 py-1.5 text-body-sm text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
             >
               {t("common.cancel")}
             </button>
             <button 
+              type="button"
               onClick={handleAdd}
               disabled={isAdding}
-              className="bg-primary text-on-primary px-4 py-1.5 rounded-lg text-body-sm font-medium hover:bg-primary/90 transition-all shadow-sm"
+              className="bg-primary text-on-primary px-4 py-1.5 rounded-lg text-body-sm font-medium hover:bg-primary/90 transition-all shadow-sm cursor-pointer disabled:opacity-50"
             >
               {isAdding ? "..." : t("common.add")}
             </button>
@@ -131,6 +136,7 @@ export default function CategoryManager({
                 {editingCatId === cat.id ? (
                   <input 
                     autoFocus
+                    aria-label={t("settings_page.category_section.name")}
                     value={editCatName}
                     onChange={(e) => setEditCatName(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSaveEdit()}
@@ -149,15 +155,19 @@ export default function CategoryManager({
                 {editingCatId !== cat.id && (
                   <>
                     <button 
+                      type="button"
                       onClick={() => handleEdit(cat)}
-                      className="p-1.5 text-outline hover:text-primary transition-colors"
+                      aria-label={`${t("common.edit")} ${tCategory(cat.name)}`}
+                      className="p-1.5 text-outline hover:text-primary transition-colors cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[18px]">edit</span>
                     </button>
                     <button 
+                      type="button"
                       onClick={() => onDeleteCategory(cat.id)}
                       disabled={isDeleting}
-                      className="p-1.5 text-outline hover:text-error transition-colors"
+                      aria-label={`${t("common.delete")} ${tCategory(cat.name)}`}
+                      className="p-1.5 text-outline hover:text-error transition-colors cursor-pointer disabled:opacity-50"
                     >
                       <span className="material-symbols-outlined text-[18px]">delete</span>
                     </button>

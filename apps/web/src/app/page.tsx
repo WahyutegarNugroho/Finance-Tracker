@@ -84,14 +84,14 @@ export default function Home() {
               </div>
 
               <div className="grid grid-cols-3 gap-4">
-                <div className="rounded-xl border border-outline-variant/25 p-4 flex items-center justify-center">
-                  <p className="font-label-caps text-label-caps text-white">Balance</p>
+                <div className="rounded-xl border border-outline-variant/25 p-4 flex items-center justify-center bg-surface-container-low/50">
+                  <p className="font-label-caps text-label-caps text-on-surface font-semibold">Balance</p>
                 </div>
-                <div className="rounded-xl border border-outline-variant/25 p-4 flex items-center justify-center">
-                  <p className="font-label-caps text-label-caps text-green-500">Income</p>
+                <div className="rounded-xl border border-outline-variant/25 p-4 flex items-center justify-center bg-secondary/10">
+                  <p className="font-label-caps text-label-caps text-secondary font-semibold">Income</p>
                 </div>
-                <div className="rounded-xl border border-outline-variant/25 p-4 flex items-center justify-center">
-                  <p className="font-label-caps text-label-caps text-orange-500">Spent</p>
+                <div className="rounded-xl border border-outline-variant/25 p-4 flex items-center justify-center bg-tertiary/10">
+                  <p className="font-label-caps text-label-caps text-tertiary font-semibold">Spent</p>
                 </div>
               </div>
 

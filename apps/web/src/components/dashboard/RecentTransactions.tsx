@@ -36,7 +36,7 @@ const RecentTransactions = React.memo(function RecentTransactions({ transactions
           </div>
         ) : (
           transactions.map((tx: Transaction) => (
-            <div key={tx.id} className="flex items-center justify-between p-3 hover:bg-surface-variant/30 rounded-lg transition-colors cursor-pointer border border-transparent hover:border-outline-variant/20">
+            <div key={tx.id} className="flex items-center justify-between p-3 hover:bg-surface-variant/30 rounded-lg transition-colors border border-transparent hover:border-outline-variant/20">
               <div className="flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${
                   tx.type === 'income' 

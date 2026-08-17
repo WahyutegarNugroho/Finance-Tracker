@@ -9,7 +9,7 @@ export default function AppearanceSection() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <section className="bg-surface/80 backdrop-blur-[12px] border border-white/10 border-outline-variant/20 rounded-xl p-6 shadow-sm">
+    <section className="bg-surface/80 backdrop-blur-[12px] border border-outline-variant/20 rounded-xl p-6 shadow-sm">
       <h3 className="font-headline-md text-headline-md text-on-background mb-6 flex items-center gap-2">
         <span className="material-symbols-outlined text-primary">palette</span>
         {t("settings_page.appearance_section.title")}
@@ -33,6 +33,7 @@ export default function AppearanceSection() {
             type="checkbox" 
             checked={theme === 'dark'} 
             onChange={toggleTheme} 
+            aria-label={t("common.dark_mode")}
           />
           <div className="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
         </label>
@@ -53,6 +54,7 @@ export default function AppearanceSection() {
           <select 
             value={language}
             onChange={(e) => setLanguage(e.target.value as 'en' | 'id')}
+            aria-label={t("settings_page.appearance_section.language")}
             className="appearance-none bg-surface-variant/30 border border-outline-variant/30 rounded-lg px-4 py-2 font-body-sm text-body-sm text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all cursor-pointer pr-10"
           >
             <option value="en">English</option>

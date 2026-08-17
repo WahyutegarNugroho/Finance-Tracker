@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
+import { getAvatarUrl } from "@/lib/formatting";
 
 interface ProfileSectionProps {
   displayName: string;
@@ -30,7 +31,7 @@ export default function ProfileSection({
   const { t } = useLanguage();
 
   return (
-    <section className="bg-surface/80 backdrop-blur-[12px] border border-white/10 border-outline-variant/20 rounded-xl p-6 shadow-sm">
+    <section className="bg-surface/80 backdrop-blur-[12px] border border-outline-variant/20 rounded-xl p-6 shadow-sm">
       <h3 className="font-headline-md text-headline-md text-on-background mb-6 flex items-center gap-2">
         <span className="material-symbols-outlined text-primary">person</span>
         {t("settings_page.profile_section.title")}
@@ -38,9 +39,9 @@ export default function ProfileSection({
       <div className="flex flex-col sm:flex-row gap-8 items-start sm:items-center mb-8">
         <div className="relative">
           <Image 
-            alt={displayName} 
+            alt={displayName || "Profile avatar"} 
             className="rounded-full border-2 border-primary/20 shadow-sm object-cover bg-surface-variant" 
-            src={user?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random`}
+            src={user?.photoURL || getAvatarUrl(displayName || user?.displayName)}
             width={96}
             height={96}
           />
@@ -97,7 +98,7 @@ export default function ProfileSection({
         <button 
           onClick={onSave}
           disabled={isSaving}
-          className="bg-primary text-on-primary font-label-caps text-label-caps px-6 py-3 rounded-lg hover:scale-[1.02] hover:bg-primary-container transition-all shadow-sm disabled:opacity-70 flex items-center justify-center gap-2"
+          className="bg-primary text-on-primary font-label-caps text-label-caps px-6 py-3 rounded-lg hover:scale-[1.02] hover:bg-primary-container transition-all shadow-sm disabled:opacity-70 flex items-center justify-center gap-2 cursor-pointer"
         >
           {isSaving ? (
             <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>

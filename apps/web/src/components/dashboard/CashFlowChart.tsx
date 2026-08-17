@@ -37,8 +37,8 @@ const CashFlowChart = React.memo(function CashFlowChart() {
         data: cashflow.map((m: CashFlowEntry) => m.expense),
         backgroundColor: chartColors.error,
         borderRadius: 4,
-      }
-    ]
+      },
+    ],
   };
 
   const barChartOptions = {
@@ -49,13 +49,13 @@ const CashFlowChart = React.memo(function CashFlowChart() {
       tooltip: {
         ...chartTooltip,
         callbacks: {
-          label: function(context: TooltipItem<'bar'>) {
+          label: function (context: TooltipItem<"bar">) {
             return ` ${context.dataset.label}: ${formatCurrency(context.raw as number)}`;
-          }
-        }
-      }
+          },
+        },
+      },
     },
-    scales: chartScales(formatCurrency)
+    scales: chartScales(formatCurrency),
   };
 
   return (
@@ -69,13 +69,17 @@ const CashFlowChart = React.memo(function CashFlowChart() {
         </span>
       </div>
 
-      <div className="flex-1 min-h-[240px] relative mt-2">
+      <div
+        className="flex-1 min-h-[240px] relative mt-2"
+        role="region"
+        aria-label={t("dashboard_page.charts.cash_flow")}
+      >
         {isLoading ? (
           <div className="absolute inset-0 flex items-center justify-center text-outline italic">
             {t("dashboard_page.loading_chart")}
           </div>
         ) : cashflow.length > 0 ? (
-          <Bar data={barChartData} options={barChartOptions} />
+          <Bar data={barChartData} options={barChartOptions} aria-label={t("dashboard_page.charts.cash_flow")} />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-outline italic">
             {t("dashboard_page.no_spending_data")}
@@ -85,13 +89,19 @@ const CashFlowChart = React.memo(function CashFlowChart() {
 
       <div className="flex justify-center gap-6 mt-6">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: chartColors.primary }}></div>
+          <div
+            className="w-3 h-3 rounded-full"
+            style={{ backgroundColor: chartColors.primary }}
+          ></div>
           <span className="font-label-caps text-label-caps text-on-surface-variant text-[10px]">
             {t("common.income")}
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: chartColors.error }}></div>
+          <div
+            className="w-3 h-3 rounded-full"
+            style={{ backgroundColor: chartColors.error }}
+          ></div>
           <span className="font-label-caps text-label-caps text-on-surface-variant text-[10px]">
             {t("common.expense")}
           </span>

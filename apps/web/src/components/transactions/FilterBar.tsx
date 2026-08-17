@@ -23,7 +23,7 @@ const FilterBar = React.memo(function FilterBar({
   const { t } = useLanguage();
 
   return (
-    <div className="bg-surface/80 backdrop-blur-[12px] border border-white/10 rounded-xl p-4 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+    <div className="bg-surface/80 backdrop-blur-[12px] border border-outline-variant/20 rounded-xl p-4 shadow-sm flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
       {/* Search */}
       <div className="relative w-full lg:w-96">
         <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">
@@ -49,7 +49,7 @@ const FilterBar = React.memo(function FilterBar({
               setTypeFilter(e.target.value);
               onResetPagination();
             }}
-            className="appearance-none flex items-center gap-2 pl-3 pr-8 py-2 bg-surface border border-outline-variant/30 rounded-lg hover:bg-surface-variant/30 transition-colors font-body-sm text-body-sm text-on-surface-variant focus:outline-none"
+            className="appearance-none flex items-center gap-2 pl-3 pr-8 py-2 bg-surface border border-outline-variant/30 rounded-lg hover:bg-surface-variant/30 transition-colors font-body-sm text-body-sm text-on-surface-variant focus:outline-none cursor-pointer"
           >
             <option value="all">{t("transactions_page.filter_all_types")}</option>
             <option value="income">{t("common.income")}</option>
@@ -65,7 +65,7 @@ const FilterBar = React.memo(function FilterBar({
         {/* Export */}
         <button 
           onClick={onExport}
-          className="flex items-center gap-2 px-4 py-2 bg-surface border border-outline-variant/30 rounded-lg hover:bg-surface-variant/30 transition-colors font-body-sm text-body-sm text-primary font-medium ml-auto lg:ml-0"
+          className="flex items-center gap-2 px-4 py-2 bg-surface border border-outline-variant/30 rounded-lg hover:bg-surface-variant/30 transition-colors font-body-sm text-body-sm text-primary font-medium ml-auto lg:ml-0 cursor-pointer"
         >
           <span className="material-symbols-outlined text-[18px]">
             download

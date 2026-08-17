@@ -216,7 +216,7 @@ function TransactionsContent() {
         onBatchDelete={(ids) => {
           Promise.all(ids.map((id) => api.delete(`/transactions/${id}`))).then(() => {
             queryClient.invalidateQueries({ queryKey: ["transactions"] });
-            toast.success(`${ids.length} transactions deleted.`);
+            toast.success(t("transactions_page.batch_delete_success").replace("{count}", String(ids.length)));
           }).catch(() => toast.error(t("transactions_page.delete_error")));
         }}
         formatDate={formatDate}

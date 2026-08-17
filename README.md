@@ -105,7 +105,7 @@ Finance-Tracker/
 │   │       │   ├── budget/                # BudgetSkeleton
 │   │       │   ├── analytics/             # AnalyticsSkeleton
 │   │       │   ├── settings/              # ProfileSection, AppearanceSection, CategoryManager, SettingsSkeleton
-│   │       │   ├── auth/                  # AuthHero, AuthLayout, GoogleButton
+│   │       │   ├── auth/                  # AuthLayout, GoogleButton
 │   │       │   ├── Sidebar.tsx
 │   │       │   ├── Topbar.tsx
 │   │       │   ├── BottomNav.tsx

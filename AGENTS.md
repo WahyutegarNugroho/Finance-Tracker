@@ -19,6 +19,7 @@
 | Charts | Chart.js v4 + react-chartjs-2 |
 | Auth (FE) | Firebase Client SDK v12 |
 | Notifications | Sonner |
+| Testing (FE) | Vitest + React Testing Library |
 | | |
 | **Backend (apps/api)** | |
 | Runtime | Node.js + Express 4.21 |
@@ -141,6 +142,8 @@ Finance-Tracker/
 │       ├── vitest.config.mjs
 │       └── eslint.config.mjs
 │
+├── packages/                        # Shared internal packages
+│   └── shared-types/                # API Contract & shared interfaces
 ├── package.json                     # Root workspace config
 └── .gitignore
 ```
@@ -223,6 +226,7 @@ Finance-Tracker/
 | K-08 | Proses | Context-First Reading Mandate |
 | K-09 | Output | Code Output Standards |
 | K-10 | Output | Response Format Contract |
+| K-11 | Proses | Version Control & Commit Protocol |
 
 ---
 
@@ -316,6 +320,7 @@ function process(data: unknown): Transaction { ... }
 - [ ] Tentukan tech stack secara eksplisit (sesuai proyek ini)
 - [ ] Identifikasi apakah perubahan di `apps/web`, `apps/api`, atau keduanya
 - [ ] Identifikasi dependensi utama beserta versinya (cek package.json)
+- [ ] Sepakati bentuk Request/Response dan tulis di `packages/shared-types` sebelum coding FE/BE.
 - [ ] **STOP** — Minta persetujuan user sebelum lanjut ke Fase 2
 
 ---
@@ -325,6 +330,7 @@ function process(data: unknown): Transaction { ... }
 **Trigger:** Blueprint sudah disetujui, mulai implementasi UI.
 
 **Aturan Komponen:**
+- Setiap pembuatan UI Component yang memiliki interaksi (klik, form, filter) WAJIB disertai file `<NamaKomponen>.test.tsx` sederhana untuk memvalidasi interaksinya.
 
 ```typescript
 // ✅ Client Component — gunakan "use client" directive jika perlu state/effects/interactivity
@@ -694,6 +700,27 @@ Agent wajib berhenti dan meminta konfirmasi user ketika:
 - Akan mengubah environment variable yang dibutuhkan
 - Tidak yakin dengan requirement (ambiguitas tinggi)
 - Akan membuat perubahan yang memengaruhi lebih dari 3 file
+
+---
+
+## K-11 · Version Control & Commit Protocol
+
+Agent WAJIB mengikuti format **Conventional Commits** jika diminta untuk men-generate pesan commit atau membuat Pull Request (PR).
+
+**Format Wajib:** `<type>(<scope>): <deskripsi singkat>`
+
+**Tipe yang Diizinkan:**
+- `feat`: Fitur baru (berkaitan dengan Tier 3)
+- `fix`: Perbaikan bug (berkaitan dengan K-04)
+- `refactor`: Perubahan kode tanpa mengubah fitur (berkaitan dengan K-04)
+- `chore`: Update dependensi, konfigurasi (berkaitan dengan Tier 2)
+- `docs`: Perubahan dokumentasi/komentar
+
+**Aturan PR (Pull Request):**
+Saat menyelesaikan Fase 2 atau Fase 3, Agent WAJIB merangkum perubahan ke dalam format deskripsi PR:
+1. Apa yang diubah/ditambahkan?
+2. File apa saja yang terpengaruh?
+3. Bagaimana cara QA mengujinya?
 
 ---
 

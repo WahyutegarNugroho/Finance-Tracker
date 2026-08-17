@@ -13,7 +13,7 @@ interface SidebarProps {
 
 export default function Sidebar({ activePath }: SidebarProps) {
   const { user, logout } = useAuth();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const menuItems = [
     { name: t("common.dashboard"), icon: 'dashboard', path: '/dashboard' },
     { name: t("common.transactions"), icon: 'receipt_long', path: '/transactions' },
@@ -33,7 +33,7 @@ export default function Sidebar({ activePath }: SidebarProps) {
             FinTrack
           </h1>
           <p className="font-label-caps text-label-caps text-outline">
-            Wealth Management
+            {t("common.wealth_management")}
           </p>
         </div>
       </div>
@@ -83,6 +83,7 @@ export default function Sidebar({ activePath }: SidebarProps) {
 
         {/* Logout */}
         <button
+          type="button"
           onClick={logout}
           className="text-error/85 hover:text-error flex items-center gap-3 px-4 py-3 hover:bg-error/10 transition-all duration-200 hover:scale-[1.02] rounded-lg cursor-pointer text-left w-full border-none bg-transparent outline-none"
         >
@@ -106,8 +107,7 @@ export default function Sidebar({ activePath }: SidebarProps) {
               {user?.displayName || "John Doe"}
             </p>
             <p className="font-label-caps text-label-caps text-outline truncate">
-              {/* ponytail: hardcoded plan badge → hide or drive from user.subscription field when billing exists */}
-              {language === "id" ? "Akun Pro" : "Pro Plan"}
+              {t("common.pro_plan")}
             </p>
           </div>
         </div>
