@@ -148,17 +148,16 @@ export default function Budget() {
 
       {summary && (
         <section className="glass-card bg-surface-container/70 rounded-xl p-6 md:p-8 mb-8 border border-outline-variant/30 relative overflow-hidden">
-          <div className="absolute -right-20 -top-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4 relative z-10">
             <div>
               <h2 className="font-label-caps text-label-caps text-on-surface-variant mb-2">
                 {t("budget_page.total_monthly_budget")}
               </h2>
               <div className="flex items-baseline gap-2">
-                <span className="font-display text-display text-on-surface font-bold">
+                <span className="font-display text-display text-on-surface font-bold font-numeric-data">
                   {formatCurrency(summary.totalSpent)}
                 </span>
-                <span className="font-body-lg text-body-lg text-outline">
+                <span className="font-body-lg text-body-lg text-outline font-numeric-data">
                   / {formatCurrency(summary.totalBudget)}
                 </span>
               </div>
@@ -168,7 +167,7 @@ export default function Budget() {
                 <span className="font-label-caps text-label-caps text-on-surface-variant">
                   {t("budget_page.remaining_label")}
                 </span>
-                <span className="font-headline-md text-headline-md text-secondary font-semibold">
+                <span className="font-headline-md text-headline-md text-secondary font-semibold font-numeric-data">
                   {formatCurrency(summary.totalRemaining)}
                 </span>
               </div>
@@ -177,7 +176,7 @@ export default function Budget() {
                 <span className="font-label-caps text-label-caps text-on-surface-variant">
                   {t("budget_page.spent_label")}
                 </span>
-                <span className="font-headline-md text-headline-md text-on-surface font-semibold">
+                <span className="font-headline-md text-headline-md text-on-surface font-semibold font-numeric-data">
                   {summary.overallPercentage}%
                 </span>
               </div>

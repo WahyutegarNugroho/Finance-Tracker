@@ -251,9 +251,12 @@ function TransactionsContent() {
         </div>
       </div>
 
-      <button onClick={() => { setTransactionToEdit(null); setIsModalOpen(true); }}
-        className="md:hidden fixed bottom-20 right-4 w-14 h-14 bg-primary text-on-primary rounded-2xl shadow-lg flex items-center justify-center hover:bg-primary/90 transition-all z-40 active:scale-95">
-        <span className="material-symbols-outlined text-[28px]">add</span>
+      <button
+        type="button"
+        onClick={() => { setTransactionToEdit(null); setIsModalOpen(true); }}
+        aria-label={t("transactions_page.add_new")}
+        className="md:hidden fixed bottom-20 right-4 w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all z-40 active:scale-95 cursor-pointer">
+        <span className="material-symbols-outlined text-[28px]" aria-hidden="true">add</span>
       </button>
 
       <TransactionModal 
