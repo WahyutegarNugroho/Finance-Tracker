@@ -74,10 +74,10 @@ export default function ConfirmDialog({
           <button
             type="button"
             onClick={onConfirm}
-            className={`font-body-sm text-body-sm font-semibold text-white px-5 py-2 rounded-lg transition-all hover:scale-[1.02] shadow-sm cursor-pointer ${
+            className={`font-body-sm text-body-sm font-semibold px-5 py-2 rounded-lg transition-all hover:scale-[1.02] shadow-sm cursor-pointer ${
               isDestructive
-                ? "bg-error hover:bg-error/95"
-                : "bg-primary hover:bg-primary/95"
+                ? "bg-error text-on-error hover:bg-error/95"
+                : "bg-primary text-on-primary hover:bg-primary/95"
             }`}
           >
             {confirmText || t("common.confirm")}

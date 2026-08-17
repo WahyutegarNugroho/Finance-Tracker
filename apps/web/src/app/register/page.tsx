@@ -7,11 +7,13 @@ import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 
 import { auth } from "@/lib/firebase";
 import { api } from "@/lib/api";
 import { getFirebaseErrorMessage } from "@/lib/constants";
+import { useLanguage } from "@/context/LanguageContext";
 import AuthLayout from "@/components/auth/AuthLayout";
 import GoogleButton from "@/components/auth/GoogleButton";
 
 export default function Register() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,7 +29,7 @@ export default function Register() {
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/dashboard");
     } catch (err: unknown) {
-      setError(getFirebaseErrorMessage(err) || 'Failed to register.');
+      setError(getFirebaseErrorMessage(err) || t("auth.register_failed"));
     } finally { setLoading(false); }
   };
 
@@ -57,8 +59,8 @@ export default function Register() {
 
   return (
     <AuthLayout
-      heroTitle="Take control of your money."
-      heroSubtitle="Sign up in seconds and start tracking your income, expenses, and budgets."
+      heroTitle={t("auth.hero_title_register")}
+      heroSubtitle={t("auth.hero_subtitle_register")}
     >
       <div className="mb-10 lg:hidden">
         <div className="flex items-center gap-2 mb-8">
@@ -67,62 +69,62 @@ export default function Register() {
         </div>
       </div>
       <div className="mb-10">
-        <h2 className="font-headline-lg text-headline-lg text-on-background mb-2">Create an account</h2>
-        <p className="font-body-sm text-body-sm text-on-surface-variant">Enter your details to get started.</p>
+        <h2 className="font-headline-lg text-headline-lg text-on-background mb-2">{t("auth.create_account")}</h2>
+        <p className="font-body-sm text-body-sm text-on-surface-variant">{t("auth.register_subtitle")}</p>
       </div>
 
       <form className="space-y-5" onSubmit={handleRegister}>
         {error && <div className="p-3 text-sm text-error bg-error-container rounded-lg">{error}</div>}
 
         <div className="space-y-2">
-          <label className="block font-label-caps text-label-caps text-on-surface-variant" htmlFor="name">Full Name</label>
+          <label className="block font-label-caps text-label-caps text-on-surface-variant" htmlFor="name">{t("auth.full_name")}</label>
           <div className="relative">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">person</span>
             <input className="w-full pl-12 pr-4 py-3 bg-surface border border-outline/40 rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-200"
               id="name" placeholder="John Doe" type="text" value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)} required aria-label="Full Name" />
+              onChange={(e) => setDisplayName(e.target.value)} required aria-label={t("auth.full_name")} />
           </div>
         </div>
 
         <div className="space-y-2">
-          <label className="block font-label-caps text-label-caps text-on-surface-variant" htmlFor="email">Email</label>
+          <label className="block font-label-caps text-label-caps text-on-surface-variant" htmlFor="email">{t("auth.email")}</label>
           <div className="relative">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">mail</span>
             <input className="w-full pl-12 pr-4 py-3 bg-surface border border-outline/40 rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-200"
               id="email" placeholder="name@company.com" type="email" value={email}
-              onChange={(e) => setEmail(e.target.value)} required aria-label="Email" />
+              onChange={(e) => setEmail(e.target.value)} required aria-label={t("auth.email")} />
           </div>
         </div>
 
         <div className="space-y-2">
-          <label className="block font-label-caps text-label-caps text-on-surface-variant" htmlFor="password">Password</label>
+          <label className="block font-label-caps text-label-caps text-on-surface-variant" htmlFor="password">{t("auth.password")}</label>
           <div className="relative">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">lock</span>
             <input className="w-full pl-12 pr-4 py-3 bg-surface border border-outline/40 rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-200"
               id="password" placeholder="••••••••" type="password" value={password}
-              onChange={(e) => setPassword(e.target.value)} required minLength={6} aria-label="Password" />
+              onChange={(e) => setPassword(e.target.value)} required minLength={6} aria-label={t("auth.password")} />
           </div>
         </div>
 
-        <button className="w-full bg-primary text-on-primary font-label-caps text-label-caps py-4 rounded-lg shadow-sm hover:bg-primary/90 transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-70 mt-4"
+        <button className="w-full bg-primary text-on-primary font-label-caps text-label-caps py-4 rounded-lg shadow-sm hover:bg-primary/90 transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-70 mt-4 cursor-pointer"
           type="submit" disabled={loading}>
           {loading ? (
             <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
-          ) : "Sign Up"}
+          ) : t("auth.sign_up")}
         </button>
 
         <div className="relative flex items-center py-4">
           <div className="flex-grow border-t border-outline-variant/30"></div>
-          <span className="flex-shrink-0 px-4 font-body-sm text-body-sm text-outline">Or continue with</span>
+          <span className="flex-shrink-0 px-4 font-body-sm text-body-sm text-outline">{t("auth.or_continue_with")}</span>
           <div className="flex-grow border-t border-outline-variant/30"></div>
         </div>
 
-        <GoogleButton onClick={handleGoogleRegister} disabled={loading} label="Sign up with Google" />
+        <GoogleButton onClick={handleGoogleRegister} disabled={loading} label={t("auth.sign_up_with_google")} />
       </form>
 
       <p className="mt-8 text-center font-body-sm text-body-sm text-on-surface-variant">
-        Already have an account?{" "}
-        <Link className="text-primary font-medium hover:underline decoration-primary/30 underline-offset-4 transition-all" href="/login">Log in</Link>
+        {t("auth.have_account")}{" "}
+        <Link className="text-primary font-medium hover:underline decoration-primary/30 underline-offset-4 transition-all" href="/login">{t("auth.sign_in")}</Link>
       </p>
     </AuthLayout>
   );

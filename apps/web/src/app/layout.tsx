@@ -1,16 +1,11 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Inter } from "next/font/google";
 import Providers from "@/components/Providers";
 import Script from "next/script";
 import "material-symbols/outlined.css";
 import "./globals.css";
 const inter = Inter({
   variable: "--font-inter",
-  subsets: ["latin"],
-});
-
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
   subsets: ["latin"],
 });
 
@@ -31,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable} antialiased`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} antialiased`} suppressHydrationWarning>
       <head>
 
         <Script
@@ -66,12 +61,8 @@ export default function RootLayout({
             `,
           }}
         />
-        <Providers>
-          {/* Decorative Background Gradient */}
-          <div className="absolute inset-0 z-[-1] pointer-events-none bg-gradient-to-br from-primary/5 via-primary/[0.02] to-transparent"></div>
-          <div className="absolute inset-0 z-[-1] bg-gradient-to-b from-background/40 via-background/80 to-background pointer-events-none transition-colors duration-300"></div>
-
-          {children}
+<Providers>
+           {children}
         </Providers>
       </body>
     </html>

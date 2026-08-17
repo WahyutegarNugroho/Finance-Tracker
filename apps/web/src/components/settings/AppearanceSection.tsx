@@ -9,7 +9,7 @@ export default function AppearanceSection() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <section className="bg-surface/80 backdrop-blur-[12px] border border-outline-variant/20 rounded-xl p-6 shadow-sm">
+    <section className="bg-surface border border-outline-variant/20 rounded-xl p-6 shadow-sm">
       <h3 className="font-headline-md text-headline-md text-on-background mb-6 flex items-center gap-2">
         <span className="material-symbols-outlined text-primary">palette</span>
         {t("settings_page.appearance_section.title")}

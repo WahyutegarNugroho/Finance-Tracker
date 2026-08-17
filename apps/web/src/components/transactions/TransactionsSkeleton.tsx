@@ -13,7 +13,7 @@ export default function TransactionsSkeleton() {
       </div>
 
       {/* Filter Bar Skeleton */}
-      <div className="bg-surface/80 backdrop-blur-[12px] border border-outline-variant/20 rounded-xl p-4 mb-6 flex flex-col lg:flex-row gap-4 justify-between items-center">
+      <div className="bg-surface border border-outline-variant/20 rounded-xl p-4 mb-6 flex flex-col lg:flex-row gap-4 justify-between items-center">
         <Skeleton width="100%" height={40} className="lg:w-96" borderRadius={8} />
         <div className="flex gap-3 w-full lg:w-auto">
           <Skeleton width={120} height={40} borderRadius={8} />
@@ -22,7 +22,7 @@ export default function TransactionsSkeleton() {
       </div>
 
       {/* Table Skeleton */}
-      <div className="bg-surface/80 backdrop-blur-[12px] border border-outline-variant/20 rounded-xl shadow-sm overflow-hidden min-h-[400px]">
+      <div className="bg-surface border border-outline-variant/20 rounded-xl shadow-sm overflow-hidden min-h-[400px]">
         <div className="p-6 border-b border-outline-variant/10">
           <div className="grid grid-cols-6 gap-4">
             {[1, 2, 3, 4, 5, 6].map((i) => (

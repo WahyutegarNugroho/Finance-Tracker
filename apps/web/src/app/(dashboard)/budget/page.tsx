@@ -250,9 +250,7 @@ export default function Budget() {
                     : "border-outline-variant/20 hover:shadow-md"
                 } transition-shadow duration-300 flex flex-col justify-between h-48 relative overflow-hidden group`}
               >
-                {b.status === "critical" && (
-                  <div className="absolute top-0 right-0 w-16 h-16 bg-error/5 rounded-bl-full pointer-events-none"></div>
-                )}
+                
                 <div className="absolute top-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity z-20 flex gap-1">
                   <button
                     type="button"

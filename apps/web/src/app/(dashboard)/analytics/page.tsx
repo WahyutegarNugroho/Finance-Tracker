@@ -195,7 +195,6 @@ export default function Analytics() {
           </div>
         </div>
         <div className="glass-card rounded-xl p-5 flex flex-col gap-3 relative overflow-hidden group transition-all duration-300 hover:shadow-md">
-          <div className="absolute right-0 top-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none transition-transform duration-700 group-hover:scale-110"></div>
           <div className="flex items-center justify-between relative z-10">
             <span className="font-label-caps text-label-caps text-primary uppercase tracking-wider">
               {t("analytics_page.summary.total_balance")}
@@ -335,7 +334,7 @@ export default function Analytics() {
                   return (
                     <div
                       key={cat.categoryId}
-                      className="flex items-center p-3 rounded-lg hover:bg-surface-variant/30 transition-all border border-transparent hover:border-outline-variant/10 group"
+                      className="flex items-center p-3 rounded-lg border border-transparent group"
                     >
                       <div
                         className="w-10 h-10 rounded-full flex items-center justify-center mr-4 transition-transform group-hover:scale-110"

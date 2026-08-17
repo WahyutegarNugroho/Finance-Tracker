@@ -57,7 +57,7 @@ export default function CategoryManager({
   };
 
   return (
-    <section className="bg-surface/80 backdrop-blur-[12px] border border-outline-variant/20 rounded-xl p-6 shadow-sm">
+    <section className="bg-surface border border-outline-variant/20 rounded-xl p-6 shadow-sm">
       <div className="flex justify-between items-center mb-6">
         <h3 className="font-headline-md text-headline-md text-on-background flex items-center gap-2">
           <span className="material-symbols-outlined text-primary">category</span>
@@ -82,7 +82,7 @@ export default function CategoryManager({
                 id="new-cat-name"
                 value={newCatName}
                 onChange={(e) => setNewCatName(e.target.value)}
-                className="w-full bg-surface border border-outline-variant/30 rounded-lg px-3 py-2 text-body-sm outline-none focus:border-primary"
+                className="w-full bg-surface border border-outline-variant/30 rounded-lg px-3 py-2 text-body-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 type="text" 
                 placeholder="Ex: Food, Rent..."
               />
@@ -93,7 +93,7 @@ export default function CategoryManager({
                 id="new-cat-type"
                 value={newCatType}
                 onChange={(e) => setNewCatType(e.target.value as "expense" | "income")}
-                className="w-full bg-surface border border-outline-variant/30 rounded-lg px-3 py-2 text-body-sm outline-none focus:border-primary cursor-pointer"
+                className="w-full bg-surface border border-outline-variant/30 rounded-lg px-3 py-2 text-body-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 cursor-pointer"
               >
                 <option value="expense">{t("common.expense")}</option>
                 <option value="income">{t("common.income")}</option>

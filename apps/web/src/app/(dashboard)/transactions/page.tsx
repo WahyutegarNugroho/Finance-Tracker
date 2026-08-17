@@ -222,7 +222,7 @@ function TransactionsContent() {
         formatDate={formatDate}
       />
 
-      <div className="mt-auto px-6 py-4 border-t border-outline-variant/10 flex items-center justify-between bg-surface-container-lowest/50 rounded-xl bg-surface/80">
+      <div className="mt-auto px-6 py-4 border-t border-outline-variant/10 flex items-center justify-between bg-surface rounded-xl">
         <span className="font-body-sm text-body-sm text-on-surface-variant">
           {filteredTransactions.length > 0
             ? t("transactions_page.transaction_count").replace("{count}", String(filteredTransactions.length))
@@ -236,12 +236,14 @@ function TransactionsContent() {
         <div className="flex items-center gap-2">
           <button onClick={() => { const prev = cursorStack[cursorStack.length - 1] || null; if (prev !== undefined) { setCursorStack(prev => prev.slice(0, -1)); setCursor(prev); } }}
             disabled={!canGoBack}
+            aria-disabled={!canGoBack}
             className="p-2 rounded-md hover:bg-surface-variant text-on-surface disabled:opacity-30 disabled:hover:bg-transparent transition-colors flex items-center gap-1">
             <span className="material-symbols-outlined text-[18px]">chevron_left</span>
             <span className="font-body-sm text-body-sm">{t("transactions_page.pagination.previous") || "Previous"}</span>
           </button>
           <button onClick={() => { if (hasMore && pagination?.nextCursor) { setCursorStack(prev => [...prev, cursor]); setCursor(pagination.nextCursor!); } }}
             disabled={!hasMore}
+            aria-disabled={!hasMore}
             className="p-2 rounded-md hover:bg-surface-variant text-on-surface disabled:opacity-30 disabled:hover:bg-transparent transition-colors flex items-center gap-1">
             <span className="font-body-sm text-body-sm">{t("transactions_page.pagination.next") || "Next"}</span>
             <span className="material-symbols-outlined text-[18px]">chevron_right</span>

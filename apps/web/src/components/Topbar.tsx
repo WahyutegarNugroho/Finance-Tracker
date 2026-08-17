@@ -25,7 +25,7 @@ export default function Topbar() {
   };
 
   return (
-    <header className="bg-surface/80 backdrop-blur-md fixed top-0 right-0 w-full md:w-[calc(100%-260px)] h-16 z-40 border-b border-outline-variant/20 shadow-sm flex justify-between items-center px-4 md:px-6">
+    <header className="bg-surface/95 fixed top-0 right-0 w-full md:w-[calc(100%-260px)] h-16 z-40 border-b border-outline-variant/20 shadow-sm flex justify-between items-center px-4 md:px-6">
       <div className="flex items-center">
         <span className="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary md:hidden">
           FinTrack
@@ -72,15 +72,20 @@ export default function Topbar() {
             notifications
           </span>
         </button>
-        <div className="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/30 cursor-pointer ml-2 bg-surface-variant">
+        <button
+          type="button"
+          className="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/30 ml-2 bg-surface-variant p-0 focus:outline-none focus:ring-2 focus:ring-primary"
+          aria-label={t("common.profile")}
+        >
           <Image
-            alt={user?.displayName || "User avatar"}
+            alt=""
             className="w-full h-full object-cover"
             src={user?.photoURL || getAvatarUrl(user?.displayName)}
             width={32}
             height={32}
+            aria-hidden="true"
           />
-        </div>
+        </button>
       </div>
     </header>
   );

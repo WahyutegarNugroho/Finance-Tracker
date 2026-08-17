@@ -22,7 +22,7 @@ export default function Sidebar({ activePath }: SidebarProps) {
   ];
 
   return (
-    <aside className="bg-surface/95 backdrop-blur-xl fixed left-0 top-0 h-screen w-[260px] hidden md:flex flex-col border-r border-outline-variant/20 shadow-sm z-50 p-6 gap-4">
+    <aside className="bg-surface/95 fixed left-0 top-0 h-screen w-[260px] hidden md:flex flex-col border-r border-outline-variant/20 shadow-sm z-50 p-6 gap-4">
       {/* Brand */}
       <div className="flex items-center gap-3 px-2 py-4 mb-6">
         <div className="w-10 h-10 bg-primary text-on-primary rounded-xl flex items-center justify-center font-bold text-xl">
@@ -104,7 +104,7 @@ export default function Sidebar({ activePath }: SidebarProps) {
           </div>
           <div className="flex-1 overflow-hidden">
             <p className="font-body-sm text-body-sm font-semibold truncate text-on-surface">
-              {user?.displayName || "John Doe"}
+              {user?.displayName || user?.email?.split('@')[0] || "Account"}
             </p>
             <p className="font-label-caps text-label-caps text-outline truncate">
               {t("common.pro_plan")}

@@ -13,7 +13,6 @@ export default React.memo(function SummaryCards({ data }: { data: DashboardOverv
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
       {/* Total Balance */}
       <div className="glass-card rounded-xl p-5 relative overflow-hidden group">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-10 -mt-10 blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
         <div className="flex justify-between items-start mb-4 relative z-10">
           <p className="font-label-caps text-label-caps text-outline">
             {t("dashboard_page.total_balance")}

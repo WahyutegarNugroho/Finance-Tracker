@@ -23,7 +23,7 @@ const FilterBar = React.memo(function FilterBar({
   const { t } = useLanguage();
 
   return (
-    <div className="bg-surface/80 backdrop-blur-[12px] border border-outline-variant/20 rounded-xl p-4 shadow-sm flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+    <div className="bg-surface border border-outline-variant/20 rounded-xl p-4 shadow-sm flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
       {/* Search */}
       <div className="relative w-full lg:w-96">
         <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">

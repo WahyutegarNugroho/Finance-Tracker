@@ -47,11 +47,11 @@ const RecentTransactions = React.memo(function RecentTransactions({ transactions
                     {tx.categoryIcon || (tx.type === 'income' ? 'payments' : 'receipt')}
                   </span>
                 </div>
-                <div>
-                  <h4 className="font-body-sm text-body-sm font-semibold text-on-surface">
+                <div className="min-w-0 flex-1">
+                  <h4 className="font-body-sm text-body-sm font-semibold text-on-surface truncate">
                     {tx.note || tCategory(tx.categoryName)}
                   </h4>
-                  <p className="font-label-caps text-label-caps text-outline mt-1 text-[10px]">
+                  <p className="font-label-caps text-label-caps text-outline mt-1 text-[10px] truncate">
                     {tCategory(tx.categoryName)} • {formatDate(tx.date)}
                   </p>
                 </div>

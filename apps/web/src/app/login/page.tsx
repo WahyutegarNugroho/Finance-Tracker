@@ -7,11 +7,13 @@ import { signInWithEmailAndPassword, signInWithPopup, sendPasswordResetEmail, Go
 import { auth } from "@/lib/firebase";
 import { api } from "@/lib/api";
 import { getFirebaseErrorMessage } from "@/lib/constants";
+import { useLanguage } from "@/context/LanguageContext";
 import AuthLayout from "@/components/auth/AuthLayout";
 import GoogleButton from "@/components/auth/GoogleButton";
 
 export default function Login() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,20 +29,20 @@ export default function Login() {
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/dashboard");
     } catch (err: unknown) {
-      setError(getFirebaseErrorMessage(err) || 'Login failed. Please try again.');
+      setError(getFirebaseErrorMessage(err) || t("auth.login_failed"));
     } finally {
       setLoading(false);
     }
   };
 
   const handleForgotPassword = async () => {
-    if (!email.trim()) { setForgotPwdMsg("Please enter your email address first."); return; }
+    if (!email.trim()) { setForgotPwdMsg(t("auth.enter_email_first")); return; }
     setError(""); setForgotPwdMsg(""); setForgotPwdLoading(true);
     try {
       await sendPasswordResetEmail(auth, email);
-      setForgotPwdMsg("Password reset email sent. Check your inbox.");
+      setForgotPwdMsg(t("auth.reset_email_sent"));
     } catch (err: unknown) {
-      setForgotPwdMsg(getFirebaseErrorMessage(err) || 'Failed to send reset email.');
+      setForgotPwdMsg(getFirebaseErrorMessage(err) || t("auth.login_failed"));
     } finally { setForgotPwdLoading(false); }
   };
 
@@ -70,8 +72,8 @@ export default function Login() {
 
   return (
     <AuthLayout
-      heroTitle="Smart money management starts here."
-      heroSubtitle="Track your income, control expenses and stay on budget all from one clean dashboard."
+      heroTitle={t("auth.hero_title_login")}
+      heroSubtitle={t("auth.hero_subtitle_login")}
     >
       <div className="mb-10 lg:hidden">
         <div className="flex items-center gap-2 mb-8">
@@ -80,64 +82,64 @@ export default function Login() {
         </div>
       </div>
       <div className="mb-10">
-        <h2 className="font-headline-lg text-headline-lg text-on-background mb-2">Welcome back</h2>
-        <p className="font-body-sm text-body-sm text-on-surface-variant">Please enter your details to access your dashboard.</p>
+        <h2 className="font-headline-lg text-headline-lg text-on-background mb-2">{t("auth.welcome_back")}</h2>
+        <p className="font-body-sm text-body-sm text-on-surface-variant">{t("auth.login_subtitle")}</p>
       </div>
 
       <form className="space-y-6" onSubmit={handleEmailLogin}>
         {forgotPwdMsg && (
-          <div className={`p-3 text-sm rounded-lg ${forgotPwdMsg.includes("sent") ? "text-secondary bg-secondary-container" : "text-error bg-error-container"}`}>
+          <div className={`p-3 text-sm rounded-lg ${forgotPwdMsg.includes("sent") || forgotPwdMsg.includes("dikirim") ? "text-secondary bg-secondary-container" : "text-error bg-error-container"}`}>
             {forgotPwdMsg}
           </div>
         )}
         {error && <div className="p-3 text-sm text-error bg-error-container rounded-lg">{error}</div>}
 
         <div className="space-y-2">
-          <label className="block font-label-caps text-label-caps text-on-surface-variant" htmlFor="email">Email</label>
+          <label className="block font-label-caps text-label-caps text-on-surface-variant" htmlFor="email">{t("auth.email")}</label>
           <div className="relative">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">mail</span>
             <input className="w-full pl-12 pr-4 py-3 bg-surface border border-outline/40 rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-200"
               id="email" placeholder="name@company.com" type="email" value={email}
-              onChange={(e) => setEmail(e.target.value)} required aria-label="Email" />
+              onChange={(e) => setEmail(e.target.value)} required aria-label={t("auth.email")} />
           </div>
         </div>
 
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <label className="block font-label-caps text-label-caps text-on-surface-variant" htmlFor="password">Password</label>
+            <label className="block font-label-caps text-label-caps text-on-surface-variant" htmlFor="password">{t("auth.password")}</label>
             <button type="button" onClick={handleForgotPassword} disabled={forgotPwdLoading}
               className="font-body-sm text-body-sm text-primary hover:text-primary-container transition-colors font-medium disabled:opacity-50">
-              {forgotPwdLoading ? "Sending..." : "Forgot password?"}
+              {forgotPwdLoading ? t("auth.sending") : t("auth.forgot_password")}
             </button>
           </div>
           <div className="relative">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">lock</span>
             <input className="w-full pl-12 pr-4 py-3 bg-surface border border-outline/40 rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-200"
               id="password" placeholder="••••••••" type="password" value={password}
-              onChange={(e) => setPassword(e.target.value)} required aria-label="Password" />
+              onChange={(e) => setPassword(e.target.value)} required aria-label={t("auth.password")} />
           </div>
         </div>
 
         <div className="pt-2 space-y-4">
-          <button className="w-full bg-primary text-on-primary font-label-caps text-label-caps py-4 rounded-lg shadow-sm hover:bg-primary/90 transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-70"
+          <button className="w-full bg-primary text-on-primary font-label-caps text-label-caps py-4 rounded-lg shadow-sm hover:bg-primary/90 transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-70 cursor-pointer"
             type="submit" disabled={loading}>
-            {loading ? "Signing In..." : "Sign In"}
+            {loading ? t("auth.signing_in") : t("auth.sign_in")}
             {!loading && <span className="material-symbols-outlined text-sm">arrow_forward</span>}
           </button>
 
           <div className="relative flex items-center py-2">
             <div className="flex-grow border-t border-outline-variant/50"></div>
-            <span className="flex-shrink-0 mx-4 font-body-sm text-body-sm text-outline">or</span>
+            <span className="flex-shrink-0 mx-4 font-body-sm text-body-sm text-outline">{t("auth.or")}</span>
             <div className="flex-grow border-t border-outline-variant/50"></div>
           </div>
 
-          <GoogleButton onClick={handleGoogleLogin} disabled={loading} label="Sign in with Google" />
+          <GoogleButton onClick={handleGoogleLogin} disabled={loading} label={t("auth.sign_in_with_google")} />
         </div>
       </form>
 
       <p className="mt-8 text-center font-body-sm text-body-sm text-on-surface-variant">
-        Don&apos;t have an account?{" "}
-        <Link className="text-primary font-medium hover:underline decoration-primary/30 underline-offset-4 transition-all" href="/register">Sign up</Link>
+        {t("auth.no_account")}{" "}
+        <Link className="text-primary font-medium hover:underline decoration-primary/30 underline-offset-4 transition-all" href="/register">{t("auth.sign_up")}</Link>
       </p>
     </AuthLayout>
   );

@@ -103,31 +103,32 @@
 
 @layer utilities {
   .glass-panel {
-    background: rgba(252, 248, 255, 0.75);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background-color: rgba(252, 248, 255, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.5);
     box-shadow: 0 8px 32px 0 rgba(70, 72, 212, 0.05);
   }
 
   .dark .glass-panel {
-    background: rgba(30, 27, 35, 0.75);
+    background-color: rgba(30, 27, 35, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
   }
   
   .glass-card {
-    background-color: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(12px);
+    background-color: rgba(252, 248, 255, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.4);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
   }
   
   .dark .glass-card {
-    background-color: rgba(48, 48, 56, 0.85);
+    background-color: rgba(48, 48, 56, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   }
+}
+
+.font-numeric-data {
+  font-variant-numeric: tabular-nums;
 }
 
 .material-symbols-outlined {

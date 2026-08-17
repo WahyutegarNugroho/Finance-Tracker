@@ -31,7 +31,7 @@ export default function ProfileSection({
   const { t } = useLanguage();
 
   return (
-    <section className="bg-surface/80 backdrop-blur-[12px] border border-outline-variant/20 rounded-xl p-6 shadow-sm">
+    <section className="bg-surface border border-outline-variant/20 rounded-xl p-6 shadow-sm">
       <h3 className="font-headline-md text-headline-md text-on-background mb-6 flex items-center gap-2">
         <span className="material-symbols-outlined text-primary">person</span>
         {t("settings_page.profile_section.title")}
@@ -59,12 +59,14 @@ export default function ProfileSection({
             />
           </div>
           <div>
-            <label className="block font-label-caps text-label-caps text-outline mb-1 uppercase">
+            <label htmlFor="profile-email" className="block font-label-caps text-label-caps text-outline mb-1 uppercase">
               {t("settings_page.profile_section.email")}
             </label>
             <input 
+              id="profile-email"
               value={user?.email || ""}
               disabled
+              aria-label={t("settings_page.profile_section.email")}
               className="w-full bg-surface-variant/10 border border-outline-variant/10 rounded-lg px-4 py-2 font-body-lg text-body-lg text-outline outline-none cursor-not-allowed" 
               type="email" 
             />
