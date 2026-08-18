@@ -1,13 +1,23 @@
 packages:
   - 'apps/*'
 
+overrides:
+  "brace-expansion@<2": "1.1.18"
+  "brace-expansion@>=3": "5.0.9"
+  "js-yaml": "4.3.1"
+  "postcss": "8.5.26"
+  "nanoid": "3.3.18"
+  "ip-address": "10.5.0"
+  "sharp": "0.35.3"
+  "shell-quote": "1.10.0"
+
 onlyBuiltDependencies:
   - "@firebase/util"
   - "protobufjs"
   - "sharp"
   - "unrs-resolver"
 allowBuilds:
-  '@firebase/util': set this to true or false
-  protobufjs: set this to true or false
-  sharp: set this to true or false
-  unrs-resolver: set this to true or false
+  '@firebase/util': true
+  protobufjs: true
+  sharp: true
+  unrs-resolver: true
