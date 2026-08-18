@@ -24,15 +24,23 @@ const getDashboardOverview = async (userId) => {
   const { start: startOfMonth, end: endOfMonth } = computePeriod(currentYear, currentMonth, 0);
   const { start: startOfPrevMonth } = computePeriod(currentYear, currentMonth, -1);
 
-  // Single query spanning both months — split client-side (saves 1 read)
-  const bothSnapshots = await db
-    .collection(TRANSACTIONS_COLLECTION)
-    .where('userId', '==', userId)
-    .where('date', '>=', startOfPrevMonth)
-    .where('date', '<=', endOfMonth)
-    .orderBy('date', 'desc')
-    .limit(10000)
-    .get();
+  // Fetch transactions spanning both months and current month's budgets in parallel to avoid query waterfalls
+  const [bothSnapshots, budgetSnapshot] = await Promise.all([
+    db
+      .collection(TRANSACTIONS_COLLECTION)
+      .where('userId', '==', userId)
+      .where('date', '>=', startOfPrevMonth)
+      .where('date', '<=', endOfMonth)
+      .orderBy('date', 'desc')
+      .limit(10000)
+      .get(),
+    db
+      .collection('budgets')
+      .where('userId', '==', userId)
+      .where('month', '==', currentMonth)
+      .where('year', '==', currentYear)
+      .get(),
+  ]);
 
   let currentIncome = 0;
   let currentExpense = 0;
@@ -92,14 +100,6 @@ const getDashboardOverview = async (userId) => {
       categoryMap[data.categoryId].amount += data.amount;
     }
   });
-
-  // Get budget summary (parallel)
-  const budgetSnapshot = await db
-    .collection('budgets')
-    .where('userId', '==', userId)
-    .where('month', '==', currentMonth)
-    .where('year', '==', currentYear)
-    .get();
 
   let totalBudgetLimit = 0;
   budgetSnapshot.docs.forEach((doc) => {
