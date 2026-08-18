@@ -28,15 +28,14 @@ export function MockChart() {
   }
 
   const fillPathD = `${pathD} L ${w},${h} L 0,${h} Z`;
-  const color = '#4648d4';
 
   return (
     <div className="absolute inset-0 w-full h-full pb-2" aria-hidden="true">
       <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="w-full h-full">
-        <path d={fillPathD} fill={`${color}26`} />
-        <path d={pathD} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d={fillPathD} className="fill-primary/15" />
+        <path d={pathD} fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="stroke-primary" />
         {pts.map((p, i) => (
-          <circle key={i} cx={p.x.toFixed(1)} cy={p.y.toFixed(1)} r="0.8" fill={color} />
+          <circle key={i} cx={p.x.toFixed(1)} cy={p.y.toFixed(1)} r="0.8" className="fill-primary" />
         ))}
       </svg>
     </div>

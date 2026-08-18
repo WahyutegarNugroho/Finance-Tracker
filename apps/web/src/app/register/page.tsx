@@ -106,7 +106,7 @@ export default function Register() {
           </div>
         </div>
 
-        <button className="w-full bg-primary text-on-primary font-label-caps text-label-caps py-4 rounded-lg shadow-sm hover:bg-primary/90 transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-70 mt-4 cursor-pointer"
+        <button className="w-full bg-primary text-on-primary font-label-caps text-label-caps py-4 rounded-lg shadow-sm hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-primary-fixed focus-visible:outline-none transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-70 mt-4 cursor-pointer"
           type="submit" disabled={loading}>
           {loading ? (
             <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
@@ -124,7 +124,7 @@ export default function Register() {
 
       <p className="mt-8 text-center font-body-sm text-body-sm text-on-surface-variant">
         {t("auth.have_account")}{" "}
-        <Link className="text-primary font-medium hover:underline decoration-primary/30 underline-offset-4 transition-all" href="/login">{t("auth.sign_in")}</Link>
+        <Link className="text-primary font-medium hover:underline decoration-primary/30 underline-offset-4 transition-all focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none rounded px-1" href="/login">{t("auth.sign_in")}</Link>
       </p>
     </AuthLayout>
   );

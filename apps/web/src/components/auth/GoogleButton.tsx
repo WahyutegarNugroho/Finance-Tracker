@@ -11,7 +11,7 @@ interface GoogleButtonProps {
 export default function GoogleButton({ onClick, disabled, label }: GoogleButtonProps) {
   return (
     <button
-      className="w-full bg-surface border border-outline/30 text-on-surface font-body-sm text-body-sm font-medium py-3 rounded-lg hover:bg-surface-variant/50 transition-colors duration-200 flex items-center justify-center gap-3 disabled:opacity-70"
+      className="w-full bg-surface border border-outline/30 text-on-surface font-body-sm text-body-sm font-medium py-3 rounded-lg hover:bg-surface-variant/50 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none transition-colors duration-200 flex items-center justify-center gap-3 disabled:opacity-70"
       type="button"
       onClick={onClick}
       disabled={disabled}

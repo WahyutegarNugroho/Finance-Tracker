@@ -17,7 +17,7 @@ export default function AuthLayout({ children, heroTitle, heroSubtitle }: AuthLa
     <div className="bg-background text-on-background min-h-screen flex antialiased">
       {/* Left Panel */}
       <aside className="relative hidden lg:flex lg:w-[44%] flex-col justify-between p-12 xl:p-16 overflow-hidden bg-[#0A0D14]">
-        <Link href="/" className="inline-flex items-center gap-2 font-headline-md text-headline-md font-bold tracking-tight text-white relative z-10">
+        <Link href="/" className="inline-flex items-center gap-2 font-headline-md text-headline-md font-bold tracking-tight text-white relative z-10 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none rounded px-1.5 py-0.5">
           <span className="material-symbols-outlined text-[26px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>
             account_balance_wallet
           </span>
@@ -38,7 +38,7 @@ export default function AuthLayout({ children, heroTitle, heroSubtitle }: AuthLa
       <main className="flex-1 min-w-0 flex items-center justify-center px-4 py-12 bg-surface-container-low">
         <div className="w-full max-w-md">
           <Link href="/"
-            className="inline-flex mb-6 items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-body-sm text-body-sm font-medium">
+            className="inline-flex mb-6 items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-body-sm text-body-sm font-medium focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none rounded px-1.5 py-0.5">
             <span className="material-symbols-outlined text-[20px]">arrow_back</span>
             {t("auth.back_to_home")}
           </Link>

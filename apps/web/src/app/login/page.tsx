@@ -108,7 +108,7 @@ export default function Login() {
           <div className="flex justify-between items-center">
             <label className="block font-label-caps text-label-caps text-on-surface-variant" htmlFor="password">{t("auth.password")}</label>
             <button type="button" onClick={handleForgotPassword} disabled={forgotPwdLoading}
-              className="font-body-sm text-body-sm text-primary hover:text-primary-container transition-colors font-medium disabled:opacity-50">
+              className="font-body-sm text-body-sm text-primary hover:text-primary-container focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none rounded px-1 transition-colors font-medium disabled:opacity-50">
               {forgotPwdLoading ? t("auth.sending") : t("auth.forgot_password")}
             </button>
           </div>
@@ -121,7 +121,7 @@ export default function Login() {
         </div>
 
         <div className="pt-2 space-y-4">
-          <button className="w-full bg-primary text-on-primary font-label-caps text-label-caps py-4 rounded-lg shadow-sm hover:bg-primary/90 transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-70 cursor-pointer"
+          <button className="w-full bg-primary text-on-primary font-label-caps text-label-caps py-4 rounded-lg shadow-sm hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-primary-fixed focus-visible:outline-none transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-70 cursor-pointer"
             type="submit" disabled={loading}>
             {loading ? t("auth.signing_in") : t("auth.sign_in")}
             {!loading && <span className="material-symbols-outlined text-sm">arrow_forward</span>}
@@ -139,7 +139,7 @@ export default function Login() {
 
       <p className="mt-8 text-center font-body-sm text-body-sm text-on-surface-variant">
         {t("auth.no_account")}{" "}
-        <Link className="text-primary font-medium hover:underline decoration-primary/30 underline-offset-4 transition-all" href="/register">{t("auth.sign_up")}</Link>
+        <Link className="text-primary font-medium hover:underline decoration-primary/30 underline-offset-4 transition-all focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none rounded px-1" href="/register">{t("auth.sign_up")}</Link>
       </p>
     </AuthLayout>
   );
