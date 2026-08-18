@@ -18,19 +18,6 @@ const getCategories = async (userId) => {
 };
 
 /**
- * Get a single category by ID (with ownership check)
- */
-const getCategoryById = async (userId, categoryId) => {
-  const doc = await db.collection(COLLECTION).doc(categoryId).get();
-
-  if (!doc.exists || doc.data().userId !== userId) {
-    return null;
-  }
-
-  return serializeDoc(doc);
-};
-
-/**
  * Create a new category
  */
 const createCategory = async (userId, data) => {

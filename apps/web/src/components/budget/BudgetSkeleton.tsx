@@ -16,7 +16,7 @@ export default function BudgetSkeleton() {
       </div>
 
       {/* Summary Card Skeleton */}
-      <div className="glass-card rounded-xl p-8 h-44 flex flex-col justify-between">
+      <div className="bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-8 h-44 flex flex-col justify-between">
         <div className="flex justify-between items-end">
           <div className="flex flex-col gap-2">
             <Skeleton className="h-4 w-32" />
@@ -42,7 +42,7 @@ export default function BudgetSkeleton() {
       {/* Category Grid Skeleton */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-          <div key={i} className="glass-card rounded-xl p-5 h-48 flex flex-col justify-between">
+          <div key={i} className="bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-5 h-48 flex flex-col justify-between">
             <div className="flex items-center gap-3">
               <Skeleton className="h-10 w-10 rounded-full" />
               <Skeleton className="h-5 w-32" />

@@ -71,6 +71,18 @@ export interface DashboardOverview {
   year: number;
 }
 
+export interface Budget {
+  id: string;
+  categoryId: string;
+  categoryName: string;
+  categoryIcon: string;
+  limitAmount: number;
+  period: "monthly" | "weekly" | "yearly";
+  month: number;
+  year: number;
+  userId: string;
+}
+
 export interface BudgetWithSpent extends Budget {
   spent: number;
   remaining: number;
@@ -82,22 +94,6 @@ export interface FirebaseAuthError {
   code?: string;
   message?: string;
   data?: { message?: string };
-}
-
-export interface Budget {
-  id: string;
-  categoryId: string;
-  categoryName: string;
-  categoryIcon: string;
-  limitAmount: number;
-  period: "monthly" | "weekly" | "yearly";
-  month: number;
-  year: number;
-  spent: number;
-  remaining: number;
-  percentage: number;
-  status: "good" | "warning" | "critical";
-  userId: string;
 }
 
 export interface AnalyticsOverview {

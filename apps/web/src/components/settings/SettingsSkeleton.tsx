@@ -12,7 +12,7 @@ export default function SettingsSkeleton() {
       </div>
 
       {/* Profile Section Skeleton */}
-      <div className="glass-card rounded-xl p-6">
+      <div className="bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-6">
         <Skeleton width={150} height={24} className="mb-6" />
         <div className="flex flex-col sm:flex-row gap-8 items-center mb-8">
           <Skeleton width={96} height={96} borderRadius="50%" />
@@ -37,7 +37,7 @@ export default function SettingsSkeleton() {
       </div>
 
       {/* Appearance Skeleton */}
-      <div className="glass-card rounded-xl p-6 space-y-4">
+      <div className="bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-6 space-y-4">
         <Skeleton width={150} height={24} className="mb-6" />
         <div className="flex items-center justify-between p-4 border border-outline-variant/10 rounded-lg">
           <div className="flex items-center gap-4">
@@ -62,7 +62,7 @@ export default function SettingsSkeleton() {
       </div>
 
       {/* Categories Skeleton */}
-      <div className="glass-card rounded-xl p-6">
+      <div className="bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-6">
         <div className="flex justify-between items-center mb-6">
           <Skeleton width={150} height={24} />
           <Skeleton width={100} height={32} borderRadius={8} />

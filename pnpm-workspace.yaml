@@ -1,6 +1,7 @@
 packages:
   - 'apps/*'
 
+# overrides: Pin package resolutions to resolve OWASP-audited dependency vulnerabilities
 overrides:
   "brace-expansion@<2": "1.1.18"
   "brace-expansion@>=3": "5.0.9"

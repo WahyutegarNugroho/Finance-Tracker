@@ -16,9 +16,21 @@ export default function DashboardSkeleton() {
       </div>
 
       {/* Summary Cards Skeleton */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="glass-card rounded-xl p-5 h-32 flex flex-col justify-between">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        {/* Total Balance */}
+        <div className="bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-5 h-32 lg:col-span-2 flex flex-col justify-between">
+          <div className="flex justify-between">
+            <Skeleton width={100} height={16} />
+            <Skeleton width={32} height={32} borderRadius={8} />
+          </div>
+          <div className="space-y-2">
+            <Skeleton width="60%" height={24} />
+            <Skeleton width="40%" height={12} />
+          </div>
+        </div>
+        {/* Other 3 cards */}
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-5 h-32 lg:col-span-1 flex flex-col justify-between">
             <div className="flex justify-between">
               <Skeleton width={100} height={16} />
               <Skeleton width={32} height={32} borderRadius={8} />
@@ -33,7 +45,7 @@ export default function DashboardSkeleton() {
 
       {/* Charts Skeleton */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="glass-card rounded-xl p-6 lg:col-span-2 h-[350px] flex flex-col">
+        <div className="bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-6 lg:col-span-2 h-[350px] flex flex-col">
           <div className="flex justify-between mb-8">
             <Skeleton width={150} height={24} />
             <Skeleton width={120} height={20} />
@@ -50,7 +62,7 @@ export default function DashboardSkeleton() {
             ))}
           </div>
         </div>
-        <div className="glass-card rounded-xl p-6 h-[350px] flex flex-col items-center">
+        <div className="bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-6 h-[350px] flex flex-col items-center">
           <Skeleton width={150} height={24} className="self-start mb-10" />
           <div className="relative w-40 h-40 rounded-full border-[12px] border-surface-variant flex items-center justify-center">
              <Skeleton width={60} height={20} />
@@ -70,7 +82,7 @@ export default function DashboardSkeleton() {
       </div>
 
       {/* Recent Transactions Skeleton */}
-      <div className="glass-card rounded-xl p-6">
+      <div className="bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-6">
         <div className="flex justify-between mb-6">
           <Skeleton width={180} height={24} />
           <Skeleton width={80} height={16} />
