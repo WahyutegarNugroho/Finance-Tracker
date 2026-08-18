@@ -66,7 +66,7 @@ export default function CategoryManager({
         <button 
           type="button"
           onClick={() => setShowAddCat(!showAddCat)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-label-caps text-label-caps cursor-pointer"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none transition-colors font-label-caps text-label-caps cursor-pointer"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
           {t("settings_page.category_section.add_new")}
@@ -105,7 +105,7 @@ export default function CategoryManager({
             <button 
               type="button"
               onClick={() => setShowAddCat(false)}
-              className="px-4 py-1.5 text-body-sm text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
+              className="px-4 py-1.5 text-body-sm text-on-surface-variant hover:text-on-surface focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none rounded transition-colors cursor-pointer"
             >
               {t("common.cancel")}
             </button>
@@ -113,7 +113,7 @@ export default function CategoryManager({
               type="button"
               onClick={handleAdd}
               disabled={isAdding}
-              className="bg-primary text-on-primary px-4 py-1.5 rounded-lg text-body-sm font-medium hover:bg-primary/90 transition-all shadow-sm cursor-pointer disabled:opacity-50"
+              className="bg-primary text-on-primary px-4 py-1.5 rounded-lg text-body-sm font-medium hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-primary/45 focus-visible:outline-none transition-all shadow-sm cursor-pointer disabled:opacity-50"
             >
               {isAdding ? "..." : t("common.add")}
             </button>
@@ -158,7 +158,7 @@ export default function CategoryManager({
                       type="button"
                       onClick={() => handleEdit(cat)}
                       aria-label={`${t("common.edit")} ${tCategory(cat.name)}`}
-                      className="p-1.5 text-outline hover:text-primary transition-colors cursor-pointer"
+                      className="p-1.5 text-outline hover:text-primary focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none rounded-md transition-colors cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[18px]">edit</span>
                     </button>
@@ -167,7 +167,7 @@ export default function CategoryManager({
                       onClick={() => onDeleteCategory(cat.id)}
                       disabled={isDeleting}
                       aria-label={`${t("common.delete")} ${tCategory(cat.name)}`}
-                      className="p-1.5 text-outline hover:text-error transition-colors cursor-pointer disabled:opacity-50"
+                      className="p-1.5 text-outline hover:text-error focus-visible:ring-2 focus-visible:ring-error/40 focus-visible:outline-none rounded-md transition-colors cursor-pointer disabled:opacity-50"
                     >
                       <span className="material-symbols-outlined text-[18px]">delete</span>
                     </button>

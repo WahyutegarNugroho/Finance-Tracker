@@ -149,7 +149,7 @@ export default function Analytics() {
               key={m}
               type="button"
               onClick={() => setMonthsRange(m)}
-              className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
+              className={`px-3 py-1 text-xs font-semibold rounded-md focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none transition-colors cursor-pointer ${
                 monthsRange === m
                   ? "bg-primary text-on-primary shadow-sm"
                   : "text-on-surface-variant hover:text-on-surface"
@@ -162,7 +162,26 @@ export default function Analytics() {
       </div>
 
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-        <div className="glass-card rounded-xl p-5 flex flex-col gap-3 group transition-all duration-300 hover:shadow-md">
+        {/* Total Balance */}
+        <div className="md:col-span-3 bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-6 flex flex-row items-center justify-between gap-4 relative overflow-hidden group hover:shadow-md transition-shadow">
+          <div>
+            <span className="font-label-caps text-label-caps text-primary uppercase tracking-wider">
+              {t("analytics_page.summary.total_balance")}
+            </span>
+            <div className="font-numeric-data text-[32px] font-bold text-primary mt-1 relative z-10">
+              {formatCurrency(overview?.balance || 0)}
+            </div>
+            <div className="text-xs text-on-surface-variant font-medium mt-1 relative z-10">
+              {t("analytics_page.current_balance")}
+            </div>
+          </div>
+          <div className="w-12 h-12 rounded-full bg-primary-container/20 flex items-center justify-center text-primary">
+            <span className="material-symbols-outlined text-2xl">savings</span>
+          </div>
+        </div>
+
+        {/* Total Income */}
+        <div className="md:col-span-1 bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-5 flex flex-col gap-3 group transition-all duration-300 hover:shadow-md">
           <div className="flex items-center justify-between">
             <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">
               {t("analytics_page.summary.total_income")}
@@ -178,7 +197,9 @@ export default function Analytics() {
             {t("analytics_page.income_this_month")}
           </div>
         </div>
-        <div className="glass-card rounded-xl p-5 flex flex-col gap-3 group transition-all duration-300 hover:shadow-md">
+
+        {/* Total Expense */}
+        <div className="md:col-span-2 bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-5 flex flex-col gap-3 group transition-all duration-300 hover:shadow-md">
           <div className="flex items-center justify-between">
             <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">
               {t("analytics_page.summary.total_expense")}
@@ -194,25 +215,9 @@ export default function Analytics() {
             {t("analytics_page.spending_this_month")}
           </div>
         </div>
-        <div className="glass-card rounded-xl p-5 flex flex-col gap-3 relative overflow-hidden group transition-all duration-300 hover:shadow-md">
-          <div className="flex items-center justify-between relative z-10">
-            <span className="font-label-caps text-label-caps text-primary uppercase tracking-wider">
-              {t("analytics_page.summary.total_balance")}
-            </span>
-            <div className="w-8 h-8 rounded-full bg-primary-container/20 flex items-center justify-center text-primary">
-              <span className="material-symbols-outlined text-lg">savings</span>
-            </div>
-          </div>
-          <div className="font-numeric-data text-[28px] font-bold text-primary relative z-10">
-            {formatCurrency(overview?.balance || 0)}
-          </div>
-          <div className="text-sm text-secondary font-medium flex items-center gap-1 relative z-10">
-            {t("analytics_page.current_balance")}
-          </div>
-        </div>
       </section>
 
-      <section className="glass-card rounded-xl p-6 md:p-8 flex flex-col gap-6">
+      <section className="bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-6 md:p-8 flex flex-col gap-6">
         <div className="flex justify-between items-center">
           <h2 className="font-headline-md text-headline-md font-semibold text-on-surface">
             {t("analytics_page.charts.income_vs_expense")}
@@ -248,7 +253,7 @@ export default function Analytics() {
       </section>
 
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-        <div className="glass-card rounded-xl p-6 flex flex-col gap-6">
+        <div className="bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-6 flex flex-col gap-6">
           <h3 className="font-headline-md text-headline-md font-semibold text-on-surface">
             {t("analytics_page.charts.spending_by_category")}
           </h3>
@@ -315,14 +320,14 @@ export default function Analytics() {
             </div>
           </div>
         </div>
-        <div className="glass-card rounded-xl p-6 flex flex-col gap-4">
+        <div className="bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-6 flex flex-col gap-4">
           <div className="flex justify-between items-center mb-2">
             <h3 className="font-headline-md text-headline-md font-semibold text-on-surface">
               {t("analytics_page.top_spending")}
             </h3>
             <Link
               href="/transactions?type=expense"
-              className="text-sm text-primary hover:underline font-bold transition-all"
+              className="text-sm text-primary hover:underline focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none rounded px-1 font-bold transition-all"
             >
               {t("common.view_all")}
             </Link>

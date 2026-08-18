@@ -49,7 +49,7 @@ const FilterBar = React.memo(function FilterBar({
               setTypeFilter(e.target.value);
               onResetPagination();
             }}
-            className="appearance-none flex items-center gap-2 pl-3 pr-8 py-2 bg-surface border border-outline-variant/30 rounded-lg hover:bg-surface-variant/30 transition-colors font-body-sm text-body-sm text-on-surface-variant focus:outline-none cursor-pointer"
+            className="appearance-none flex items-center gap-2 pl-3 pr-8 py-2 bg-surface border border-outline-variant/30 rounded-lg hover:bg-surface-variant/30 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:outline-none transition-colors font-body-sm text-body-sm text-on-surface-variant cursor-pointer"
           >
             <option value="all">{t("transactions_page.filter_all_types")}</option>
             <option value="income">{t("common.income")}</option>
@@ -65,7 +65,7 @@ const FilterBar = React.memo(function FilterBar({
         {/* Export */}
         <button 
           onClick={onExport}
-          className="flex items-center gap-2 px-4 py-2 bg-surface border border-outline-variant/30 rounded-lg hover:bg-surface-variant/30 transition-colors font-body-sm text-body-sm text-primary font-medium ml-auto lg:ml-0 cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2 bg-surface border border-outline-variant/30 rounded-lg hover:bg-surface-variant/30 focus-visible:ring-2 focus-visible:ring-primary/45 focus-visible:outline-none transition-colors font-body-sm text-body-sm text-primary font-medium ml-auto lg:ml-0 cursor-pointer"
         >
           <span className="material-symbols-outlined text-[18px]">
             download

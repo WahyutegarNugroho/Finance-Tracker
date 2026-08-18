@@ -172,12 +172,12 @@ export default function Settings() {
         <p className="font-body-sm text-body-sm text-on-surface-variant mb-6">{t("settings_page.danger_zone.desc")}</p>
         <div className="flex flex-wrap gap-4">
           <button onClick={logout}
-            className="bg-surface border border-outline-variant/30 text-on-surface hover:bg-surface-variant/30 font-body-sm text-body-sm font-semibold px-6 py-2.5 rounded-lg transition-colors flex items-center gap-2">
+            className="bg-surface border border-outline-variant/30 text-on-surface hover:bg-surface-variant/30 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none font-body-sm text-body-sm font-semibold px-6 py-2.5 rounded-lg transition-colors flex items-center gap-2">
             <span className="material-symbols-outlined text-[18px]">logout</span>
             {t("common.logout")}
           </button>
           <button onClick={() => setIsResetConfirmOpen(true)} disabled={resetDataMutation.isPending}
-            className="bg-error text-on-error hover:bg-error/90 disabled:opacity-50 font-body-sm text-body-sm font-semibold px-6 py-2.5 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
+            className="bg-error text-on-error hover:bg-error/90 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-error/45 focus-visible:outline-none font-body-sm text-body-sm font-semibold px-6 py-2.5 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
             <span className="material-symbols-outlined text-[18px]">delete_forever</span>
             {t("settings_page.danger_zone.reset_all")}
           </button>

@@ -107,7 +107,7 @@ export default React.memo(function TransactionTable({
                   type="checkbox"
                   checked={allSelected}
                   onChange={toggleSelectAll}
-                  className="accent-primary cursor-pointer"
+                  className="accent-primary cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none rounded-sm"
                   aria-label={t("common.select_all")}
                 />
               </th>
@@ -155,7 +155,7 @@ export default React.memo(function TransactionTable({
                       type="checkbox"
                       checked={selectedIds.has(tx.id)}
                       onChange={() => toggleSelect(tx.id)}
-                      className="accent-primary cursor-pointer"
+                      className="accent-primary cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none rounded-sm"
                       aria-label={t("transactions_page.select_transaction").replace("{id}", tx.note || tx.categoryName)}
                     />
                   </td>
@@ -212,14 +212,14 @@ export default React.memo(function TransactionTable({
                       <button
                         type="button"
                         onClick={() => setOpenMenuId(openMenuId === tx.id ? null : tx.id)}
-                        className="p-1 hover:bg-surface-variant rounded-full transition-colors cursor-pointer"
+                        className="p-1 hover:bg-surface-variant focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none rounded-full transition-colors cursor-pointer"
                         aria-label={t("transactions_page.table.actions")}
                         aria-expanded={openMenuId === tx.id}
                         aria-haspopup="true"
                       >
                         <span className="material-symbols-outlined text-[20px]">more_vert</span>
                       </button>
-
+ 
                       {openMenuId === tx.id && (
                         <div
                           className="absolute right-0 top-full mt-1 w-32 bg-surface border border-outline-variant/20 rounded-lg shadow-lg z-10 flex flex-col overflow-hidden text-left"
@@ -230,7 +230,7 @@ export default React.memo(function TransactionTable({
                               onEdit(tx);
                               setOpenMenuId(null);
                             }}
-                            className="w-full text-left px-4 py-2 text-sm text-on-surface hover:bg-surface-variant/50 flex items-center gap-2 cursor-pointer"
+                            className="w-full text-left px-4 py-2 text-sm text-on-surface hover:bg-surface-variant/50 focus-visible:bg-surface-variant/50 focus-visible:outline-none flex items-center gap-2 cursor-pointer"
                           >
                             <span className="material-symbols-outlined text-[18px]">edit</span>
                             {t("common.edit")}
@@ -241,7 +241,7 @@ export default React.memo(function TransactionTable({
                               onDelete(tx.id);
                               setOpenMenuId(null);
                             }}
-                            className="w-full text-left px-4 py-2 text-sm text-error hover:bg-error-container/50 flex items-center gap-2 cursor-pointer"
+                            className="w-full text-left px-4 py-2 text-sm text-error hover:bg-error-container/50 focus-visible:bg-error-container/50 focus-visible:outline-none flex items-center gap-2 cursor-pointer"
                           >
                             <span className="material-symbols-outlined text-[18px]">delete</span>
                             {t("common.delete")}

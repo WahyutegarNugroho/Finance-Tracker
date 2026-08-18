@@ -10,9 +10,9 @@ export default React.memo(function SummaryCards({ data }: { data: DashboardOverv
   const { t } = useLanguage();
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
       {/* Total Balance */}
-      <div className="glass-card rounded-xl p-5 relative overflow-hidden group">
+      <div className="bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-5 lg:col-span-2 relative overflow-hidden group">
         <div className="flex justify-between items-start mb-4 relative z-10">
           <p className="font-label-caps text-label-caps text-outline">
             {t("dashboard_page.total_balance")}
@@ -24,7 +24,7 @@ export default React.memo(function SummaryCards({ data }: { data: DashboardOverv
           </div>
         </div>
         <div className="relative z-10">
-          <h3 className="font-headline-lg text-headline-lg text-on-surface">
+          <h3 className="font-headline-lg text-headline-lg text-on-surface font-numeric-data">
             {formatCurrency(data.balance)}
           </h3>
           <div className={`flex items-center gap-1 mt-2 ${data.balanceChange >= 0 ? "text-secondary" : "text-error"}`}>
@@ -42,7 +42,7 @@ export default React.memo(function SummaryCards({ data }: { data: DashboardOverv
       </div>
 
       {/* Income */}
-      <div className="glass-card rounded-xl p-5 relative overflow-hidden group">
+      <div className="bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-5 lg:col-span-1 relative overflow-hidden group">
         <div className="flex justify-between items-start mb-4">
           <p className="font-label-caps text-label-caps text-outline">
             {t("common.income")}
@@ -54,7 +54,7 @@ export default React.memo(function SummaryCards({ data }: { data: DashboardOverv
           </div>
         </div>
         <div>
-          <h3 className="font-headline-md text-headline-md text-on-surface">
+          <h3 className="font-headline-md text-headline-md text-on-surface font-numeric-data">
             {formatCurrency(data.income)}
           </h3>
           <div className={`flex items-center gap-1 mt-2 ${data.incomeChange >= 0 ? "text-secondary" : "text-error"}`}>
@@ -69,7 +69,7 @@ export default React.memo(function SummaryCards({ data }: { data: DashboardOverv
       </div>
 
       {/* Expense */}
-      <div className="glass-card rounded-xl p-5 relative overflow-hidden group">
+      <div className="bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-5 lg:col-span-1 relative overflow-hidden group">
         <div className="flex justify-between items-start mb-4">
           <p className="font-label-caps text-label-caps text-outline">
             {t("common.expense")}
@@ -81,7 +81,7 @@ export default React.memo(function SummaryCards({ data }: { data: DashboardOverv
           </div>
         </div>
         <div>
-          <h3 className="font-headline-md text-headline-md text-on-surface">
+          <h3 className="font-headline-md text-headline-md text-on-surface font-numeric-data">
             {formatCurrency(data.expense)}
           </h3>
           <div className={`flex items-center gap-1 mt-2 ${data.expenseChange <= 0 ? "text-secondary" : "text-error"}`}>
@@ -96,7 +96,7 @@ export default React.memo(function SummaryCards({ data }: { data: DashboardOverv
       </div>
 
       {/* Budget Usage */}
-      <div className="glass-card rounded-xl p-5 relative overflow-hidden group">
+      <div className="bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-5 lg:col-span-1 relative overflow-hidden group">
         <div className="flex justify-between items-start mb-4">
           <p className="font-label-caps text-label-caps text-outline">
             {t("dashboard_page.budget_usage")}
@@ -109,7 +109,7 @@ export default React.memo(function SummaryCards({ data }: { data: DashboardOverv
         </div>
         <div>
           <div className="flex items-end gap-2 mb-2">
-            <h3 className="font-headline-md text-headline-md text-on-surface">
+            <h3 className="font-headline-md text-headline-md text-on-surface font-numeric-data">
               {data.budgetUsage}%
             </h3>
             <p className="font-body-sm text-body-sm text-outline pb-0.5 text-[10px]">

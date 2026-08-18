@@ -17,13 +17,13 @@ const RecentTransactions = React.memo(function RecentTransactions({ transactions
   const { t, tCategory } = useLanguage();
 
   return (
-    <div className="glass-card rounded-xl p-6">
+    <div className="bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-6">
       <div className="flex justify-between items-center mb-6">
         <h3 className="font-headline-md text-headline-md text-on-surface">
           {t("dashboard_page.recent_transactions")}
         </h3>
         <Link
-          className="text-primary hover:text-primary-container font-label-caps text-label-caps transition-colors text-[12px]"
+          className="text-primary hover:text-primary-container font-label-caps text-label-caps transition-colors text-[12px] focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none rounded px-1"
           href="/transactions"
         >
           {t("common.view_all")}

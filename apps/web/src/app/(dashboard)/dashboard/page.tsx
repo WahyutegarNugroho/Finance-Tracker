@@ -49,7 +49,7 @@ export default function Dashboard() {
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="bg-primary hover:bg-primary/90 text-on-primary font-body-sm text-body-sm px-6 py-3 rounded-lg transition-all duration-200 shadow-sm hover:scale-[1.02] active:scale-95 flex items-center gap-2"
+          className="bg-primary hover:bg-primary/90 text-on-primary font-body-sm text-body-sm px-6 py-3 rounded-lg focus-visible:ring-2 focus-visible:ring-primary/45 focus-visible:outline-none transition-all duration-200 shadow-sm hover:scale-[1.02] active:scale-95 flex items-center gap-2"
         >
           <span className="material-symbols-outlined text-sm">add</span>
           {t("dashboard_page.new_transaction")}
@@ -78,7 +78,7 @@ export default function Dashboard() {
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="bg-primary hover:bg-primary-container text-on-primary font-body-sm text-body-sm px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:scale-[1.02] active:scale-95 flex items-center gap-2"
+          className="bg-primary hover:bg-primary-container text-on-primary font-body-sm text-body-sm px-4 py-2 rounded-lg focus-visible:ring-2 focus-visible:ring-primary/45 focus-visible:outline-none transition-all duration-200 shadow-sm hover:scale-[1.02] active:scale-95 flex items-center gap-2"
         >
           <span className="material-symbols-outlined text-sm">add</span>
           {t("dashboard_page.new_transaction")}
@@ -90,7 +90,7 @@ export default function Dashboard() {
           <span>{t("dashboard_page.load_error")}</span>
           <button
             onClick={() => refetch()}
-            className="bg-error text-on-error px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-error/90 transition-colors shrink-0"
+            className="bg-error text-on-error px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-error/90 focus-visible:ring-2 focus-visible:ring-error/45 focus-visible:outline-none transition-colors shrink-0"
           >
             {t("error_page.try_again")}
           </button>

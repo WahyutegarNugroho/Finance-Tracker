@@ -100,7 +100,7 @@ export default function ProfileSection({
         <button 
           onClick={onSave}
           disabled={isSaving}
-          className="bg-primary text-on-primary font-label-caps text-label-caps px-6 py-3 rounded-lg hover:scale-[1.02] hover:bg-primary-container transition-all shadow-sm disabled:opacity-70 flex items-center justify-center gap-2 cursor-pointer"
+          className="bg-primary text-on-primary font-label-caps text-label-caps px-6 py-3 rounded-lg hover:scale-[1.02] hover:bg-primary-container focus-visible:ring-2 focus-visible:ring-primary/45 focus-visible:outline-none transition-all shadow-sm disabled:opacity-70 flex items-center justify-center gap-2 cursor-pointer"
         >
           {isSaving ? (
             <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>

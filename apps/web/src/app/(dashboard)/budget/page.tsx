@@ -116,7 +116,7 @@ export default function Budget() {
               type="button"
               onClick={() => shiftMonth(-1)}
               aria-label="Previous month"
-              className="w-8 h-8 rounded-md flex items-center justify-center hover:bg-surface-container-highest text-on-surface-variant transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-md flex items-center justify-center hover:bg-surface-container-highest focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none text-on-surface-variant transition-colors cursor-pointer"
             >
               <span className="material-symbols-outlined text-[20px]">chevron_left</span>
             </button>
@@ -127,7 +127,7 @@ export default function Budget() {
               type="button"
               onClick={() => shiftMonth(1)}
               aria-label="Next month"
-              className="w-8 h-8 rounded-md flex items-center justify-center hover:bg-surface-container-highest text-on-surface-variant transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-md flex items-center justify-center hover:bg-surface-container-highest focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none text-on-surface-variant transition-colors cursor-pointer"
             >
               <span className="material-symbols-outlined text-[20px]">chevron_right</span>
             </button>
@@ -138,7 +138,7 @@ export default function Budget() {
               setBudgetToEdit(null);
               setIsModalOpen(true);
             }}
-            className="bg-primary hover:bg-primary/90 text-on-primary font-body-sm text-body-sm font-semibold px-6 py-2.5 rounded-lg flex items-center gap-2 transition-all duration-200 hover:scale-[1.02] shadow-sm cursor-pointer"
+            className="bg-primary hover:bg-primary/90 text-on-primary font-body-sm text-body-sm font-semibold px-6 py-2.5 rounded-lg flex items-center gap-2 transition-all duration-200 hover:scale-[1.02] focus-visible:ring-2 focus-visible:ring-primary/45 focus-visible:outline-none shadow-sm cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">add</span>
             {t("budget_page.create_new")}
@@ -147,7 +147,7 @@ export default function Budget() {
       </div>
 
       {summary && (
-        <section className="glass-card bg-surface-container/70 rounded-xl p-6 md:p-8 mb-8 border border-outline-variant/30 relative overflow-hidden">
+        <section className="bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-6 md:p-8 mb-8 relative overflow-hidden">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4 relative z-10">
             <div>
               <h2 className="font-label-caps text-label-caps text-on-surface-variant mb-2">
@@ -243,7 +243,7 @@ export default function Budget() {
             return (
               <div
                 key={b.id}
-                className={`glass-card bg-surface-container-low/80 rounded-xl p-5 border ${
+                className={`bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-5 ${
                   b.status === "critical"
                     ? "border-error/20 hover:border-error/40"
                     : "border-outline-variant/20 hover:shadow-md"
@@ -257,7 +257,7 @@ export default function Budget() {
                       setBudgetToEdit(b);
                       setIsModalOpen(true);
                     }}
-                    className="p-1.5 bg-surface rounded-md border border-outline-variant/20 hover:bg-surface-variant text-on-surface transition-colors cursor-pointer"
+                    className="p-1.5 bg-surface rounded-md border border-outline-variant/20 hover:bg-surface-variant focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none text-on-surface transition-colors cursor-pointer"
                     aria-label={`${t("budget_page.edit_budget")}: ${tCategory(b.categoryName)}`}
                   >
                     <span className="material-symbols-outlined text-[16px]">edit</span>
@@ -265,7 +265,7 @@ export default function Budget() {
                   <button
                     type="button"
                     onClick={() => handleDeleteClick(b.id)}
-                    className="p-1.5 bg-surface rounded-md border border-outline-variant/20 hover:bg-error-container hover:text-error text-on-surface transition-colors cursor-pointer"
+                    className="p-1.5 bg-surface rounded-md border border-outline-variant/20 hover:bg-error-container hover:text-error focus-visible:ring-2 focus-visible:ring-error/40 focus-visible:outline-none text-on-surface transition-colors cursor-pointer"
                     aria-label={`${t("budget_page.delete_budget")}: ${tCategory(b.categoryName)}`}
                   >
                     <span className="material-symbols-outlined text-[16px]">delete</span>

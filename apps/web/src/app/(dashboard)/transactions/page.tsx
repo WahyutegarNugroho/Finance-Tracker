@@ -182,7 +182,7 @@ function TransactionsContent() {
         </div>
         <button 
           onClick={() => { setTransactionToEdit(null); setIsModalOpen(true); }}
-          className="bg-primary hover:bg-primary-container text-on-primary font-body-sm text-body-sm px-4 py-2.5 rounded-lg transition-all duration-200 shadow-sm hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 w-full md:w-auto"
+          className="bg-primary hover:bg-primary-container text-on-primary font-body-sm text-body-sm px-4 py-2.5 rounded-lg focus-visible:ring-2 focus-visible:ring-primary/45 focus-visible:outline-none transition-all duration-200 shadow-sm hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 w-full md:w-auto"
         >
           <span className="material-symbols-outlined text-sm">add</span>
           {t("transactions_page.add_new")}
@@ -193,7 +193,7 @@ function TransactionsContent() {
         <div className="p-4 bg-error-container text-error rounded-xl flex items-center justify-between gap-4">
           <span>{t("transactions_page.error_load")}</span>
           <button onClick={() => queryClient.invalidateQueries({ queryKey: ["transactions"] })}
-            className="bg-error text-on-error px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-error/90 transition-colors shrink-0">
+            className="bg-error text-on-error px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-error/90 focus-visible:ring-2 focus-visible:ring-error/45 focus-visible:outline-none transition-colors shrink-0">
             {t("error_page.try_again")}
           </button>
         </div>
@@ -237,14 +237,14 @@ function TransactionsContent() {
           <button onClick={() => { const prev = cursorStack[cursorStack.length - 1] || null; if (prev !== undefined) { setCursorStack(prev => prev.slice(0, -1)); setCursor(prev); } }}
             disabled={!canGoBack}
             aria-disabled={!canGoBack}
-            className="p-2 rounded-md hover:bg-surface-variant text-on-surface disabled:opacity-30 disabled:hover:bg-transparent transition-colors flex items-center gap-1">
+            className="p-2 rounded-md hover:bg-surface-variant focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none text-on-surface disabled:opacity-30 disabled:hover:bg-transparent transition-colors flex items-center gap-1">
             <span className="material-symbols-outlined text-[18px]">chevron_left</span>
             <span className="font-body-sm text-body-sm">{t("transactions_page.pagination.previous") || "Previous"}</span>
           </button>
           <button onClick={() => { if (hasMore && pagination?.nextCursor) { setCursorStack(prev => [...prev, cursor]); setCursor(pagination.nextCursor!); } }}
             disabled={!hasMore}
             aria-disabled={!hasMore}
-            className="p-2 rounded-md hover:bg-surface-variant text-on-surface disabled:opacity-30 disabled:hover:bg-transparent transition-colors flex items-center gap-1">
+            className="p-2 rounded-md hover:bg-surface-variant focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none text-on-surface disabled:opacity-30 disabled:hover:bg-transparent transition-colors flex items-center gap-1">
             <span className="font-body-sm text-body-sm">{t("transactions_page.pagination.next") || "Next"}</span>
             <span className="material-symbols-outlined text-[18px]">chevron_right</span>
           </button>
