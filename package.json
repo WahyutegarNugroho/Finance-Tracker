@@ -6,6 +6,18 @@
   "workspaces": [
     "apps/*"
   ],
+  "pnpm": {
+    "overrides": {
+      "brace-expansion@<2": "1.1.18",
+      "brace-expansion@>=3": "5.0.9",
+      "js-yaml": "4.3.1",
+      "postcss": "8.5.26",
+      "nanoid": "3.3.18",
+      "ip-address": "10.5.0",
+      "sharp": "0.35.3",
+      "shell-quote": "1.10.0"
+    }
+  },
   "scripts": {
     "dev": "concurrently -n api,web -c cyan,magenta \"pnpm dev:api\" \"pnpm dev:web\"",
     "dev:api": "npm run dev --workspace=apps/api",
