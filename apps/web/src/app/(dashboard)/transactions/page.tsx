@@ -40,7 +40,7 @@ function TransactionsContent() {
       setCursorStack([]);
     }, 500);
     return () => clearTimeout(handler);
-  }, [searchQuery]);
+  }, [searchQuery, setDebouncedSearch, setCursor, setCursorStack]);
 
   const { data: transactionsData, isLoading: transactionsLoading, isError } = useQuery<ApiResponse<Transaction[]>>({
     queryKey: ["transactions", cursor, typeFilter, debouncedSearch],

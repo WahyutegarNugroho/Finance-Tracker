@@ -32,7 +32,7 @@ const getDashboardOverview = async (userId) => {
       .where('date', '>=', startOfPrevMonth)
       .where('date', '<=', endOfMonth)
       .orderBy('date', 'desc')
-      .limit(10000)
+      .limit(500)
       .get(),
     db
       .collection('budgets')
@@ -146,10 +146,10 @@ const getCashFlow = async (userId, months = 6) => {
     .where('userId', '==', userId)
     .where('date', '>=', startDate)
     .orderBy('date', 'asc')
-    .limit(10000)
+    .limit(500)
     .get();
 
-  const monthlyData = {};
+   const monthlyData = {};
 
   for (let i = 0; i < months; i++) {
     const date = new Date(now.getFullYear(), now.getMonth() - months + 1 + i, 1);
@@ -198,6 +198,7 @@ const getCategoryBreakdown = async (userId, month, year) => {
     .where('type', '==', 'expense')
     .where('date', '>=', startDate)
     .where('date', '<=', endDate)
+    .limit(1000)
     .get();
 
   const categoryMap = {};
@@ -255,10 +256,10 @@ const getTrends = async (userId) => {
     .where('date', '>=', startOfPrevYear)
     .where('date', '<=', endOfCurrentYear)
     .orderBy('date', 'asc')
-    .limit(20000)
+    .limit(5000)
     .get();
 
-  let currentYearIncome = 0;
+   let currentYearIncome = 0;
   let currentYearExpense = 0;
   let currentYearMonths = 0;
   let prevYearIncome = 0;

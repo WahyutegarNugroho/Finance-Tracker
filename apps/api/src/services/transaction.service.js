@@ -134,28 +134,46 @@ const getTransactionById = async (userId, transactionId) => {
 /**
  * Create a new transaction
  */
+const sanitizeInput = (str) => {
+  if (typeof str !== "string") return "";
+  return str.replace(/<[^>]*>/g, "").replace(/javascript:/gi, "").replace(/on\w+=/gi, "").trim().slice(0, 1000);
+};
+
+const validateCategoryForUser = async (userId, categoryId) => {
+  const catDoc = await db.collection("categories").doc(categoryId).get();
+  if (!catDoc.exists || catDoc.data().userId !== userId) {
+    throw new Error("Invalid categoryId for user.");
+  }
+  return catDoc.data().name;
+};
+
 const createTransaction = async (userId, data) => {
-  // Fetch user's currency for the transaction
   const userDoc = await db.collection(USERS_COLLECTION).doc(userId).get();
-  const userCurrency = userDoc.exists ? (userDoc.data().currency || 'IDR') : 'IDR';
+  const userCurrency = userDoc.exists ? (userDoc.data().currency || "IDR") : "IDR";
 
   if (data.amount < 0) {
-    throw new Error('Amount must be a positive number.');
+    throw new Error("Amount must be a positive number.");
   }
+
+  const categoryName = await validateCategoryForUser(userId, data.categoryId);
+  const sanitizedNote = sanitizeInput(data.note);
+  const sanitizedCategoryName = sanitizeInput(data.categoryName || categoryName);
+  const sanitizedCategoryIcon = sanitizeInput(data.categoryIcon || "category");
+
   const transactionData = {
     userId,
     categoryId: data.categoryId,
-    categoryName: data.categoryName,
-    categoryIcon: data.categoryIcon,
+    categoryName: sanitizedCategoryName,
+    categoryIcon: sanitizedCategoryIcon,
     type: data.type,
     amount: data.amount,
     currency: data.currency || userCurrency,
-    note: data.note || '',
+    note: sanitizedNote,
     date: data.date ? new Date(data.date) : new Date(),
     isRecurring: data.isRecurring || false,
     recurringFrequency: data.recurringFrequency || null,
     recurringEndDate: data.recurringEndDate ? new Date(data.recurringEndDate) : null,
-    tags: data.tags || [],
+    tags: (data.tags || []).map((t) => sanitizeInput(t)),
     attachments: data.attachments || [],
     createdAt: now(),
     updatedAt: now(),
@@ -198,12 +216,23 @@ const updateTransaction = async (userId, transactionId, data) => {
   if (data.amount !== undefined && data.amount < 0) {
     throw new Error('Amount must be a positive number.');
   }
+
+  if (data.categoryId && data.categoryId !== doc.data().categoryId) {
+    await validateCategoryForUser(userId, data.categoryId);
+    updateData.categoryId = data.categoryId;
+  }
+
   for (const field of allowedFields) {
+    if (field === 'categoryId') continue;
     if (data[field] !== undefined) {
       if (field === 'amount') {
         updateData[field] = data[field];
       } else if (field === 'date') {
         updateData[field] = new Date(data[field]);
+      } else if (field === 'note' || field === 'categoryName' || field === 'categoryIcon') {
+        updateData[field] = sanitizeInput(data[field]);
+      } else if (field === 'tags') {
+        updateData[field] = data[field].map((t) => sanitizeInput(t));
       } else {
         updateData[field] = data[field];
       }
@@ -214,7 +243,6 @@ const updateTransaction = async (userId, transactionId, data) => {
 
   await db.collection(COLLECTION).doc(transactionId).update(updateData);
 
-  // Construct response from original data + updates instead of re-fetching (saves 1 read)
   return {
     id: transactionId,
     ...doc.data(),
@@ -297,20 +325,25 @@ const batchCreateTransactions = async (userId, transactionsData) => {
     if (tx.amount < 0) {
       throw new Error('Amount must be a positive number.');
     }
+    const categoryName = await validateCategoryForUser(userId, tx.categoryId);
+    const sanitizedNote = sanitizeInput(tx.note);
+    const sanitizedCategoryName = sanitizeInput(tx.categoryName || categoryName);
+    const sanitizedCategoryIcon = sanitizeInput(tx.categoryIcon || 'category');
+
     const data = {
       userId,
       categoryId: tx.categoryId,
-      categoryName: tx.categoryName,
-      categoryIcon: tx.categoryIcon || '',
+      categoryName: sanitizedCategoryName,
+      categoryIcon: sanitizedCategoryIcon,
       type: tx.type,
       amount: tx.amount,
       currency: tx.currency || userCurrency,
-      note: tx.note || '',
+      note: sanitizedNote,
       date: tx.date ? new Date(tx.date) : new Date(),
       isRecurring: tx.isRecurring || false,
       recurringFrequency: tx.recurringFrequency || null,
       recurringEndDate: tx.recurringEndDate ? new Date(tx.recurringEndDate) : null,
-      tags: tx.tags || [],
+      tags: (tx.tags || []).map((t) => sanitizeInput(t)),
       attachments: tx.attachments || [],
       createdAt: now(),
       updatedAt: now(),

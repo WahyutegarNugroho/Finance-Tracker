@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 import { translations, type Translations } from "../lib/translations";
 
 type Language = "en" | "id";
@@ -15,17 +15,14 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguageState] = useState<Language>("en");
-
-  useEffect(() => {
+  const [language, setLanguageState] = useState<Language>(() => {
+    if (typeof document === "undefined") return "en";
+    const htmlLang = document.documentElement.lang;
+    if (htmlLang === "id" || htmlLang === "en") return htmlLang as Language;
     const savedLang = localStorage.getItem("language") as Language;
-    if (savedLang && (savedLang === "en" || savedLang === "id")) {
-      // ponytail: setTimeout hydration hack → read lang from <html lang=...> attribute set server-side
-      setTimeout(() => {
-        setLanguageState(savedLang);
-      }, 0);
-    }
-  }, []);
+    if (savedLang && (savedLang === "en" || savedLang === "id")) return savedLang;
+    return "en";
+  });
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
@@ -71,8 +68,6 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t, tCategory }}>
-      {/* Prevent hydration mismatch by only rendering after mount if needed, 
-          but for simplicity we just return children and handle mounting in components if necessary */}
       {children}
     </LanguageContext.Provider>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 type Theme = "light" | "dark";
 
@@ -12,35 +12,23 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("light");
-
-  useEffect(() => {
-    // Check local storage or system preference
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof document === "undefined") return "light";
+    if (document.documentElement.classList.contains("dark")) return "dark";
     const storedTheme = localStorage.getItem("theme") as Theme;
     const isSystemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const initialTheme = storedTheme || (isSystemDark ? "dark" : "light");
-
-    if (initialTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    }
-
-    // ponytail: setTimeout hydration hack → read theme from <html data-theme=...> attribute set by inline script
-    setTimeout(() => {
-      setTheme(initialTheme);
-    }, 0);
-  }, []);
+    return storedTheme || (isSystemDark ? "dark" : "light");
+  });
 
   const toggleTheme = () => {
     setTheme((prevTheme) => {
       const newTheme = prevTheme === "light" ? "dark" : "light";
       localStorage.setItem("theme", newTheme);
-      
       if (newTheme === "dark") {
         document.documentElement.classList.add("dark");
       } else {
         document.documentElement.classList.remove("dark");
       }
-      
       return newTheme;
     });
   };

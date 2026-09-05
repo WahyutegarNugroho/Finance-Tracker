@@ -5,6 +5,16 @@ import { User, onAuthStateChanged, signOut as firebaseSignOut } from "firebase/a
 import { auth } from "@/lib/firebase";
 import { api } from "@/lib/api";
 import { useRouter } from "next/navigation";
+import logger from "@/lib/logger";
+
+function setAuthCookie(token: string | null) {
+  if (typeof document === 'undefined') return
+  if (token) {
+    document.cookie = `auth_token=${token}; path=/; SameSite=Lax; max-age=3600`
+  } else {
+    document.cookie = 'auth_token=; path=/; SameSite=Lax; max-age=0'
+  }
+}
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
   IDR: "Rp",
@@ -58,8 +68,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
     try {
       await api.put("/users/profile", { currency: code });
-    } catch {
-      // Silent — profile fetch on next page load will restore
+    } catch (err) {
+      logger.warn({ err, currency: code }, "Failed to sync currency preference");
     }
   }, []);
 
@@ -69,6 +79,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
 
       if (firebaseUser) {
+        firebaseUser.getIdToken().then((token) => setAuthCookie(token))
         // Load cached currency immediately to prevent layout shifts
         if (typeof window !== "undefined") {
           const cached = localStorage.getItem("currency");
@@ -86,21 +97,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               localStorage.setItem("currency", userCurrency);
             }
           })
-          .catch(() => {
-            // Keep default/cached currency on error
+          .catch((err) => {
+            logger.warn({ err }, "Failed to fetch profile currency — using cached/default");
           });
+      } else {
+        setAuthCookie(null)
       }
     });
 
-    return () => unsubscribe();
+    // Refresh auth cookie every 30 minutes to stay in sync with Firebase token lifecycle
+    const cookieInterval = setInterval(() => {
+      if (auth.currentUser) {
+        auth.currentUser.getIdToken(true).then(setAuthCookie).catch(() => {})
+      }
+    }, 30 * 60 * 1000)
+
+    return () => { unsubscribe(); clearInterval(cookieInterval) }
   }, []);
 
   const logout = async () => {
     try {
       await firebaseSignOut(auth);
+      setAuthCookie(null);
       router.push("/login");
-    } catch {
-      // Silent — redirect handles unauthenticated state
+    } catch (err) {
+      logger.warn({ err }, "Logout error — redirecting to login");
+      setAuthCookie(null);
+      router.push("/login");
     }
   };
 
