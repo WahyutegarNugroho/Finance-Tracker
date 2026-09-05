@@ -1,5 +1,6 @@
 const { db } = require('../config/firebase');
 const { serializeDoc, now, BATCH_LIMIT } = require('../utils/firestore');
+const cache = require('../utils/cache');
 
 const USERS_COLLECTION = 'users';
 
@@ -25,13 +26,19 @@ const deleteCollectionInBatches = async (collectionName, uid, filterFn = null) =
  * Get user profile by UID
  */
 const getProfile = async (uid) => {
+  const cacheKey = `user:${uid}`;
+  const cached = cache.get(cacheKey);
+  if (cached) return cached;
+
   const doc = await db.collection(USERS_COLLECTION).doc(uid).get();
 
   if (!doc.exists) {
     return null;
   }
 
-  return serializeDoc(doc);
+  const profile = serializeDoc(doc);
+  cache.set(cacheKey, profile, 60 * 1000);
+  return profile;
 };
 
 /**
@@ -50,6 +57,7 @@ const updateProfile = async (uid, data) => {
   updateData.updatedAt = now();
 
   await db.collection(USERS_COLLECTION).doc(uid).update(updateData);
+  cache.del(`user:${uid}`);
 
   // Preserve full profile in response — re-fetch is needed here since we
   // don't have the original doc data in scope
@@ -63,6 +71,8 @@ const updateProfile = async (uid, data) => {
 const logger = require('../utils/logger');
 
 const resetUserData = async (uid) => {
+  cache.del(`user:${uid}`);
+  cache.del(`categories:${uid}`);
   const collections = ['transactions', 'budgets', 'categories'];
   const results = await Promise.allSettled([
     deleteCollectionInBatches('transactions', uid),

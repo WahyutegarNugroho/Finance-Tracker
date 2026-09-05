@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fintrack-v2';
+const CACHE_NAME = 'fintrack-v3';
 const STATIC_ASSETS = [
   '/',
   '/dashboard',
@@ -14,8 +14,9 @@ const STATIC_ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      // ponytail: silent catch → log to console.warn when debugging SW install failures
-      return cache.addAll(STATIC_ASSETS).catch(() => {});
+      return cache.addAll(STATIC_ASSETS).catch((err) => {
+        console.warn('SW install cache warning:', err);
+      });
     })
   );
   self.skipWaiting();
@@ -43,8 +44,7 @@ self.addEventListener('fetch', (event) => {
   // Never cache API responses (financial data)
   if (request.url.includes('/api/')) return;
 
-  // Do not intercept cross-origin requests (e.g. Google Auth APIs, external fonts)
-  // This prevents the SW from applying outdated CSP headers to them
+  // Do not intercept cross-origin requests
   if (!request.url.startsWith(self.location.origin)) {
     return;
   }
@@ -59,19 +59,20 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static assets: cache-first
+  // Static assets: Stale-While-Revalidate pattern
   event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached;
-      return fetch(request).then((response) => {
-        if (response && response.status === 200) {
-          const clone = response.clone();
+    caches.match(request).then((cachedResponse) => {
+      const fetchPromise = fetch(request).then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, clone);
+            cache.put(request, responseToCache);
           });
         }
-        return response;
-      });
+        return networkResponse;
+      }).catch(() => cachedResponse);
+
+      return cachedResponse || fetchPromise;
     })
   );
 });

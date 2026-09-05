@@ -1,5 +1,6 @@
 const { db } = require('../config/firebase');
 const { serializeDoc, now, BATCH_LIMIT } = require('../utils/firestore');
+const cache = require('../utils/cache');
 
 const COLLECTION = 'categories';
 
@@ -7,14 +8,21 @@ const COLLECTION = 'categories';
  * Get all categories for a user (including defaults)
  */
 const getCategories = async (userId) => {
+  const cacheKey = `categories:${userId}`;
+  const cached = cache.get(cacheKey);
+  if (cached) return cached;
+
   const snapshot = await db
     .collection(COLLECTION)
     .where('userId', '==', userId)
     .get();
 
-  return snapshot.docs
+  const categories = snapshot.docs
     .map((doc) => serializeDoc(doc))
     .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+  cache.set(cacheKey, categories, 60 * 1000);
+  return categories;
 };
 
 /**
@@ -33,6 +41,7 @@ const createCategory = async (userId, data) => {
   };
 
   const docRef = await db.collection(COLLECTION).add(categoryData);
+  cache.del(`categories:${userId}`);
 
   return { id: docRef.id, ...categoryData };
 };
@@ -60,6 +69,7 @@ const updateCategory = async (userId, categoryId, data) => {
   updateData.updatedAt = now();
 
   await db.collection(COLLECTION).doc(categoryId).update(updateData);
+  cache.del(`categories:${userId}`);
 
   // Update denormalized data in transactions if name or icon changed
   if (updateData.name || updateData.icon) {
@@ -120,6 +130,7 @@ const deleteCategory = async (userId, categoryId) => {
   }
 
   await db.collection(COLLECTION).doc(categoryId).delete();
+  cache.del(`categories:${userId}`);
 
   return { success: true };
 };
