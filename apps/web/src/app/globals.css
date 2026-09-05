@@ -137,6 +137,14 @@
     "wght" 400,
     "GRAD" 0,
     "opsz" 24;
+  font-display: optional;
+}
+
+/* Reserve fixed space for chart containers to prevent CLS */
+.chart-container {
+  contain: layout style;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 240px;
 }
 
 /* Skeleton Loading Animation */

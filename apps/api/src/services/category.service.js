@@ -67,6 +67,7 @@ const updateCategory = async (userId, categoryId, data) => {
       .collection('transactions')
       .where('userId', '==', userId)
       .where('categoryId', '==', categoryId)
+      .limit(2000)
       .get();
 
     if (!txSnapshot.empty) {

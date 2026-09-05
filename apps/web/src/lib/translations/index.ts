@@ -1,4 +1,7 @@
+import type { Translations } from './en'
+import { en } from './en'
+import { id } from './id'
 export type { Translations } from './en'
-export { en } from './en'
-export { id } from './id'
+export { en }
+export { id }
 export const translations: Record<string, Translations> = { en, id }

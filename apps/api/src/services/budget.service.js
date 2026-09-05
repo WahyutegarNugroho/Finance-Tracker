@@ -72,6 +72,7 @@ const getBudgets = async (userId, month, year) => {
     .where('type', '==', 'expense')
     .where('date', '>=', globalStart)
     .where('date', '<=', globalEnd)
+    .limit(2000)
     .get();
 
   // Group transactions by categoryId — O(allTx) instead of O(budgets × allTx)

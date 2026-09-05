@@ -9,6 +9,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const routes = require('./routes');
 const { errorHandler } = require('./middleware/errorHandler');
 const { globalLimiter } = require('./middleware/rateLimiter');
+const latencyMiddleware = require('./middleware/latency');
 const logger = require('./utils/logger');
 
 const app = express();
@@ -58,6 +59,9 @@ app.use((req, res, next) => {
   res.setHeader('X-Correlation-Id', req.correlationId);
   next();
 });
+
+// ─── Latency Monitor (must come after correlation ID for log context) ───
+app.use(latencyMiddleware);
 
 // ─── Request Logging ───
 morgan.token('cid', (req) => req.correlationId || '-');

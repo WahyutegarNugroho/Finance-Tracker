@@ -49,10 +49,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} antialiased`} suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://identitytoolkit.googleapis.com" />
         <link rel="preconnect" href="https://securetoken.googleapis.com" />
         <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com" />
         <link rel="dns-prefetch" href="https://securetoken.googleapis.com" />
+        <link rel="dns-prefetch" href="https://firestore.googleapis.com" />
         <Script id="theme-script" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="bg-background text-on-background font-body-lg text-body-lg min-h-screen flex flex-col relative overflow-x-hidden transition-colors duration-300">

@@ -38,12 +38,14 @@ export default function ProfileSection({
       </h3>
       <div className="flex flex-col sm:flex-row gap-8 items-start sm:items-center mb-8">
         <div className="relative">
-          <Image 
-            alt={displayName || "Profile avatar"} 
-            className="rounded-full border-2 border-primary/20 shadow-sm object-cover bg-surface-variant" 
+          <Image
+            alt={displayName || "Profile avatar"}
+            className="rounded-full border-2 border-primary/20 shadow-sm object-cover bg-surface-variant"
             src={user?.photoURL || getAvatarUrl(displayName || user?.displayName)}
             width={96}
             height={96}
+            sizes="96px"
+            priority
           />
         </div>
         <div className="flex-grow w-full">

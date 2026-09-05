@@ -70,7 +70,7 @@ const CashFlowChart = React.memo(function CashFlowChart() {
       </div>
 
       <div
-        className="flex-1 min-h-[240px] relative mt-2"
+        className="flex-1 min-h-[240px] relative mt-2 chart-container"
         role="region"
         aria-label={t("dashboard_page.charts.cash_flow")}
       >

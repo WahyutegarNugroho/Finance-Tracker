@@ -1,24 +1,33 @@
-"use client";
-
-import React from "react";
 import Link from "next/link";
-import { MockChart } from "../components/MockChart";
-import { useLanguage } from "../context/LanguageContext";
+import { Suspense } from "react";
+import { cookies } from "next/headers";
+import { translations, type Translations } from "@/lib/translations";
+import { MockChartClient } from "@/components/MockChartClient";
 
-export default function Home() {
-  const { t } = useLanguage();
+export default async function Home() {
+  const cookieStore = await cookies();
+  const lang = cookieStore.get("language")?.value === "id" ? "id" : "en";
+  const dict = translations[lang] as Translations;
+
+  const t = (k: string): string => {
+    const keys = k.split(".");
+    let cur: string | Translations = dict;
+    for (const key of keys) {
+      if (cur && typeof cur === "object" && key in cur) {
+        cur = cur[key];
+      } else {
+        return k;
+      }
+    }
+    return typeof cur === "string" ? cur : k;
+  };
 
   return (
     <>
       <header className="w-full fixed top-0 z-50 bg-surface/95 border-b border-outline-variant/10 px-gutter md:px-container-margin py-3.5 shadow-sm">
         <div className="max-w-[1440px] mx-auto flex justify-between items-center h-full">
           <div className="font-headline-md text-headline-md font-bold text-primary flex items-center gap-2">
-            <span
-              className="material-symbols-outlined text-[24px]"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              layers
-            </span>
+            <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>layers</span>
             FinTrack
           </div>
           <div className="flex items-center gap-2 md:gap-3">
@@ -52,26 +61,18 @@ export default function Home() {
 
           <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-[220px_1fr] rounded-xl border border-outline-variant/25 bg-surface overflow-hidden text-left shadow-sm">
             <aside className="hidden lg:flex flex-col gap-1 p-3 bg-surface-container-low border-b lg:border-b-0 lg:border-r border-outline-variant/20">
-              <div className="flex items-center gap-2 px-3 h-9 rounded-lg bg-surface border border-outline-variant/25 font-body-sm text-body-sm font-medium">
-                <span className="material-symbols-outlined text-primary text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>dashboard</span>
-                {t("common.dashboard")}
-              </div>
-              <div className="flex items-center gap-2 px-3 h-9 rounded-lg font-body-sm text-body-sm text-on-surface-variant">
-                <span className="material-symbols-outlined text-[18px]">receipt_long</span>
-                {t("common.transactions")}
-              </div>
-              <div className="flex items-center gap-2 px-3 h-9 rounded-lg font-body-sm text-body-sm text-on-surface-variant">
-                <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
-                {t("common.budget")}
-              </div>
-              <div className="flex items-center gap-2 px-3 h-9 rounded-lg font-body-sm text-body-sm text-on-surface-variant">
-                <span className="material-symbols-outlined text-[18px]">insights</span>
-                {t("common.analytics")}
-              </div>
-              <div className="mt-auto flex items-center gap-2 px-3 h-9 rounded-lg font-body-sm text-body-sm text-on-surface-variant">
-                <span className="material-symbols-outlined text-[18px]">settings</span>
-                {t("common.settings")}
-              </div>
+              {[
+                { icon: "dashboard", key: "common.dashboard", active: true },
+                { icon: "receipt_long", key: "common.transactions", active: false },
+                { icon: "account_balance_wallet", key: "common.budget", active: false },
+                { icon: "insights", key: "common.analytics", active: false },
+                { icon: "settings", key: "common.settings", active: false },
+              ].map((item) => (
+                <div key={item.key} className={`flex items-center gap-2 px-3 h-9 rounded-lg font-body-sm text-body-sm ${item.active ? "bg-surface border border-outline-variant/25 font-medium" : "text-on-surface-variant"}`}>
+                  <span className={`material-symbols-outlined text-[18px] ${item.active ? "text-primary" : ""}`} style={item.active ? { fontVariationSettings: "'FILL' 1" } : undefined}>{item.icon}</span>
+                  {t(item.key)}
+                </div>
+              ))}
             </aside>
 
             <div className="p-5 sm:p-6 flex flex-col gap-5">
@@ -101,7 +102,9 @@ export default function Home() {
               </div>
 
               <div className="relative h-44">
-                <MockChart />
+                <Suspense fallback={<div className="w-full h-full bg-surface-container-low rounded-lg" />}>
+                  <MockChartClient />
+                </Suspense>
               </div>
 
               <div className="flex flex-col divide-y divide-outline-variant/15">
@@ -143,27 +146,17 @@ export default function Home() {
         <section className="py-12 bg-surface-container-low/50 border-t border-outline-variant/10 px-gutter md:px-container-margin relative">
           <div className="max-w-[1440px] mx-auto relative z-10">
             <div className="text-center mb-10">
-              <h2 className="font-headline-lg text-headline-lg text-on-background mb-2">
-                {t("landing.features_heading")}
-              </h2>
-              <p className="font-body-lg text-body-lg text-on-surface-variant max-w-xl mx-auto">
-                {t("landing.features_sub")}
-              </p>
+              <h2 className="font-headline-lg text-headline-lg text-on-background mb-2">{t("landing.features_heading")}</h2>
+              <p className="font-body-lg text-body-lg text-on-surface-variant max-w-xl mx-auto">{t("landing.features_sub")}</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
               <div className="md:col-span-2 rounded-xl border border-outline-variant/20 bg-surface p-6 flex flex-col justify-between gap-4">
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary text-[28px]" aria-hidden="true">
-                      analytics
-                    </span>
-                    <h3 className="font-headline-md text-headline-md text-on-background">
-                      {t("landing.f1_title")}
-                    </h3>
+                    <span className="material-symbols-outlined text-primary text-[28px]" aria-hidden="true">analytics</span>
+                    <h3 className="font-headline-md text-headline-md text-on-background">{t("landing.f1_title")}</h3>
                   </div>
-                  <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed max-w-[65ch]">
-                    {t("landing.f1_desc")}
-                  </p>
+                  <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed max-w-[65ch]">{t("landing.f1_desc")}</p>
                 </div>
                 <div className="h-20 bg-surface-container-low border border-outline-variant/15 rounded-lg flex items-center justify-between px-4 py-2 mt-2">
                   <div className="flex flex-col">
@@ -183,16 +176,10 @@ export default function Home() {
                 <div className="rounded-xl border border-outline-variant/20 bg-surface p-6 flex flex-col justify-between gap-3 flex-1">
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-secondary text-[24px]" aria-hidden="true">
-                        account_balance_wallet
-                      </span>
-                      <h3 className="font-headline-md text-headline-md text-on-background text-sm">
-                        {t("landing.f2_title")}
-                      </h3>
+                      <span className="material-symbols-outlined text-secondary text-[24px]" aria-hidden="true">account_balance_wallet</span>
+                      <h3 className="font-headline-md text-headline-md text-on-background text-sm">{t("landing.f2_title")}</h3>
                     </div>
-                    <p className="text-xs text-on-surface-variant leading-relaxed">
-                      {t("landing.f2_desc")}
-                    </p>
+                    <p className="text-xs text-on-surface-variant leading-relaxed">{t("landing.f2_desc")}</p>
                   </div>
                   <div role="img" aria-label="75%" className="w-full bg-surface-container-high rounded-full h-2 mt-1">
                     <div className="bg-secondary h-2 rounded-full" style={{ width: "75%" }}></div>
@@ -202,16 +189,10 @@ export default function Home() {
                 <div className="rounded-xl border border-outline-variant/20 bg-surface p-6 flex flex-col justify-between gap-3 flex-1">
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-tertiary text-[24px]" aria-hidden="true">
-                        receipt_long
-                      </span>
-                      <h3 className="font-headline-md text-headline-md text-on-background text-sm">
-                        {t("landing.f3_title")}
-                      </h3>
+                      <span className="material-symbols-outlined text-tertiary text-[24px]" aria-hidden="true">receipt_long</span>
+                      <h3 className="font-headline-md text-headline-md text-on-background text-sm">{t("landing.f3_title")}</h3>
                     </div>
-                    <p className="text-xs text-on-surface-variant leading-relaxed">
-                      {t("landing.f3_desc")}
-                    </p>
+                    <p className="text-xs text-on-surface-variant leading-relaxed">{t("landing.f3_desc")}</p>
                   </div>
                   <div className="flex justify-between items-center text-xs border-t border-outline-variant/10 pt-2 font-numeric-data">
                     <span className="text-on-surface-variant">{t("landing.f3_csv_label")}</span>

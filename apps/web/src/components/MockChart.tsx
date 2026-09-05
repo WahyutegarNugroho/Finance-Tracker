@@ -1,4 +1,6 @@
-export function MockChart() {
+import React from "react";
+
+export const MockChart = React.memo(function MockChart() {
   const data = [60, 65, 40, 50, 75, 100];
   const w = 100;
   const h = 36;
@@ -40,4 +42,4 @@ export function MockChart() {
       </svg>
     </div>
   );
-}
+});
