@@ -48,9 +48,7 @@ export const id: Translations = {
     nav_comparison: "Kenapa FinTrack",
     nav_calculator: "Simulasi 50/30/20",
     nav_faq: "FAQ",
-    badge_version: "v2.0 • Local-First",
 
-    hero_badge: "100% Data Privat • Tanpa Sambung Rekening • PWA Siap Pakai",
     hero_title_a: "Keuangan rapi tanpa",
     hero_title_b: "drama spreadsheet atau aplikasi bank yang ribet.",
     hero_sub: "Buku kas pribadi modern yang cepat, privat, dan jernih. Catat pengeluaran dalam hitungan detik, pasang batas anggaran per kategori, dan pahami arus kas riil Anda tanpa perlu membagikan password perbankan atau dibanjiri iklan pinjol.",
@@ -70,7 +68,7 @@ export const id: Translations = {
     metrics_m4_val: "Offline",
     metrics_m4_label: "Siap pakai sebagai PWA di HP",
 
-    showcase_window_title: "FinTrack Workspace — Buku Kas Presisi",
+    showcase_window_title: "FinTrack Workspace",
     showcase_tab_cashflow: "Radar Arus Kas",
     showcase_tab_budgets: "Batas Anggaran",
     showcase_tab_quicklog: "Pencatatan Cepat",

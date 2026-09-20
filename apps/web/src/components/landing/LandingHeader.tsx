@@ -29,9 +29,6 @@ export default function LandingHeader() {
               FinTrack
             </span>
           </Link>
-          <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-primary/10 text-primary border border-primary/20">
-            {t("landing.badge_version")}
-          </span>
         </div>
 
         {/* Desktop Nav Links */}

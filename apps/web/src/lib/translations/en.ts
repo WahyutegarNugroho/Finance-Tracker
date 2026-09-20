@@ -50,12 +50,10 @@ export const en: Translations = {
     nav_comparison: "Why FinTrack",
     nav_calculator: "50/30/20 Plan",
     nav_faq: "FAQ",
-    badge_version: "v2.0 • Local-First",
 
-    hero_badge: "100% Private Data • Zero Bank Logins Required • Offline-Ready PWA",
     hero_title_a: "Financial clarity without",
     hero_title_b: "spreadsheet chaos or bank app fatigue.",
-    hero_sub: "A lightning-fast, local-first personal finance ledger. Record expenses in seconds, set strict category guardrails, and see where your money actually goes without surrendering bank logins or enduring loan spam.",
+    hero_sub: "A lightning fast, local first personal finance ledger. Record expenses in seconds, set strict category guardrails and see where your money actually goes without surrendering bank logins or enduring loan spam.",
     cta_register: "Start Tracking Free",
     cta_login: "Sign In",
     cta_demo: "Explore Live Demo",
@@ -72,7 +70,7 @@ export const en: Translations = {
     metrics_m4_val: "Offline",
     metrics_m4_label: "Ready as PWA mobile app",
 
-    showcase_window_title: "FinTrack Workspace — Precision Ledger",
+    showcase_window_title: "FinTrack Workspace",
     showcase_tab_cashflow: "Cash Flow Radar",
     showcase_tab_budgets: "Category Guardrails",
     showcase_tab_quicklog: "Quick Entry",

@@ -22,12 +22,6 @@ export default function Home() {
       <main className="flex-1 w-full pt-28 pb-20">
         {/* HERO SECTION */}
         <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center">
-          {/* Top trust pill */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20 mb-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
-            <span className="material-symbols-outlined text-[16px]">shield</span>
-            <span>{t("landing.hero_badge")}</span>
-          </div>
-
           {/* Main Hero Headline */}
           <h1 className="font-display text-3xl sm:text-5xl lg:text-6xl font-extrabold text-on-surface max-w-4xl tracking-tight leading-[1.15] mb-6 animate-in fade-in slide-in-from-bottom-3 duration-700">
             {t("landing.hero_title_a")}{" "}
