@@ -189,7 +189,7 @@ export const id: Translations = {
     calc_wants_desc: "Kulineran, kopi santai, hobi, bioskop, pakaian, dan langganan hiburan.",
     calc_savings_title: "20% Tabungan & Investasi",
     calc_savings_desc: "Dana darurat, tabungan masa depan, reksadana, dan pelunasan kewajiban.",
-    calc_tip: "💡 Tips: Di FinTrack, Anda bisa memasang target anggaran kategori persis sesuai proporsi ini.",
+    calc_tip: "Tips: Di FinTrack, Anda bisa memasang target anggaran kategori persis sesuai proporsi ini.",
 
     faq_badge: "Tanya Jawab",
     faq_heading: "Jawaban jujur, tanpa basa-basi marketing",

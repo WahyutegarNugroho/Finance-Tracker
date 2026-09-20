@@ -176,7 +176,7 @@ export const en: Translations = {
     bento_f4_desc: "Your ledger belongs to you. Export raw data to clean CSV or JSON anytime. No paywalled exports, ever.",
     bento_f5_tag: "Global & Local",
     bento_f5_title: "Bilingual & Multi-Currency",
-    bento_f5_desc: "Switch between Rupiah, USD, and EUR seamlessly. Full localized interface in Bahasa Indonesia and English.",
+    bento_f5_desc: "Switch between Rupiah, USD, and EUR instantly. Full localized interface in Bahasa Indonesia and English.",
     bento_f6_tag: "Everywhere",
     bento_f6_title: "Installable PWA App",
     bento_f6_desc: "Install FinTrack right to your iPhone or Android home screen. Light on battery, zero app store bloat.",
@@ -191,7 +191,7 @@ export const en: Translations = {
     calc_wants_desc: "Dining out, weekend coffee, hobby gear, streaming subscriptions, leisure.",
     calc_savings_title: "20% Savings & Debt",
     calc_savings_desc: "Emergency fund, retirement nest egg, mutual funds, and debt repayment.",
-    calc_tip: "💡 Tip: FinTrack lets you configure category budgets that directly enforce this exact split.",
+    calc_tip: "Tip: In FinTrack, you can configure category budgets that directly follow this exact split.",
 
     faq_badge: "Common Questions",
     faq_heading: "Clear answers, zero marketing fluff",
@@ -205,7 +205,7 @@ export const en: Translations = {
     faq_a4: "Yes. FinTrack is built as a modern Progressive Web App (PWA). You can add it to your home screen on iOS or Android, enjoying native-like performance and fast loading.",
 
     cta_heading: "Ready to regain clarity over your money?",
-    cta_sub: "Join smart professionals and creators taking control with a calm, private ledger. Create an account in under 30 seconds.",
+    cta_sub: "Start managing your cash flow with clarity, privacy, and calm. Create an account in under 30 seconds.",
     cta_button: "Create Free Account Now",
     cta_login_text: "Already have an account?",
     cta_login_link: "Sign in here",
