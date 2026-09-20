@@ -21,8 +21,7 @@ export default function LandingFaq() {
   return (
     <section id="faq" className="py-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
       <div className="text-center mb-12">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-outline-variant/30 text-on-surface-variant border border-outline-variant/40 mb-3">
-          <span className="material-symbols-outlined text-[15px]">quiz</span>
+        <span className="text-xs font-mono uppercase tracking-wider text-on-surface-variant/80 font-bold block mb-2">
           {t("landing.faq_badge")}
         </span>
         <h2 className="font-headline-lg text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-on-surface mb-3">

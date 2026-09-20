@@ -53,64 +53,94 @@ export default function Home() {
             </a>
           </div>
 
-          {/* Micro-guarantees */}
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-on-surface-variant font-medium mb-4">
-            <span className="inline-flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-secondary text-[16px]">check</span>
-              {t("landing.guarantee_1")}
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-secondary text-[16px]">check</span>
-              {t("landing.guarantee_2")}
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-secondary text-[16px]">check</span>
-              {t("landing.guarantee_3")}
-            </span>
-          </div>
+          {/* Calm Assurance */}
+          <p className="text-xs text-on-surface-variant/80 font-mono tracking-wide mb-4">
+            {t("landing.hero_assurance")}
+          </p>
 
           {/* Living Product Showcase */}
           <HeroShowcase />
         </section>
 
-        {/* PROOF POINTS / KEY METRICS STRIP */}
-        <section className="mt-20 py-10 border-y border-outline-variant/20 bg-surface-container-low/50">
+        {/* FINTRACK CORE PRINCIPLES / ETHOS STRIP */}
+        <section className="mt-20 py-12 border-y border-outline-variant/20 bg-surface">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
-              <div className="space-y-1">
-                <p className="font-headline-lg text-2xl sm:text-3xl font-extrabold text-primary font-numeric-data">
-                  {t("landing.metrics_m1_val")}
-                </p>
-                <p className="text-xs sm:text-sm text-on-surface-variant">
-                  {t("landing.metrics_m1_label")}
-                </p>
+            <div className="max-w-2xl mb-8">
+              <span className="text-xs font-mono uppercase tracking-wider text-primary font-bold block mb-1">
+                {t("landing.ethos_title")}
+              </span>
+              <p className="text-sm text-on-surface-variant">
+                {t("landing.ethos_sub")}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              <div className="p-5 rounded-xl bg-surface-container-low/50 border border-outline-variant/20 flex flex-col justify-between space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary font-bold">
+                    {t("landing.ethos_1_badge")}
+                  </span>
+                  <span className="material-symbols-outlined text-[18px] text-primary">security</span>
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-on-surface mb-1">
+                    {t("landing.ethos_1_title")}
+                  </h3>
+                  <p className="text-xs text-on-surface-variant leading-relaxed">
+                    {t("landing.ethos_1_desc")}
+                  </p>
+                </div>
               </div>
 
-              <div className="space-y-1">
-                <p className="font-headline-lg text-2xl sm:text-3xl font-extrabold text-secondary font-numeric-data">
-                  {t("landing.metrics_m2_val")}
-                </p>
-                <p className="text-xs sm:text-sm text-on-surface-variant">
-                  {t("landing.metrics_m2_label")}
-                </p>
+              <div className="p-5 rounded-xl bg-surface-container-low/50 border border-outline-variant/20 flex flex-col justify-between space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-secondary/10 text-secondary font-bold">
+                    {t("landing.ethos_2_badge")}
+                  </span>
+                  <span className="material-symbols-outlined text-[18px] text-secondary">speed</span>
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-on-surface mb-1">
+                    {t("landing.ethos_2_title")}
+                  </h3>
+                  <p className="text-xs text-on-surface-variant leading-relaxed">
+                    {t("landing.ethos_2_desc")}
+                  </p>
+                </div>
               </div>
 
-              <div className="space-y-1">
-                <p className="font-headline-lg text-2xl sm:text-3xl font-extrabold text-tertiary font-numeric-data">
-                  {t("landing.metrics_m3_val")}
-                </p>
-                <p className="text-xs sm:text-sm text-on-surface-variant">
-                  {t("landing.metrics_m3_label")}
-                </p>
+              <div className="p-5 rounded-xl bg-surface-container-low/50 border border-outline-variant/20 flex flex-col justify-between space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-tertiary/10 text-tertiary font-bold">
+                    {t("landing.ethos_3_badge")}
+                  </span>
+                  <span className="material-symbols-outlined text-[18px] text-tertiary">lock_open_right</span>
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-on-surface mb-1">
+                    {t("landing.ethos_3_title")}
+                  </h3>
+                  <p className="text-xs text-on-surface-variant leading-relaxed">
+                    {t("landing.ethos_3_desc")}
+                  </p>
+                </div>
               </div>
 
-              <div className="space-y-1">
-                <p className="font-headline-lg text-2xl sm:text-3xl font-extrabold text-on-surface font-numeric-data">
-                  {t("landing.metrics_m4_val")}
-                </p>
-                <p className="text-xs sm:text-sm text-on-surface-variant">
-                  {t("landing.metrics_m4_label")}
-                </p>
+              <div className="p-5 rounded-xl bg-surface-container-low/50 border border-outline-variant/20 flex flex-col justify-between space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary font-bold">
+                    {t("landing.ethos_4_badge")}
+                  </span>
+                  <span className="material-symbols-outlined text-[18px] text-primary">devices</span>
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-on-surface mb-1">
+                    {t("landing.ethos_4_title")}
+                  </h3>
+                  <p className="text-xs text-on-surface-variant leading-relaxed">
+                    {t("landing.ethos_4_desc")}
+                  </p>
+                </div>
               </div>
             </div>
           </div>

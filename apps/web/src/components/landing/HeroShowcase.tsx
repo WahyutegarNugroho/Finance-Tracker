@@ -47,15 +47,15 @@ export default function HeroShowcase() {
     <div className="w-full max-w-5xl mx-auto mt-10 rounded-2xl border border-outline-variant/30 bg-surface shadow-2xl overflow-hidden transition-all duration-300">
       {/* Window Titlebar */}
       <div className="bg-surface-container-low border-b border-outline-variant/20 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          {/* Mac-style window dots */}
-          <div className="flex items-center gap-1.5" aria-hidden="true">
-            <span className="w-3 h-3 rounded-full bg-error/60 border border-error/40 inline-block" />
-            <span className="w-3 h-3 rounded-full bg-tertiary-fixed-dim/70 border border-tertiary-fixed-dim/50 inline-block" />
-            <span className="w-3 h-3 rounded-full bg-secondary-fixed-dim/70 border border-secondary-fixed-dim/50 inline-block" />
+        <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-surface border border-outline-variant/30 text-primary">
+            <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
+            <span className="text-[11px] font-mono font-semibold tracking-tight text-on-surface">
+              {t("landing.showcase_window_title")}
+            </span>
           </div>
-          <span className="text-xs font-semibold text-on-surface-variant/80 tracking-wide font-mono hidden sm:inline">
-            {t("landing.showcase_window_title")}
+          <span className="text-[11px] text-on-surface-variant/70 font-mono hidden sm:inline">
+            • Live Preview
           </span>
         </div>
 
@@ -94,7 +94,7 @@ export default function HeroShowcase() {
                 : "text-on-surface-variant hover:text-on-surface"
             }`}
           >
-            <span className="material-symbols-outlined text-[15px]">flash_on</span>
+            <span className="material-symbols-outlined text-[15px]">edit_note</span>
             <span>{t("landing.showcase_tab_quicklog")}</span>
           </button>
         </div>

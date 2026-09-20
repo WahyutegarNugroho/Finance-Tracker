@@ -28,15 +28,14 @@ export default function BudgetCalculator() {
   return (
     <section id="calculator" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       <div className="rounded-3xl border border-outline-variant/30 bg-surface-container-low/70 p-6 sm:p-10 lg:p-12 shadow-lg">
-        <div className="text-center max-w-3xl mx-auto mb-10">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-secondary/15 text-secondary border border-secondary/25 mb-3">
-            <span className="material-symbols-outlined text-[15px]">calculate</span>
+        <div className="max-w-3xl mx-auto mb-10 text-center">
+          <span className="text-xs font-mono uppercase tracking-wider text-secondary font-bold block mb-2">
             {t("landing.calc_badge")}
           </span>
-          <h2 className="font-headline-lg text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-on-surface mb-4">
+          <h2 className="font-headline-lg text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-on-surface mb-3">
             {t("landing.calc_heading")}
           </h2>
-          <p className="font-body-lg text-sm sm:text-base text-on-surface-variant leading-relaxed">
+          <p className="font-body-lg text-sm sm:text-base text-on-surface-variant leading-relaxed max-w-2xl mx-auto">
             {t("landing.calc_sub")}
           </p>
         </div>
