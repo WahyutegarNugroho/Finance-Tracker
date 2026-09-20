@@ -189,23 +189,16 @@ export default function HeroShowcase() {
               {/* Area SVG Chart */}
               <div className="relative h-28 w-full">
                 <svg viewBox="0 0 500 100" preserveAspectRatio="none" className="w-full h-full">
-                  <defs>
-                    <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="var(--color-secondary)" stopOpacity="0.25" />
-                      <stop offset="100%" stopColor="var(--color-secondary)" stopOpacity="0.0" />
-                    </linearGradient>
-                    <linearGradient id="expenseGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="var(--color-tertiary)" stopOpacity="0.2" />
-                      <stop offset="100%" stopColor="var(--color-tertiary)" stopOpacity="0.0" />
-                    </linearGradient>
-                  </defs>
-                  {/* Inflow area & line */}
-                  <path d="M 0,65 Q 100,50 200,60 T 400,30 T 500,20 L 500,100 L 0,100 Z" fill="url(#incomeGrad)" />
+                  {/* Subtle technical grid guides */}
+                  <line x1="0" y1="25" x2="500" y2="25" stroke="var(--color-outline-variant)" strokeOpacity="0.12" strokeDasharray="2 4" />
+                  <line x1="0" y1="50" x2="500" y2="50" stroke="var(--color-outline-variant)" strokeOpacity="0.12" strokeDasharray="2 4" />
+                  <line x1="0" y1="75" x2="500" y2="75" stroke="var(--color-outline-variant)" strokeOpacity="0.12" strokeDasharray="2 4" />
+
+                  {/* Inflow solid line */}
                   <path d="M 0,65 Q 100,50 200,60 T 400,30 T 500,20" fill="none" stroke="var(--color-secondary)" strokeWidth="2.5" strokeLinecap="round" />
                   
-                  {/* Outflow area & line */}
-                  <path d="M 0,80 Q 100,70 200,75 T 400,60 T 500,55 L 500,100 L 0,100 Z" fill="url(#expenseGrad)" />
-                  <path d="M 0,80 Q 100,70 200,75 T 400,60 T 500,55" fill="none" stroke="var(--color-tertiary)" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="3 3" />
+                  {/* Outflow dashed line */}
+                  <path d="M 0,80 Q 100,70 200,75 T 400,60 T 500,55" fill="none" stroke="var(--color-tertiary)" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="4 4" />
                 </svg>
                 {/* Months labels */}
                 <div className="flex justify-between text-[11px] text-on-surface-variant font-mono mt-2 pt-1 border-t border-outline-variant/15">

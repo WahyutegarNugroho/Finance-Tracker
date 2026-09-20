@@ -31,7 +31,7 @@ export default function Home() {
           {/* Main Hero Headline */}
           <h1 className="font-display text-3xl sm:text-5xl lg:text-6xl font-extrabold text-on-surface max-w-4xl tracking-tight leading-[1.15] mb-6 animate-in fade-in slide-in-from-bottom-3 duration-700">
             {t("landing.hero_title_a")}{" "}
-            <span className="text-primary bg-gradient-to-r from-primary to-primary-container bg-clip-text text-transparent">
+            <span className="text-primary">
               {t("landing.hero_title_b")}
             </span>
           </h1>
@@ -136,28 +136,25 @@ export default function Home() {
 
         {/* BOTTOM FINAL CONVERSION CTA */}
         <section className="px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto mt-16">
-          <div className="rounded-3xl bg-gradient-to-br from-primary to-primary-container p-8 sm:p-12 lg:p-14 text-center text-on-primary shadow-xl relative overflow-hidden">
-            <div className="absolute -right-12 -top-12 w-64 h-64 bg-on-primary/10 rounded-full blur-2xl pointer-events-none" />
-            <div className="absolute -left-12 -bottom-12 w-64 h-64 bg-on-primary/10 rounded-full blur-2xl pointer-events-none" />
-
-            <div className="relative z-10 max-w-2xl mx-auto space-y-6">
-              <h2 className="font-headline-lg text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">
+          <div className="rounded-3xl bg-surface-container-low border border-outline-variant/30 p-8 sm:p-12 lg:p-14 text-center shadow-sm">
+            <div className="max-w-2xl mx-auto space-y-6">
+              <h2 className="font-headline-lg text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-on-surface">
                 {t("landing.cta_heading")}
               </h2>
-              <p className="text-sm sm:text-base text-on-primary/85 leading-relaxed">
+              <p className="text-sm sm:text-base text-on-surface-variant leading-relaxed">
                 {t("landing.cta_sub")}
               </p>
               <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
                   href="/register"
-                  className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-surface text-primary font-bold text-sm sm:text-base hover:bg-surface/90 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-surface"
+                  className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-primary text-on-primary font-bold text-sm sm:text-base hover:bg-primary/90 shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                 >
                   {t("landing.cta_button")}
                 </Link>
               </div>
-              <p className="text-xs text-on-primary/75">
+              <p className="text-xs text-on-surface-variant">
                 {t("landing.cta_login_text")}{" "}
-                <Link href="/login" className="underline font-semibold hover:text-surface">
+                <Link href="/login" className="underline font-semibold text-primary hover:text-primary/80">
                   {t("landing.cta_login_link")}
                 </Link>
               </p>

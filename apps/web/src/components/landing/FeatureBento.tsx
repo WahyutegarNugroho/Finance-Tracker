@@ -215,7 +215,7 @@ export default function FeatureBento() {
         </div>
 
         {/* Bento 6: PWA Mobile Native Feel (Spans full on mobile/desktop as needed) */}
-        <div className="md:col-span-3 rounded-2xl border border-outline-variant/30 bg-gradient-to-r from-surface-container-low via-surface to-surface-container-low p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
+        <div className="md:col-span-3 rounded-2xl border border-outline-variant/30 bg-surface-container-low p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
           <div className="max-w-xl">
             <span className="text-[11px] font-bold uppercase tracking-wider text-primary px-2 py-0.5 rounded bg-primary/10 mb-3 inline-block">
               {t("landing.bento_f6_tag")}
