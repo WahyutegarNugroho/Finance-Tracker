@@ -36,7 +36,7 @@ export const formatShortDate = (dateString: string, language: string) => {
   }).format(date);
 };
 
-const AVATAR_COLORS = ['#4648d4', '#8b5cf6', '#ec4899', '#f59e0b', '#06b6d4', '#10b981', '#6366f1', '#ef4444'];
+const AVATAR_COLORS = ['#006c4c', '#4c6357', '#805600', '#00695c', '#2e7d32', '#10b981', '#1b5e20', '#ba1a1a'];
 export const getAvatarUrl = (name: string | null | undefined): string => {
   const displayName = name || 'User';
   const initials = displayName.split(' ').map(s => s[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'U';

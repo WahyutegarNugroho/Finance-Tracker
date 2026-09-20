@@ -4,8 +4,8 @@
   "description": "Track your income, expenses, and budgets effortlessly.",
   "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#121218",
-  "theme_color": "#4648d4",
+  "background_color": "#0f1512",
+  "theme_color": "#006c4c",
   "orientation": "portrait-primary",
   "icons": [
     {

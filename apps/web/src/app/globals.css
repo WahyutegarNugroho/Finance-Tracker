@@ -2,127 +2,137 @@
 @config "../../tailwind.config.ts";
 
 :root {
-  --color-on-background: #1b1b23;
-  --color-primary: #4648d4;
-  --color-surface-container-high: #e9e6f3;
-  --color-on-secondary-fixed: #002113;
-  --color-secondary-fixed-dim: #4edea3;
-  --color-primary-fixed-dim: #c0c1ff;
-  --color-surface-container: #efecf8;
-  --color-outline-variant: #c7c4d7;
-  --color-on-error-container: #93000a;
-  --color-surface: #fcf8ff;
-  --color-primary-container: #6063ee;
-  --color-on-surface-variant: #464554;
-  --color-inverse-primary: #c0c1ff;
-  --color-surface-variant: #e4e1ed;
-  --color-inverse-surface: #303038;
-  --color-on-tertiary-container: #fffbff;
-  --color-on-tertiary-fixed-variant: #653e00;
-  --color-error-container: #ffdad6;
-  --color-on-primary: #ffffff;
-  --color-tertiary-fixed-dim: #ffb95f;
-  --color-tertiary: #825100;
-  --color-surface-bright: #fcf8ff;
-  --color-surface-container-low: #f5f2fe;
-  --color-primary-fixed: #e1e0ff;
-  --color-on-primary-container: #fffbff;
-  --color-tertiary-fixed: #ffddb8;
-  --color-surface-container-highest: #e4e1ed;
-  --color-on-error: #ffffff;
-  --color-on-secondary: #ffffff;
+  --color-background: #fbfdfa;
+  --color-on-background: #191c1a;
+  --color-surface: #fbfdfa;
+  --color-on-surface: #191c1a;
+  --color-surface-dim: #d8dad7;
+  --color-surface-bright: #fbfdfa;
   --color-surface-container-lowest: #ffffff;
-  --color-secondary-container: #6cf8bb;
-  --color-on-tertiary-fixed: #2a1700;
-  --color-tertiary-container: #a36700;
-  --color-surface-dim: #dbd8e4;
-  --color-on-primary-fixed-variant: #2f2ebe;
-  --color-error: #ba1a1a;
-  --color-on-primary-fixed: #07006c;
-  --color-on-surface: #1b1b23;
-  --color-surface-tint: #494bd6;
+  --color-surface-container-low: #f5f7f4;
+  --color-surface-container: #eff2ee;
+  --color-surface-container-high: #e9ece8;
+  --color-surface-container-highest: #e3e6e2;
+  --color-surface-variant: #dbe5de;
+  --color-on-surface-variant: #3f4943;
+  --color-inverse-surface: #2e312e;
+  --color-inverse-on-surface: #f0f2ee;
+
+  --color-outline: #707973;
+  --color-outline-variant: #bfc9c2;
+  --color-surface-tint: #006c4c;
+
+  --color-primary: #006c4c;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #8cf8c6;
+  --color-on-primary-container: #002114;
+  --color-primary-fixed: #8cf8c6;
+  --color-primary-fixed-dim: #6fdba9;
+  --color-on-primary-fixed: #002114;
+  --color-on-primary-fixed-variant: #005138;
+  --color-inverse-primary: #6fdba9;
+
+  --color-secondary: #4c6357;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #cee8d9;
+  --color-on-secondary-container: #082016;
+  --color-secondary-fixed: #cee8d9;
+  --color-secondary-fixed-dim: #b2ccbe;
+  --color-on-secondary-fixed: #082016;
+  --color-on-secondary-fixed-variant: #354b40;
+
+  --color-tertiary: #805600;
   --color-on-tertiary: #ffffff;
-  --color-outline: #767586;
-  --color-on-secondary-fixed-variant: #005236;
-  --color-secondary: #006c49;
-  --color-inverse-on-surface: #f2effb;
-  --color-on-secondary-container: #00714d;
-  --color-secondary-fixed: #6ffbbe;
-  --color-background: #fcf8ff;
+  --color-tertiary-container: #ffddb3;
+  --color-on-tertiary-container: #291800;
+  --color-tertiary-fixed: #ffddb3;
+  --color-tertiary-fixed-dim: #f3be6a;
+  --color-on-tertiary-fixed: #291800;
+  --color-on-tertiary-fixed-variant: #614000;
+
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
 }
 
 .dark {
-  --color-on-background: #e4e1ed;
-  --color-primary: #b4b5ff;
-  --color-surface-container-high: #2b2931;
-  --color-on-secondary-fixed: #002113;
-  --color-secondary-fixed-dim: #4edea3;
-  --color-primary-fixed-dim: #c0c1ff;
-  --color-surface-container: #1e1b23;
-  --color-outline-variant: #464554;
-  --color-on-error-container: #ffdad6;
-  --color-surface: #131018;
-  --color-primary-container: #2f2ebe;
-  --color-on-surface-variant: #c7c4d7;
-  --color-inverse-primary: #4648d4;
-  --color-surface-variant: #464554;
-  --color-inverse-surface: #e4e1ed;
-  --color-on-tertiary-container: #ffddb8;
-  --color-on-tertiary-fixed-variant: #653e00;
-  --color-error-container: #93000a;
-  --color-on-primary: #07006c;
-  --color-tertiary-fixed-dim: #ffb95f;
-  --color-tertiary: #ffb95f;
-  --color-surface-bright: #38363d;
-  --color-surface-container-low: #1b1b23;
-  --color-primary-fixed: #e1e0ff;
-  --color-on-primary-container: #e1e0ff;
-  --color-tertiary-fixed: #ffddb8;
-  --color-surface-container-highest: #333139;
-  --color-on-error: #690005;
-  --color-on-secondary: #003824;
-  --color-surface-container-lowest: #0d0b13;
-  --color-secondary-container: #005236;
-  --color-on-tertiary-fixed: #2a1700;
-  --color-tertiary-container: #653e00;
-  --color-surface-dim: #131018;
-  --color-on-primary-fixed-variant: #2f2ebe;
+  --color-background: #0f1512;
+  --color-on-background: #e1e3df;
+  --color-surface: #0f1512;
+  --color-on-surface: #e1e3df;
+  --color-surface-dim: #0f1512;
+  --color-surface-bright: #353b37;
+  --color-surface-container-lowest: #0a0f0d;
+  --color-surface-container-low: #171d1a;
+  --color-surface-container: #1b211e;
+  --color-surface-container-high: #252c28;
+  --color-surface-container-highest: #303733;
+  --color-surface-variant: #3f4943;
+  --color-on-surface-variant: #bfc9c2;
+  --color-inverse-surface: #e1e3df;
+  --color-inverse-on-surface: #191c1a;
+
+  --color-outline: #89938c;
+  --color-outline-variant: #3f4943;
+  --color-surface-tint: #6fdba9;
+
+  --color-primary: #6fdba9;
+  --color-on-primary: #003825;
+  --color-primary-container: #005138;
+  --color-on-primary-container: #8cf8c6;
+  --color-primary-fixed: #8cf8c6;
+  --color-primary-fixed-dim: #6fdba9;
+  --color-on-primary-fixed: #002114;
+  --color-on-primary-fixed-variant: #005138;
+  --color-inverse-primary: #006c4c;
+
+  --color-secondary: #b2ccbe;
+  --color-on-secondary: #1e352b;
+  --color-secondary-container: #354b40;
+  --color-on-secondary-container: #cee8d9;
+  --color-secondary-fixed: #cee8d9;
+  --color-secondary-fixed-dim: #b2ccbe;
+  --color-on-secondary-fixed: #082016;
+  --color-on-secondary-fixed-variant: #354b40;
+
+  --color-tertiary: #f3be6a;
+  --color-on-tertiary: #442c00;
+  --color-tertiary-container: #614000;
+  --color-on-tertiary-container: #ffddb3;
+  --color-tertiary-fixed: #ffddb3;
+  --color-tertiary-fixed-dim: #f3be6a;
+  --color-on-tertiary-fixed: #291800;
+  --color-on-tertiary-fixed-variant: #614000;
+
   --color-error: #ffb4ab;
-  --color-on-primary-fixed: #07006c;
-  --color-on-surface: #e4e1ed;
-  --color-surface-tint: #b4b5ff;
-  --color-on-tertiary: #452b00;
-  --color-outline: #908f9f;
-  --color-on-secondary-fixed-variant: #005236;
-  --color-secondary: #4edea3;
-  --color-inverse-on-surface: #303038;
-  --color-on-secondary-container: #6cf8bb;
-  --color-secondary-fixed: #6ffbbe;
-  --color-background: #131018;
+  --color-on-error: #690005;
+  --color-error-container: #93000a;
+  --color-on-error-container: #ffdad6;
 }
 
 @layer utilities {
   .glass-panel {
-    background-color: rgba(252, 248, 255, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 8px 32px 0 rgba(70, 72, 212, 0.05);
+    background-color: rgba(251, 253, 250, 0.95);
+    border: 1px solid rgba(191, 201, 194, 0.4);
+    box-shadow: 0 8px 32px 0 rgba(0, 108, 76, 0.04);
   }
 
   .dark .glass-panel {
-    background-color: rgba(30, 27, 35, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+    background-color: rgba(23, 29, 26, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
   }
   
   .glass-card {
-    background-color: rgba(252, 248, 255, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    background-color: rgba(251, 253, 250, 0.9);
+    border: 1px solid rgba(191, 201, 194, 0.35);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
   }
   
   .dark .glass-card {
-    background-color: rgba(48, 48, 56, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background-color: rgba(27, 33, 30, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   }
 }
