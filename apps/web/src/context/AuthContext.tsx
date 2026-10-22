@@ -98,7 +98,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }
           })
           .catch((err) => {
-            logger.warn({ err }, "Failed to fetch profile currency — using cached/default");
+            logger.warn({ err }, "Failed to fetch profile currency: using cached/default");
           });
       } else {
         setAuthCookie(null)
@@ -121,7 +121,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setAuthCookie(null);
       router.push("/login");
     } catch (err) {
-      logger.warn({ err }, "Logout error — redirecting to login");
+      logger.warn({ err }, "Logout error: redirecting to login");
       setAuthCookie(null);
       router.push("/login");
     }

@@ -15,7 +15,7 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 
 export default function Settings() {
   const { user, logout, setCurrency: setGlobalCurrency } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const queryClient = useQueryClient();
 
   const [displayName, setDisplayName] = useState("");
@@ -125,7 +125,7 @@ export default function Settings() {
   if (profileError) {
     return (
       <div className="max-w-4xl mx-auto p-8 text-center">
-        <div className="p-4 bg-error-container/50 text-error rounded-xl border border-error/20 inline-block">
+        <div className="p-5 bg-[#FB923C]/10 border-2 border-[#FB923C] text-[#FB923C] rounded-2xl font-mono text-sm inline-block shadow-[4px_4px_0px_#08110A]">
           {t("dashboard_page.load_error")}
         </div>
       </div>
@@ -135,10 +135,20 @@ export default function Settings() {
   if (profileLoading && !profile) return <SettingsSkeleton />;
 
   return (
-    <div className="flex flex-col gap-8 h-full animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both">
-      <div>
-        <h2 className="font-headline-lg text-headline-lg font-bold text-on-background">{t("settings_page.title")}</h2>
-        <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">{t("settings_page.subtitle")}</p>
+    <div className="flex flex-col gap-8 h-full animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both pb-12">
+      <div className="flex flex-col gap-2">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FAF8F5] dark:bg-[#0D1910] border-2 border-[#08110A] dark:border-white/20 text-[#08110A] dark:text-[#F5EFE6] w-fit shadow-[2px_2px_0px_#08110A] dark:shadow-[2px_2px_0px_rgba(255,255,255,0.1)]">
+          <span className="w-2 h-2 rounded-full bg-[#39E75F]"></span>
+          <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
+            {language === "id" ? "PREFERENSI" : "PREFERENCES"}
+          </span>
+        </div>
+        <h2 className="font-heading text-3xl sm:text-4xl font-extrabold text-[#08110A] dark:text-[#F5EFE6] tracking-tight">
+          {t("settings_page.title")}
+        </h2>
+        <p className="text-sm font-mono text-[#08110A]/60 dark:text-[#F5EFE6]/60">
+          {t("settings_page.subtitle")}
+        </p>
       </div>
 
       <ProfileSection 
@@ -164,20 +174,36 @@ export default function Settings() {
         isDeleting={deleteCategoryMutation.isPending}
       />
 
-      <section className="bg-error-container/10 border border-error/20 rounded-xl p-6 shadow-sm mb-12">
-        <h3 className="font-headline-md text-headline-md text-error mb-4 flex items-center gap-2">
-          <span className="material-symbols-outlined">warning</span>
-          {t("settings_page.danger_zone.title")}
-        </h3>
-        <p className="font-body-sm text-body-sm text-on-surface-variant mb-6">{t("settings_page.danger_zone.desc")}</p>
+      <section className="bg-[#FB923C]/5 dark:bg-[#FB923C]/10 border-2 border-[#FB923C]/30 rounded-3xl p-6 sm:p-8 shadow-[4px_4px_0px_#08110A] dark:shadow-[4px_4px_0px_rgba(255,255,255,0.08)]">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-[#FB923C]/20 border-2 border-[#FB923C] flex items-center justify-center text-[#FB923C]">
+            <span className="material-symbols-outlined text-[20px]">warning</span>
+          </div>
+          <div>
+            <h3 className="font-heading font-bold text-xl text-[#08110A] dark:text-[#F5EFE6]">
+              {t("settings_page.danger_zone.title")}
+            </h3>
+            <p className="text-xs font-mono text-[#FB923C] uppercase tracking-wider font-bold">
+              Irreversible Actions
+            </p>
+          </div>
+        </div>
+        <p className="text-sm text-[#08110A]/70 dark:text-[#F5EFE6]/70 mb-6">
+          {t("settings_page.danger_zone.desc")}
+        </p>
         <div className="flex flex-wrap gap-4">
-          <button onClick={logout}
-            className="bg-surface border border-outline-variant/30 text-on-surface hover:bg-surface-variant/30 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none font-body-sm text-body-sm font-semibold px-6 py-2.5 rounded-lg transition-colors flex items-center gap-2">
+          <button 
+            onClick={logout}
+            className="min-h-[44px] bg-white dark:bg-[#0D1910] border-2 border-[#08110A] dark:border-white/20 text-[#08110A] dark:text-[#F5EFE6] font-mono text-xs uppercase tracking-wider font-bold px-5 py-2.5 rounded-full shadow-[3px_3px_0px_#08110A] dark:shadow-[3px_3px_0px_rgba(255,255,255,0.1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_#08110A] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#39E75F] transition-all flex items-center gap-2 cursor-pointer"
+          >
             <span className="material-symbols-outlined text-[18px]">logout</span>
             {t("common.logout")}
           </button>
-          <button onClick={() => setIsResetConfirmOpen(true)} disabled={resetDataMutation.isPending}
-            className="bg-error text-on-error hover:bg-error/90 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-error/45 focus-visible:outline-none font-body-sm text-body-sm font-semibold px-6 py-2.5 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
+          <button 
+            onClick={() => setIsResetConfirmOpen(true)} 
+            disabled={resetDataMutation.isPending}
+            className="min-h-[44px] bg-[#FB923C] text-[#08110A] border-2 border-[#08110A] font-mono text-xs uppercase tracking-wider font-bold px-5 py-2.5 rounded-full shadow-[3px_3px_0px_#08110A] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_#08110A] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FB923C] transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+          >
             <span className="material-symbols-outlined text-[18px]">delete_forever</span>
             {t("settings_page.danger_zone.reset_all")}
           </button>

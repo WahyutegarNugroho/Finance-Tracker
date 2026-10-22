@@ -32,63 +32,63 @@ export default React.memo(function TransactionRow({
 
   return (
     <tr
-      className={`hover:bg-surface-variant/20 transition-colors group ${
-        selectedIds.has(tx.id) ? "bg-primary/5" : ""
+      className={`hover:bg-[#FAF8F5] dark:hover:bg-white/5 transition-colors group ${
+        selectedIds.has(tx.id) ? "bg-[#39E75F]/10 dark:bg-[#39E75F]/15" : ""
       }`}
     >
-      <td className="px-2 py-4 w-10">
+      <td className="px-3 py-3 w-10">
         <input
           type="checkbox"
           checked={selectedIds.has(tx.id)}
           onChange={() => toggleSelect(tx.id)}
-          className="accent-primary cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none rounded-sm"
+          className="accent-[#39E75F] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#39E75F] focus-visible:outline-none rounded w-4 h-4"
           aria-label={t("transactions_page.select_transaction").replace("{id}", tx.note || tx.categoryName)}
         />
       </td>
-      <td className="px-6 py-4 whitespace-nowrap font-body-sm text-body-sm text-on-surface">
+      <td className="px-4 py-3 whitespace-nowrap font-mono text-xs font-bold text-[#08110A] dark:text-[#F5EFE6]">
         {formatDate(tx.date, language)}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="flex items-center gap-2">
+      <td className="px-4 py-3 whitespace-nowrap">
+        <div className="flex items-center gap-2.5">
           <div
-            className={`w-8 h-8 rounded-full flex items-center justify-center ${
+            className={`w-8 h-8 rounded-xl border border-[#08110A] flex items-center justify-center shrink-0 shadow-[1px_1px_0px_#08110A] ${
               tx.type === "income"
-                ? "bg-secondary/10 text-secondary"
-                : "bg-primary/10 text-primary"
+                ? "bg-[#39E75F] text-[#08110A]"
+                : "bg-[#FB923C] text-[#08110A]"
             }`}
           >
-            <span className="material-symbols-outlined text-[16px]">
-              {tx.categoryIcon || "category"}
+            <span className="material-symbols-outlined text-[16px] font-bold">
+              {tx.categoryIcon || "receipt_long"}
             </span>
           </div>
-          <span className="font-body-sm text-body-sm text-on-surface">
-            {tCategory(tx.categoryName)}
+          <span className="font-sans text-xs sm:text-sm font-bold text-[#08110A] dark:text-white">
+            {tCategory(tx.categoryName || "Others")}
           </span>
         </div>
       </td>
-      <td className="px-6 py-4 font-body-sm text-body-sm text-on-surface-variant max-w-xs truncate">
+      <td className="px-4 py-3 font-sans text-xs text-[#08110A]/70 dark:text-[#F5EFE6]/70 max-w-xs truncate">
         {tx.note || "-"}
       </td>
       <td
-        className={`px-6 py-4 whitespace-nowrap font-numeric-data text-numeric-data text-right font-semibold ${
-          tx.type === "income" ? "text-secondary" : "text-on-surface"
+        className={`px-4 py-3 whitespace-nowrap font-mono text-xs sm:text-sm text-right font-black ${
+          tx.type === "income" ? "text-[#166534] dark:text-[#39E75F]" : "text-[#991B1B] dark:text-[#FB923C]"
         }`}
       >
         {tx.type === "income" ? "+" : "-"}
-        {formatCurrency(tx.amount)}
+        {formatCurrency(isNaN(Number(tx.amount)) ? 0 : Number(tx.amount))}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-center">
+      <td className="px-4 py-3 whitespace-nowrap text-center">
         <span
-          className={`inline-flex items-center px-2 py-1 rounded-md font-label-caps text-label-caps text-[10px] ${
+          className={`inline-flex items-center px-2.5 py-0.5 rounded-full border border-[#08110A] font-display font-black text-[10px] uppercase shadow-[1px_1px_0px_#08110A] ${
             tx.type === "income"
-              ? "bg-secondary/10 text-secondary"
-              : "bg-surface-variant/50 text-on-surface-variant"
+              ? "bg-[#39E75F] text-[#08110A]"
+              : "bg-[#FB923C] text-[#08110A]"
           }`}
         >
           {tx.type === "income" ? t("common.credit") : t("common.debit")}
         </span>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-right text-outline relative">
+      <td className="px-4 py-3 whitespace-nowrap text-right text-outline relative">
         <div
           onBlur={(e) => {
             if (!e.currentTarget.contains(e.relatedTarget)) setOpenMenuId(null);
@@ -98,17 +98,17 @@ export default React.memo(function TransactionRow({
           <button
             type="button"
             onClick={() => setOpenMenuId(openMenuId === tx.id ? null : tx.id)}
-            className="p-1 hover:bg-surface-variant focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none rounded-full transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full hover:bg-black/5 dark:hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-[#39E75F] focus-visible:outline-none transition-colors flex items-center justify-center cursor-pointer text-[#08110A] dark:text-white"
             aria-label={t("transactions_page.table.actions")}
             aria-expanded={openMenuId === tx.id}
             aria-haspopup="true"
           >
-            <span className="material-symbols-outlined text-[20px]">more_vert</span>
+            <span className="material-symbols-outlined text-[18px]">more_vert</span>
           </button>
 
           {openMenuId === tx.id && (
             <div
-              className="absolute right-0 top-full mt-1 w-32 bg-surface border border-outline-variant/20 rounded-lg shadow-lg z-10 flex flex-col overflow-hidden text-left"
+              className="absolute right-0 top-full mt-1 w-36 bg-white dark:bg-[#08110A] border-2 border-[#08110A] dark:border-white/20 rounded-2xl shadow-[4px_4px_0px_#08110A] z-20 flex flex-col overflow-hidden text-left p-1"
             >
               <button
                 type="button"
@@ -116,9 +116,9 @@ export default React.memo(function TransactionRow({
                   onEdit(tx);
                   setOpenMenuId(null);
                 }}
-                className="w-full text-left px-4 py-2 text-sm text-on-surface hover:bg-surface-variant/50 focus-visible:bg-surface-variant/50 focus-visible:outline-none flex items-center gap-2 cursor-pointer"
+                className="w-full text-left px-3 py-2 text-xs font-display font-black uppercase text-[#08110A] dark:text-white hover:bg-[#FAF8F5] dark:hover:bg-white/10 rounded-xl flex items-center gap-2 cursor-pointer transition-colors"
               >
-                <span className="material-symbols-outlined text-[18px]">edit</span>
+                <span className="material-symbols-outlined text-[16px]">edit</span>
                 {t("common.edit")}
               </button>
               <button
@@ -127,9 +127,9 @@ export default React.memo(function TransactionRow({
                   onDelete(tx.id);
                   setOpenMenuId(null);
                 }}
-                className="w-full text-left px-4 py-2 text-sm text-error hover:bg-error-container/50 focus-visible:bg-error-container/50 focus-visible:outline-none flex items-center gap-2 cursor-pointer"
+                className="w-full text-left px-3 py-2 text-xs font-display font-black uppercase text-[#991B1B] hover:bg-[#FEE2E2] dark:hover:bg-red-950/40 rounded-xl flex items-center gap-2 cursor-pointer transition-colors"
               >
-                <span className="material-symbols-outlined text-[18px]">delete</span>
+                <span className="material-symbols-outlined text-[16px]">delete</span>
                 {t("common.delete")}
               </button>
             </div>

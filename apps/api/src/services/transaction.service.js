@@ -1,7 +1,7 @@
 const { db } = require('../config/firebase');
 const { serializeDoc, mapSnapshot, now, fromFirestoreTimestamp } = require('../utils/firestore');
 const { parsePagination, encodeCursor, buildCursor } = require('../utils/pagination');
-const { scanForMatches } = require('../utils/search');
+const { matchesFilter, scanForMatches } = require('../utils/search');
 const { calculateNextRecurringDate } = require('../utils/recurring');
 const logger = require('../utils/logger');
 
@@ -10,87 +10,35 @@ const USERS_COLLECTION = 'users';
 const TX_DATE_FIELDS = ['date', 'createdAt', 'updatedAt'];
 
 /**
- * Get transactions with server-side filtering, search, and cursor-based pagination
+ * Execute cursor-paginated streaming scan across documents for a user,
+ * applying all filter criteria (search, type, category, date range).
+ * Used when substring search is active or when Firestore throws missing composite index errors.
  */
-const getTransactions = async (userId, queryParams) => {
-  const { limit } = parsePagination(queryParams);
-
-  let query = db.collection(COLLECTION).where('userId', '==', userId);
-
-  if (queryParams.type && queryParams.type !== 'all') {
-    query = query.where('type', '==', queryParams.type);
-  }
-
-  if (queryParams.categoryId) {
-    query = query.where('categoryId', '==', queryParams.categoryId);
-  }
-
-  if (queryParams.startDate) {
-    query = query.where('date', '>=', new Date(queryParams.startDate));
-  }
-
-  if (queryParams.endDate) {
-    query = query.where('date', '<=', new Date(queryParams.endDate));
-  }
-
-  const order = queryParams.order === 'asc' ? 'asc' : 'desc';
-  const sortBy = queryParams.sortBy === 'amount' ? 'amount' : 'date';
-  query = query.orderBy(sortBy, order).orderBy('__name__', order);
+const runStreamingFallback = async (userId, queryParams, limit, sortBy, order) => {
+  let baseQuery = db.collection(COLLECTION).where('userId', '==', userId);
+  baseQuery = baseQuery.orderBy(sortBy, order).orderBy('__name__', order);
 
   if (queryParams.cursor) {
     try {
       const cursor = JSON.parse(Buffer.from(queryParams.cursor, 'base64').toString('utf8'));
       if (cursor.sortValue !== undefined && cursor.id) {
         const sortValue = sortBy === 'amount' ? Number(cursor.sortValue) : new Date(cursor.sortValue);
-        query = query.startAfter(sortValue, cursor.id);
+        baseQuery = baseQuery.startAfter(sortValue, cursor.id);
       }
     } catch (decodeError) {
       logger.warn({ err: decodeError, cursor: queryParams.cursor }, 'Invalid cursor — resetting to start');
     }
   }
 
-  const searchTerm = queryParams.search ? String(queryParams.search) : '';
-  if (searchTerm) {
-    return findTransactionsWithSearch(query, limit, sortBy, searchTerm);
-  }
-
-  const snapshot = await query.limit(limit + 1).get();
-
-  let transactions = mapSnapshot(snapshot);
-
-  const hasMore = transactions.length > limit;
-  if (hasMore) {
-    transactions = transactions.slice(0, limit);
-  }
-
-  const nextCursor = hasMore && snapshot.docs.length > 0
-    ? encodeCursor(buildCursor(
-        snapshot.docs.find(d => d.id === transactions[limit - 1]?.id) || snapshot.docs[snapshot.docs.length - 1],
-        sortBy
-      ))
-    : null;
-
-  return {
-    transactions,
-    pagination: { hasMore, nextCursor, itemsPerPage: limit },
-  };
-};
-
-/**
- * Search + cursor-paginate by scanning raw Firestore pages until enough matches
- * are found (bounded by SCAN cap) — substring search has no native Firestore query.
- */
-const findTransactionsWithSearch = async (baseQuery, limit, sortBy, searchTerm) => {
-  let query = baseQuery;
-
+  let currentQuery = baseQuery;
   const result = await scanForMatches({
-    searchTerm,
+    filterFn: (data) => matchesFilter(data, queryParams),
     limit,
     fetchPage: async (count) => {
-      const snapshot = await query.limit(count).get();
+      const snapshot = await currentQuery.limit(count).get();
       if (snapshot.empty) return null;
       const docs = snapshot.docs.map((doc) => ({ id: doc.id, data: doc.data() }));
-      query = query.startAfter(snapshot.docs[snapshot.docs.length - 1]);
+      currentQuery = currentQuery.startAfter(snapshot.docs[snapshot.docs.length - 1]);
       return docs;
     },
   });
@@ -116,6 +64,86 @@ const findTransactionsWithSearch = async (baseQuery, limit, sortBy, searchTerm) 
       ...(result.truncated ? { searchTruncated: true } : {}),
     },
   };
+};
+
+/**
+ * Get transactions with server-side filtering, search, and cursor-based pagination
+ */
+const getTransactions = async (userId, queryParams) => {
+  const { limit } = parsePagination(queryParams);
+  const order = queryParams.order === 'asc' ? 'asc' : 'desc';
+  const sortBy = queryParams.sortBy === 'amount' ? 'amount' : 'date';
+  const searchTerm = queryParams.search ? String(queryParams.search) : '';
+
+  // Substring search cannot be executed by native Firestore indexes — run stream scan
+  if (searchTerm) {
+    return runStreamingFallback(userId, queryParams, limit, sortBy, order);
+  }
+
+  // Fast path: attempt direct compound query on Firestore
+  try {
+    let query = db.collection(COLLECTION).where('userId', '==', userId);
+
+    if (queryParams.type && queryParams.type !== 'all') {
+      query = query.where('type', '==', queryParams.type);
+    }
+
+    if (queryParams.categoryId) {
+      query = query.where('categoryId', '==', queryParams.categoryId);
+    }
+
+    if (queryParams.startDate) {
+      query = query.where('date', '>=', new Date(queryParams.startDate));
+    }
+
+    if (queryParams.endDate) {
+      query = query.where('date', '<=', new Date(queryParams.endDate));
+    }
+
+    query = query.orderBy(sortBy, order).orderBy('__name__', order);
+
+    if (queryParams.cursor) {
+      try {
+        const cursor = JSON.parse(Buffer.from(queryParams.cursor, 'base64').toString('utf8'));
+        if (cursor.sortValue !== undefined && cursor.id) {
+          const sortValue = sortBy === 'amount' ? Number(cursor.sortValue) : new Date(cursor.sortValue);
+          query = query.startAfter(sortValue, cursor.id);
+        }
+      } catch (decodeError) {
+        logger.warn({ err: decodeError, cursor: queryParams.cursor }, 'Invalid cursor — resetting to start');
+      }
+    }
+
+    const snapshot = await query.limit(limit + 1).get();
+
+    let transactions = mapSnapshot(snapshot);
+
+    const hasMore = transactions.length > limit;
+    if (hasMore) {
+      transactions = transactions.slice(0, limit);
+    }
+
+    const nextCursor = hasMore && snapshot.docs.length > 0
+      ? encodeCursor(buildCursor(
+          snapshot.docs.find(d => d.id === transactions[limit - 1]?.id) || snapshot.docs[snapshot.docs.length - 1],
+          sortBy
+        ))
+      : null;
+
+    return {
+      transactions,
+      pagination: { hasMore, nextCursor, itemsPerPage: limit },
+    };
+  } catch (err) {
+    const isIndexError = err.code === 9 || 
+      err.message?.includes('requires an index') || 
+      err.message?.includes('FAILED_PRECONDITION');
+    if (isIndexError) {
+      logger.warn({ err: err.message, queryParams }, 'Firestore composite index missing — falling back to streaming scan');
+      return runStreamingFallback(userId, queryParams, limit, sortBy, order);
+    }
+    throw err;
+  }
 };
 
 /**

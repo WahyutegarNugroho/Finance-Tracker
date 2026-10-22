@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fintrack-v3';
+const CACHE_NAME = 'fintrack-v4';
 const STATIC_ASSETS = [
   '/',
   '/dashboard',
@@ -37,6 +37,11 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const { request } = event;
+
+  // Never intercept during local development or on localhost
+  if (self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1') {
+    return;
+  }
 
   // Only cache GET requests
   if (request.method !== 'GET') return;

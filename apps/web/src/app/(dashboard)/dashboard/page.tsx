@@ -33,26 +33,58 @@ export default function Dashboard() {
     return <DashboardSkeleton />;
   }
 
-  if (!data) {
+  if (queryError) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-          <span className="material-symbols-outlined text-4xl">account_balance_wallet</span>
+        <div className="w-20 h-20 rounded-3xl bg-[#FEE2E2] text-[#991B1B] border-2 border-[#08110A] shadow-[4px_4px_0px_#08110A] flex items-center justify-center">
+          <span className="material-symbols-outlined text-4xl font-bold">cloud_off</span>
         </div>
-        <div>
-          <h2 className="font-headline-md text-headline-md text-on-background mb-2">
+        <div className="max-w-md mx-auto space-y-2">
+          <h2 className="font-display text-2xl sm:text-3xl font-black uppercase text-[#08110A] dark:text-white">
+            {t("dashboard_page.load_error")}
+          </h2>
+          <p className="font-sans text-xs sm:text-sm text-[#08110A]/70 dark:text-[#F5EFE6]/70">
+            {queryError instanceof Error ? queryError.message : "Gagal memuat data dari server API."}
+          </p>
+        </div>
+        <button 
+          onClick={() => refetch()}
+          className="min-h-[44px] bg-[#39E75F] hover:bg-[#2ed652] active:translate-y-0.5 text-[#08110A] font-display text-xs sm:text-sm font-black uppercase tracking-wider px-6 py-3 rounded-full border-2 border-[#08110A] shadow-[3px_3px_0px_#08110A] focus-visible:ring-2 focus-visible:ring-[#08110A] focus-visible:ring-offset-2 focus-visible:outline-none transition-all flex items-center gap-2 cursor-pointer"
+        >
+          <span className="material-symbols-outlined text-sm font-bold">refresh</span>
+          <span>{t("error_page.try_again")}</span>
+        </button>
+      </div>
+    );
+  }
+
+  const isDataEmpty = !data || (
+    data.recentTransactions?.length === 0 && 
+    data.income === 0 && 
+    data.expense === 0 && 
+    data.balance === 0
+  );
+
+  if (isDataEmpty) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="w-20 h-20 rounded-3xl bg-[#39E75F] text-[#08110A] border-2 border-[#08110A] shadow-[4px_4px_0px_#08110A] flex items-center justify-center">
+          <span className="material-symbols-outlined text-4xl font-bold">account_balance_wallet</span>
+        </div>
+        <div className="max-w-md mx-auto space-y-2">
+          <h2 className="font-display text-2xl sm:text-3xl font-black uppercase text-[#08110A] dark:text-white">
             {t("dashboard_page.no_data")}
           </h2>
-          <p className="font-body-sm text-body-sm text-on-surface-variant max-w-sm mx-auto">
+          <p className="font-sans text-xs sm:text-sm text-[#08110A]/70 dark:text-[#F5EFE6]/70">
             {t("dashboard_page.no_data_desc")}
           </p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="bg-primary hover:bg-primary/90 text-on-primary font-body-sm text-body-sm px-6 py-3 rounded-lg focus-visible:ring-2 focus-visible:ring-primary/45 focus-visible:outline-none transition-all duration-200 shadow-sm hover:scale-[1.02] active:scale-95 flex items-center gap-2"
+          className="min-h-[44px] bg-[#39E75F] hover:bg-[#2ed652] active:translate-y-0.5 text-[#08110A] font-display text-xs sm:text-sm font-black uppercase tracking-wider px-6 py-3 rounded-full border-2 border-[#08110A] shadow-[3px_3px_0px_#08110A] focus-visible:ring-2 focus-visible:ring-[#08110A] focus-visible:ring-offset-2 focus-visible:outline-none transition-all flex items-center gap-2 cursor-pointer"
         >
-          <span className="material-symbols-outlined text-sm">add</span>
-          {t("dashboard_page.new_transaction")}
+          <span className="material-symbols-outlined text-sm font-bold">add</span>
+          <span>{t("dashboard_page.new_transaction")}</span>
         </button>
         <TransactionModal 
           isOpen={isModalOpen} 
@@ -69,33 +101,29 @@ export default function Dashboard() {
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8">
         <div>
-          <h2 className="font-headline-lg text-headline-lg text-on-background mb-1">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full border-2 border-[#08110A] bg-[#39E75F] text-[#08110A] font-display font-black text-[10px] uppercase shadow-[2px_2px_0px_#08110A]">
+              {language === "id" ? "RINGKASAN AKTIF" : "ACTIVE OVERVIEW"}
+            </span>
+            <span className="font-mono text-xs font-bold text-[#08110A]/60 dark:text-[#F5EFE6]/60">
+              {new Date().toLocaleDateString(language === "id" ? "id-ID" : "en-US", { month: "long", year: "numeric" })}
+            </span>
+          </div>
+          <h1 className="font-display text-2xl sm:text-3xl font-black uppercase tracking-tight text-[#08110A] dark:text-white">
             {t("dashboard_page.title")}
-          </h2>
-          <p className="font-body-sm text-body-sm text-on-surface-variant">
+          </h1>
+          <p className="font-sans text-xs sm:text-sm text-[#08110A]/70 dark:text-[#F5EFE6]/70 mt-0.5">
             {t("dashboard_page.welcome")}
           </p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="bg-primary hover:bg-primary-container text-on-primary font-body-sm text-body-sm px-4 py-2 rounded-lg focus-visible:ring-2 focus-visible:ring-primary/45 focus-visible:outline-none transition-all duration-200 shadow-sm hover:scale-[1.02] active:scale-95 flex items-center gap-2"
+          className="min-h-[44px] bg-[#39E75F] hover:bg-[#2ed652] active:translate-y-0.5 text-[#08110A] font-display text-xs sm:text-sm font-black uppercase tracking-wider px-5 py-2.5 rounded-full border-2 border-[#08110A] shadow-[3px_3px_0px_#08110A] focus-visible:ring-2 focus-visible:ring-[#08110A] focus-visible:ring-offset-2 focus-visible:outline-none transition-all flex items-center gap-2 cursor-pointer"
         >
-          <span className="material-symbols-outlined text-sm">add</span>
-          {t("dashboard_page.new_transaction")}
+          <span className="material-symbols-outlined text-[18px] font-bold">add</span>
+          <span>{t("dashboard_page.new_transaction")}</span>
         </button>
       </div>
-
-      {queryError && (
-        <div className="mb-4 p-4 bg-error-container text-error rounded-xl flex items-center justify-between gap-4">
-          <span>{t("dashboard_page.load_error")}</span>
-          <button
-            onClick={() => refetch()}
-            className="bg-error text-on-error px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-error/90 focus-visible:ring-2 focus-visible:ring-error/45 focus-visible:outline-none transition-colors shrink-0"
-          >
-            {t("error_page.try_again")}
-          </button>
-        </div>
-      )}
 
       <SummaryCards data={data} />
 

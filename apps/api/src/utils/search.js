@@ -13,6 +13,38 @@ const matchesSearch = (tx, searchTerm) => {
   );
 };
 
+const getDocDate = (value) => {
+  if (!value) return new Date();
+  if (value instanceof Date) return value;
+  if (typeof value.toDate === 'function') return value.toDate();
+  if (value._seconds) return new Date(value._seconds * 1000);
+  return new Date(value);
+};
+
+/**
+ * Evaluate if a document matches query filter criteria
+ */
+const matchesFilter = (tx, queryParams = {}) => {
+  if (queryParams.type && queryParams.type !== 'all' && tx.type !== queryParams.type) {
+    return false;
+  }
+  if (queryParams.categoryId && tx.categoryId !== queryParams.categoryId) {
+    return false;
+  }
+  if (queryParams.startDate) {
+    const txDate = getDocDate(tx.date);
+    if (txDate < new Date(queryParams.startDate)) return false;
+  }
+  if (queryParams.endDate) {
+    const txDate = getDocDate(tx.date);
+    if (txDate > new Date(queryParams.endDate)) return false;
+  }
+  if (queryParams.search && !matchesSearch(tx, queryParams.search)) {
+    return false;
+  }
+  return true;
+};
+
 /**
  * Bounded stream scan for search results.
  * `fetchPage(count)` must return the next `count` raw docs (array of { id, data })
@@ -26,11 +58,13 @@ const matchesSearch = (tx, searchTerm) => {
  *  - truncated    : true when the raw scan cap was hit before knowing whether more matches exist
  */
 // ponytail: raw-cap scan → dedicated search service (Algolia/Typesense) when account growth matters
-async function scanForMatches({ fetchPage, searchTerm, limit, pageSize = SEARCH_RAW_PAGE_SIZE, rawCap = SEARCH_RAW_CAP }) {
+async function scanForMatches({ fetchPage, searchTerm, filterFn, limit, pageSize = SEARCH_RAW_PAGE_SIZE, rawCap = SEARCH_RAW_CAP }) {
   const matches = [];
   let hasMore = false;
   let truncated = false;
   let scanned = 0;
+
+  const matchChecker = filterFn || ((data) => matchesSearch(data, searchTerm));
 
   while (!hasMore && !truncated) {
     const remaining = rawCap - scanned;
@@ -44,7 +78,7 @@ async function scanForMatches({ fetchPage, searchTerm, limit, pageSize = SEARCH_
 
     for (const doc of page) {
       scanned++;
-      if (matchesSearch(doc.data, searchTerm)) {
+      if (matchChecker(doc.data)) {
         matches.push(doc);
         if (matches.length === limit + 1) {
           hasMore = true;
@@ -64,4 +98,4 @@ async function scanForMatches({ fetchPage, searchTerm, limit, pageSize = SEARCH_
   };
 }
 
-module.exports = { matchesSearch, scanForMatches, SEARCH_RAW_PAGE_SIZE, SEARCH_RAW_CAP };
+module.exports = { matchesSearch, matchesFilter, scanForMatches, SEARCH_RAW_PAGE_SIZE, SEARCH_RAW_CAP };

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Bricolage_Grotesque, Playfair_Display } from "next/font/google";
 import Providers from "@/components/Providers";
-import Script from "next/script";
 import "material-symbols/outlined.css";
 import "./globals.css";
 
@@ -10,29 +9,22 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-const themeScript = `
-  try {
-    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-  } catch (e) { console.warn('[Theme]', e) }
-`;
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-display",
+  subsets: ["latin"],
+  display: "swap",
+});
 
-const swScript = `
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('/sw.js').catch(function(e) {
-        console.warn('[SW]', e);
-      });
-    });
-  }
-`;
+const playfair = Playfair_Display({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "FinTrack - Personal Finance Management",
-  description: "Track your income, expenses, and budgets effortlessly.",
+  description: "Fast, private personal finance ledger to track income, expenses, and category budgets.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -47,8 +39,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} antialiased`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} ${bricolage.variable} ${playfair.variable} antialiased`} suppressHydrationWarning>
       <head>
+        <link rel="preload" href="/fonts/Deacon-Black.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/Graphik-Regular.otf" as="font" type="font/otf" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://identitytoolkit.googleapis.com" />
@@ -56,10 +50,8 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com" />
         <link rel="dns-prefetch" href="https://securetoken.googleapis.com" />
         <link rel="dns-prefetch" href="https://firestore.googleapis.com" />
-        <Script id="theme-script" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="bg-background text-on-background font-body-lg text-body-lg min-h-screen flex flex-col relative overflow-x-hidden transition-colors duration-300">
-        <Script id="register-sw" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: swScript }} />
         <Providers>
           {children}
         </Providers>

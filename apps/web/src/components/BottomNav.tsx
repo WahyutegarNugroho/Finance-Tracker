@@ -19,7 +19,7 @@ export default function BottomNav({ activePath }: BottomNavProps) {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 w-full md:hidden z-50 h-[64px] bg-surface/95 border-t border-outline-variant/20 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] flex justify-around items-center px-4 pb-safe">
+    <nav className="fixed bottom-0 left-0 w-full md:hidden z-50 h-[68px] bg-[#FAF8F5]/95 dark:bg-[#08110A]/95 backdrop-blur-md border-t-2 border-[#08110A]/15 dark:border-white/10 flex justify-around items-center px-2 pb-safe select-none">
       {menuItems.map((item) => {
         const isActive = activePath === item.path;
         return (
@@ -29,17 +29,17 @@ export default function BottomNav({ activePath }: BottomNavProps) {
             aria-current={isActive ? "page" : undefined}
             className={
               isActive
-                ? "flex flex-col items-center text-primary font-bold active:bg-primary/5 p-2 rounded-lg"
-                : "flex flex-col items-center text-on-surface-variant hover:text-primary active:bg-primary/5 p-2 rounded-lg transition-colors"
+                ? "flex flex-col items-center justify-center min-w-[48px] min-h-[48px] px-3 py-1 bg-[#39E75F] text-[#08110A] font-black rounded-xl border border-[#08110A] shadow-[2px_2px_0px_#08110A] transition-transform active:scale-95"
+                : "flex flex-col items-center justify-center min-w-[48px] min-h-[48px] px-2 py-1 text-[#08110A]/70 dark:text-[#F5EFE6]/70 hover:text-[#08110A] dark:hover:text-white rounded-xl transition-colors font-bold"
             }
           >
             <span
-              className="material-symbols-outlined mb-1"
+              className="material-symbols-outlined text-[20px]"
               style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}
             >
               {item.icon}
             </span>
-            <span className="font-label-caps text-[10px] uppercase">
+            <span className="font-display text-[9px] uppercase tracking-wider mt-0.5">
               {item.name}
             </span>
           </Link>

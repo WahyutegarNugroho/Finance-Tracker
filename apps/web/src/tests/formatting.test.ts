@@ -23,6 +23,13 @@ describe('Formatting Utils', () => {
     expect(typeof res).toBe('string');
   });
 
+  it('formatDate defensively handles corrupted or empty date strings without throwing RangeError', () => {
+    expect(formatDate('', 'en')).toBe('-');
+    expect(formatDate('not-a-valid-date', 'en')).toBe('-');
+    expect(formatDate(null as unknown as string, 'en')).toBe('-');
+    expect(formatDate(undefined as unknown as string, 'en')).toBe('-');
+  });
+
   it('getAvatarUrl generates valid data URL', () => {
     const url = getAvatarUrl('John Doe');
     expect(url.startsWith('data:image/svg+xml;base64,')).toBe(true);

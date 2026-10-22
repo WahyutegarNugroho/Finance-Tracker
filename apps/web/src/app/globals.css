@@ -1,6 +1,30 @@
 @import "tailwindcss";
 @config "../../tailwind.config.ts";
 
+@font-face {
+  font-family: 'Deacon';
+  src: url('/fonts/Deacon-Black.woff2') format('woff2');
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Graphik';
+  src: url('/fonts/Graphik-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Graphik';
+  src: url('/fonts/Graphik-Medium.otf') format('opentype');
+  font-weight: 500 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --color-background: #fbfdfa;
   --color-on-background: #191c1a;
@@ -54,9 +78,35 @@
   --color-on-error: #ffffff;
   --color-error-container: #ffdad6;
   --color-on-error-container: #93000a;
+
+  /* Kikin Brand Palette Tokens */
+  --color-brand-forest: #08110a;
+  --color-brand-forest-card: #0f1c13;
+  --color-brand-forest-border: #1a2f20;
+  --color-brand-neon: #39e75f;
+  --color-brand-neon-hover: #2dd852;
+  --color-brand-sand: #f5efe6;
+  --color-brand-sand-card: #ffffff;
+  --color-brand-sand-muted: #e7dfd4;
+  --color-brand-sky: #7dd3fc;
+  --color-brand-badge-yellow: #fde047;
+  --color-brand-badge-orange: #fb923c;
 }
 
 .dark {
+  /* Kikin Brand Palette Tokens in dark */
+  --color-brand-forest: #08110a;
+  --color-brand-forest-card: #0f1c13;
+  --color-brand-forest-border: #1a2f20;
+  --color-brand-neon: #39e75f;
+  --color-brand-neon-hover: #2dd852;
+  --color-brand-sand: #f5efe6;
+  --color-brand-sand-card: #ffffff;
+  --color-brand-sand-muted: #e7dfd4;
+  --color-brand-sky: #7dd3fc;
+  --color-brand-badge-yellow: #fde047;
+  --color-brand-badge-orange: #fb923c;
+
   --color-background: #0f1512;
   --color-on-background: #e1e3df;
   --color-surface: #0f1512;
@@ -77,8 +127,8 @@
   --color-outline-variant: #3f4943;
   --color-surface-tint: #6fdba9;
 
-  --color-primary: #6fdba9;
-  --color-on-primary: #003825;
+  --color-primary: #39e75f;
+  --color-on-primary: #08110a;
   --color-primary-container: #005138;
   --color-on-primary-container: #8cf8c6;
   --color-primary-fixed: #8cf8c6;
@@ -185,4 +235,59 @@
     var(--color-surface-container) 63%
   );
   background-size: 200% 100%;
+}
+
+/* Kikin Editorial Utility Styles */
+.badge-stamp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-family: var(--font-display), sans-serif;
+  border: 2px solid currentColor;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+}
+
+.pill-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pill-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+
+.pill-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 25s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Archival Paper Linocut Micro-Grain Texture */
+.bg-grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.025'/%3E%3C/svg%3E");
 }

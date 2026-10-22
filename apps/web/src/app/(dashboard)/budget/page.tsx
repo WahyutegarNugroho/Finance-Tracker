@@ -93,6 +93,11 @@ export default function Budget() {
 
   if (loading) return <BudgetSkeleton />;
 
+  const now = new Date();
+  const isCurrentMonth = selectedMonth === now.getMonth() + 1 && selectedYear === now.getFullYear();
+  const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+  const daysRemaining = isCurrentMonth ? Math.max(0, daysInMonth - now.getDate()) : null;
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
       {(budgetsError || summaryError) && (
@@ -103,33 +108,38 @@ export default function Budget() {
 
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
-          <h1 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full border-2 border-[#08110A] bg-[#FDE047] text-[#08110A] font-display font-black text-[10px] uppercase shadow-[2px_2px_0px_#08110A]">
+              {language === "id" ? "BATAS PENGELUARAN" : "SPENDING LIMITS"}
+            </span>
+          </div>
+          <h1 className="font-display text-2xl sm:text-3xl font-black uppercase tracking-tight text-[#08110A] dark:text-white">
             {t("budget_page.title")}
           </h1>
-          <p className="font-body-lg text-body-lg text-on-surface-variant mt-1">
+          <p className="font-sans text-xs sm:text-sm text-[#08110A]/70 dark:text-[#F5EFE6]/70 mt-1">
             {t("budget_page.subtitle")}
           </p>
         </div>
         <div className="flex items-center gap-4 self-start md:self-auto flex-wrap">
-          <div className="flex items-center gap-3 bg-surface-container-high/60 border border-outline-variant/30 rounded-lg p-1.5 shadow-sm">
+          <div className="flex items-center gap-2 bg-white dark:bg-[#0D1910] border-2 border-[#08110A] dark:border-white/20 rounded-full p-1.5 shadow-[2px_2px_0px_#08110A]">
             <button
               type="button"
               onClick={() => shiftMonth(-1)}
               aria-label="Previous month"
-              className="w-8 h-8 rounded-md flex items-center justify-center hover:bg-surface-container-highest focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none text-on-surface-variant transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 text-[#08110A] dark:text-[#F5EFE6] transition-colors cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[20px]">chevron_left</span>
+              <span className="material-symbols-outlined text-[18px]">chevron_left</span>
             </button>
-            <span className="font-numeric-data font-semibold text-sm px-2 text-on-surface min-w-[90px] text-center">
+            <span className="font-mono font-black text-xs px-2 text-[#08110A] dark:text-white min-w-[100px] text-center uppercase">
               {getMonthName(selectedMonth)} {selectedYear}
             </span>
             <button
               type="button"
               onClick={() => shiftMonth(1)}
               aria-label="Next month"
-              className="w-8 h-8 rounded-md flex items-center justify-center hover:bg-surface-container-highest focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none text-on-surface-variant transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 text-[#08110A] dark:text-[#F5EFE6] transition-colors cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[20px]">chevron_right</span>
+              <span className="material-symbols-outlined text-[18px]">chevron_right</span>
             </button>
           </div>
           <button
@@ -138,58 +148,65 @@ export default function Budget() {
               setBudgetToEdit(null);
               setIsModalOpen(true);
             }}
-            className="bg-primary hover:bg-primary/90 text-on-primary font-body-sm text-body-sm font-semibold px-6 py-2.5 rounded-lg flex items-center gap-2 transition-all duration-200 hover:scale-[1.02] focus-visible:ring-2 focus-visible:ring-primary/45 focus-visible:outline-none shadow-sm cursor-pointer"
+            className="min-h-[44px] bg-[#39E75F] hover:bg-[#2ed652] active:translate-y-0.5 text-[#08110A] font-display text-xs sm:text-sm font-black uppercase tracking-wider px-6 py-2.5 rounded-full border-2 border-[#08110A] shadow-[3px_3px_0px_#08110A] focus-visible:ring-2 focus-visible:ring-[#08110A] focus-visible:ring-offset-2 focus-visible:outline-none transition-all flex items-center gap-2 cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[18px]">add</span>
+            <span className="material-symbols-outlined text-[18px] font-bold">add</span>
             {t("budget_page.create_new")}
           </button>
         </div>
       </div>
 
       {summary && (
-        <section className="bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-6 md:p-8 mb-8 relative overflow-hidden">
+        <section className="bg-white dark:bg-[#0D1910] text-[#08110A] dark:text-[#F5EFE6] border-2 border-[#08110A] dark:border-white/20 shadow-[4px_4px_0px_#08110A] dark:shadow-[4px_4px_0px_rgba(57,231,95,0.3)] rounded-3xl p-6 md:p-8 mb-8 relative overflow-hidden">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4 relative z-10">
             <div>
-              <h2 className="font-label-caps text-label-caps text-on-surface-variant mb-2">
-                {t("budget_page.total_monthly_budget")}
-              </h2>
+              <div className="flex items-center gap-2 mb-2">
+                <h2 className="font-display font-black text-xs uppercase tracking-wider text-[#08110A]/70 dark:text-[#F5EFE6]/70">
+                  {t("budget_page.total_monthly_budget")}
+                </h2>
+                {daysRemaining !== null && (
+                  <span className="bg-[#39E75F] text-[#08110A] border border-[#08110A] text-[10px] px-2.5 py-0.5 rounded-full font-mono font-black shadow-[1px_1px_0px_#08110A]">
+                    {daysRemaining} {t("budget_page.days_left")}
+                  </span>
+                )}
+              </div>
               <div className="flex items-baseline gap-2">
-                <span className="font-display text-display text-on-surface font-bold font-numeric-data">
+                <span className="font-display text-3xl sm:text-4xl text-[#08110A] dark:text-white font-black">
                   {formatCurrency(summary.totalSpent)}
                 </span>
-                <span className="font-body-lg text-body-lg text-outline font-numeric-data">
+                <span className="font-mono text-sm sm:text-base text-[#08110A]/60 dark:text-[#F5EFE6]/60 font-bold">
                   / {formatCurrency(summary.totalBudget)}
                 </span>
               </div>
             </div>
             <div className="flex items-center gap-6">
               <div className="flex flex-col items-end">
-                <span className="font-label-caps text-label-caps text-on-surface-variant">
+                <span className="font-display font-black text-xs text-[#08110A]/70 dark:text-[#F5EFE6]/70 uppercase tracking-wider">
                   {t("budget_page.remaining_label")}
                 </span>
-                <span className="font-headline-md text-headline-md text-secondary font-semibold font-numeric-data">
+                <span className="font-display text-2xl font-black text-[#166534] dark:text-[#39E75F]">
                   {formatCurrency(summary.totalRemaining)}
                 </span>
               </div>
-              <div className="h-10 w-px bg-outline-variant/40"></div>
+              <div className="h-10 w-[2px] bg-[#08110A]/15 dark:bg-white/15"></div>
               <div className="flex flex-col items-end">
-                <span className="font-label-caps text-label-caps text-on-surface-variant">
+                <span className="font-display font-black text-xs text-[#08110A]/70 dark:text-[#F5EFE6]/70 uppercase tracking-wider">
                   {t("budget_page.spent_label")}
                 </span>
-                <span className="font-headline-md text-headline-md text-on-surface font-semibold font-numeric-data">
+                <span className="font-display text-2xl font-black text-[#08110A] dark:text-white">
                   {summary.overallPercentage}%
                 </span>
               </div>
             </div>
           </div>
-          <div className="relative w-full h-4 bg-surface-variant/80 rounded-full overflow-hidden border border-outline-variant/30 shadow-inner z-10">
+          <div className="relative w-full h-4 bg-[#FAF8F5] dark:bg-white/10 rounded-full overflow-hidden border-2 border-[#08110A] dark:border-white/20 p-0.5 z-10">
             <div
-              className={`absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ease-out ${
+              className={`h-full rounded-full transition-all duration-700 ${
                 summary.overallPercentage >= 95
-                  ? "bg-error"
+                  ? "bg-[#EF4444]"
                   : summary.overallPercentage >= 75
-                  ? "bg-tertiary"
-                  : "bg-primary"
+                  ? "bg-[#FB923C]"
+                  : "bg-[#39E75F]"
               }`}
               style={{ width: `${Math.min(100, summary.overallPercentage)}%` }}
             ></div>
@@ -198,66 +215,58 @@ export default function Budget() {
       )}
 
       <div className="mb-4">
-        <h3 className="font-headline-md text-headline-md text-on-surface font-semibold">
+        <h3 className="font-display font-black text-lg uppercase tracking-tight text-[#08110A] dark:text-white">
           {t("budget_page.category_breakdown")}
         </h3>
       </div>
 
       {!Array.isArray(budgets) || budgets.length === 0 ? (
-        <div className="text-center py-12 bg-surface/50 rounded-xl border border-outline-variant/20">
-          <span className="material-symbols-outlined text-4xl text-outline mb-2">
+        <div className="text-center py-12 bg-white dark:bg-[#0D1910] rounded-3xl border-2 border-[#08110A] dark:border-white/20 shadow-[3px_3px_0px_#08110A]">
+          <span className="material-symbols-outlined text-4xl text-[#08110A]/40 dark:text-white/40 mb-2">
             account_balance_wallet
           </span>
-          <p className="text-on-surface-variant">{t("budget_page.no_budgets")}</p>
+          <p className="font-mono text-xs font-bold text-[#08110A]/70 dark:text-[#F5EFE6]/70">{t("budget_page.no_budgets")}</p>
           <button
             type="button"
             onClick={() => {
               setBudgetToEdit(null);
               setIsModalOpen(true);
             }}
-            className="mt-4 text-primary font-medium hover:underline cursor-pointer"
+            className="mt-4 font-mono text-xs font-black uppercase text-[#08110A] dark:text-[#39E75F] underline underline-offset-4 decoration-2 cursor-pointer"
           >
             {t("budget_page.create_first")}
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           {budgets.map((b) => {
-            let statusColor = "text-primary",
-              bgColor = "bg-primary",
-              bgContainer = "bg-primary/10";
+            let statusColor = "text-[#166534] dark:text-[#39E75F]",
+              bgColor = "bg-[#39E75F]",
+              bgContainer = "bg-[#39E75F] text-[#08110A]";
             if (b.status === "critical") {
-              statusColor = "text-error";
-              bgColor = "bg-error";
-              bgContainer = "bg-error/10";
+              statusColor = "text-[#991B1B] dark:text-[#EF4444]";
+              bgColor = "bg-[#EF4444]";
+              bgContainer = "bg-[#EF4444] text-white";
             } else if (b.status === "warning") {
-              statusColor = "text-tertiary";
-              bgColor = "bg-tertiary";
-              bgContainer = "bg-tertiary-container/20";
-            } else if (b.status === "good") {
-              statusColor = "text-secondary";
-              bgColor = "bg-secondary";
-              bgContainer = "bg-secondary/10";
+              statusColor = "text-[#C2410C] dark:text-[#FB923C]";
+              bgColor = "bg-[#FB923C]";
+              bgContainer = "bg-[#FB923C] text-[#08110A]";
             }
 
             return (
               <div
                 key={b.id}
-                className={`bg-surface border border-outline-variant/20 shadow-sm rounded-xl p-5 ${
-                  b.status === "critical"
-                    ? "border-error/20 hover:border-error/40"
-                    : "border-outline-variant/20 hover:shadow-md"
-                } transition-shadow duration-300 flex flex-col justify-between h-48 relative overflow-hidden group`}
+                className="bg-white dark:bg-[#0D1910] text-[#08110A] dark:text-[#F5EFE6] border-2 border-[#08110A] dark:border-white/20 shadow-[3px_3px_0px_#08110A] dark:shadow-[3px_3px_0px_rgba(57,231,95,0.25)] rounded-3xl p-5 transition-transform hover:-translate-y-0.5 flex flex-col justify-between h-48 relative overflow-hidden group"
               >
                 
-                <div className="absolute top-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity z-20 flex gap-1">
+                <div className="absolute top-3 right-3 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity z-20 flex gap-1">
                   <button
                     type="button"
                     onClick={() => {
                       setBudgetToEdit(b);
                       setIsModalOpen(true);
                     }}
-                    className="p-1.5 bg-surface rounded-md border border-outline-variant/20 hover:bg-surface-variant focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none text-on-surface transition-colors cursor-pointer"
+                    className="w-8 h-8 rounded-full border border-[#08110A] bg-white dark:bg-[#08110A] hover:bg-[#FAF8F5] dark:hover:bg-white/10 text-[#08110A] dark:text-white transition-colors cursor-pointer flex items-center justify-center shadow-[1px_1px_0px_#08110A]"
                     aria-label={`${t("budget_page.edit_budget")}: ${tCategory(b.categoryName)}`}
                   >
                     <span className="material-symbols-outlined text-[16px]">edit</span>
@@ -265,7 +274,7 @@ export default function Budget() {
                   <button
                     type="button"
                     onClick={() => handleDeleteClick(b.id)}
-                    className="p-1.5 bg-surface rounded-md border border-outline-variant/20 hover:bg-error-container hover:text-error focus-visible:ring-2 focus-visible:ring-error/40 focus-visible:outline-none text-on-surface transition-colors cursor-pointer"
+                    className="w-8 h-8 rounded-full border border-[#08110A] bg-white dark:bg-[#08110A] hover:bg-[#FEE2E2] text-[#991B1B] transition-colors cursor-pointer flex items-center justify-center shadow-[1px_1px_0px_#08110A]"
                     aria-label={`${t("budget_page.delete_budget")}: ${tCategory(b.categoryName)}`}
                   >
                     <span className="material-symbols-outlined text-[16px]">delete</span>
@@ -274,45 +283,50 @@ export default function Budget() {
                 <div className="flex justify-between items-start mb-2 relative z-10">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-10 h-10 rounded-full ${bgContainer} ${statusColor} flex items-center justify-center`}
+                      className={`w-10 h-10 rounded-2xl border-2 border-[#08110A] ${bgContainer} flex items-center justify-center shadow-[1px_1px_0px_#08110A] font-bold`}
                     >
-                      <span className="material-symbols-outlined">
+                      <span className="material-symbols-outlined text-[20px]">
                         {b.categoryIcon || "category"}
                       </span>
                     </div>
-                    <span className="font-body-sm text-body-sm font-medium text-on-surface truncate pr-8">
+                    <span className="font-sans text-sm font-bold text-[#08110A] dark:text-white truncate pr-8">
                       {tCategory(b.categoryName)}
                     </span>
                   </div>
                 </div>
                 <div className="mt-auto relative z-10">
                   <div className="flex justify-between items-end mb-2">
-                    <span
-                      className={`font-numeric-data text-xs font-semibold ${
-                        b.status === "critical" ? "text-error" : "text-on-surface"
-                      }`}
-                    >
+                    <span className="font-mono text-xs font-bold text-[#08110A] dark:text-white">
                       {formatCurrency(b.spent)}{" "}
-                      <span className="text-outline font-normal text-[10px]">
+                      <span className="text-[#08110A]/50 dark:text-[#F5EFE6]/50 font-normal text-[10px]">
                         / {formatCurrency(b.limitAmount)}
                       </span>
                     </span>
-                    <span className={`font-label-caps text-[10px] ${statusColor}`}>
+                    <span className={`font-mono font-black text-xs ${statusColor}`}>
                       {b.percentage}%
                     </span>
                   </div>
-                  <div className="w-full h-2 bg-surface-variant rounded-full overflow-hidden">
+                  <div className="w-full h-2.5 bg-[#FAF8F5] dark:bg-white/10 rounded-full overflow-hidden border border-[#08110A]/20 dark:border-white/20">
                     <div
-                      className={`h-full ${bgColor} rounded-full transition-all duration-1000`}
+                      className={`h-full ${bgColor} rounded-full transition-all duration-700`}
                       style={{ width: `${Math.min(100, b.percentage)}%` }}
                     ></div>
                   </div>
                   {b.status === "critical" && (
-                    <p className="font-body-sm text-[10px] text-error mt-1.5 opacity-80">
-                      {t("budget_page.only_remaining").replace(
-                        "{remaining}",
-                        formatCurrency(b.remaining)
-                      )}
+                    <p className="font-mono text-[10px] font-bold text-[#991B1B] dark:text-[#EF4444] mt-1.5">
+                      {b.spent > b.limitAmount
+                        ? t("budget_page.over_by")
+                          ? t("budget_page.over_by").replace(
+                              "{amount}",
+                              formatCurrency(b.spent - b.limitAmount)
+                            )
+                          : language === "id"
+                          ? `Melebihi anggaran ${formatCurrency(b.spent - b.limitAmount)}`
+                          : `Over budget by ${formatCurrency(b.spent - b.limitAmount)}`
+                        : t("budget_page.only_remaining").replace(
+                            "{remaining}",
+                            formatCurrency(b.remaining)
+                          )}
                     </p>
                   )}
                 </div>

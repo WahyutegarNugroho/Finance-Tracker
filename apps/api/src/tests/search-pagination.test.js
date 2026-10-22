@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { matchesSearch, scanForMatches } from '../utils/search.js';
+import { matchesSearch, matchesFilter, scanForMatches } from '../utils/search.js';
 
 function makeDocs(notes) {
   return notes.map((note, i) => ({
     id: `d${String(i + 1).padStart(2, '0')}`,
-    data: { note, categoryName: 'Food', amount: 100 + i },
+    data: { note, categoryName: 'Food', amount: 100 + i, type: i % 2 === 0 ? 'expense' : 'income' },
   }));
 }
 
@@ -29,6 +29,32 @@ describe('matchesSearch', () => {
 
   it('does not match unrelated docs', () => {
     expect(matchesSearch({ note: 'kopi', categoryName: '' }, 'bakso')).toBe(false);
+  });
+});
+
+describe('matchesFilter', () => {
+  const sample = {
+    note: 'Dinner with team',
+    categoryName: 'Food & Dining',
+    categoryId: 'cat-123',
+    type: 'expense',
+    date: '2026-10-15T12:00:00Z',
+  };
+
+  it('matches when type matches', () => {
+    expect(matchesFilter(sample, { type: 'expense' })).toBe(true);
+    expect(matchesFilter(sample, { type: 'income' })).toBe(false);
+    expect(matchesFilter(sample, { type: 'all' })).toBe(true);
+  });
+
+  it('matches categoryId filter', () => {
+    expect(matchesFilter(sample, { categoryId: 'cat-123' })).toBe(true);
+    expect(matchesFilter(sample, { categoryId: 'cat-999' })).toBe(false);
+  });
+
+  it('matches date range', () => {
+    expect(matchesFilter(sample, { startDate: '2026-10-01', endDate: '2026-10-31' })).toBe(true);
+    expect(matchesFilter(sample, { startDate: '2026-10-20' })).toBe(false);
   });
 });
 

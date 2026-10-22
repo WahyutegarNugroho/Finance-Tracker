@@ -19,8 +19,10 @@ export function formatAmount(val: string, currency: string): string {
   return cleaned.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
-export const formatDate = (dateString: string, language: string) => {
+export const formatDate = (dateString: string | null | undefined, language: string): string => {
+  if (!dateString) return "-";
   const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "-";
   return new Intl.DateTimeFormat(language === "id" ? "id-ID" : "en-US", {
     year: "numeric",
     month: "short",
@@ -28,8 +30,10 @@ export const formatDate = (dateString: string, language: string) => {
   }).format(date);
 };
 
-export const formatShortDate = (dateString: string, language: string) => {
+export const formatShortDate = (dateString: string | null | undefined, language: string): string => {
+  if (!dateString) return "-";
   const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "-";
   return new Intl.DateTimeFormat(language === "id" ? "id-ID" : "en-US", {
     month: "short",
     day: "numeric",

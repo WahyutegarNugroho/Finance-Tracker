@@ -121,10 +121,10 @@ export default function BudgetModal({
       onClose={onClose}
       titleId="budget-modal-title"
     >
-      <div className="flex justify-between items-center p-6 border-b border-outline-variant/10">
+      <div className="flex justify-between items-center p-6 border-b-2 border-[#08110A]/10 dark:border-white/10">
         <h2
           id="budget-modal-title"
-          className="font-headline-md text-headline-md font-bold text-on-background"
+          className="font-display font-black text-xl uppercase tracking-tight text-[#08110A] dark:text-white"
         >
           {budgetToEdit ? t("common.edit") : t("budget_page.create_new")}
         </h2>
@@ -132,15 +132,15 @@ export default function BudgetModal({
           type="button"
           onClick={onClose}
           aria-label={t("common.cancel")}
-          className="text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50 p-2 rounded-full transition-colors cursor-pointer"
+          className="w-9 h-9 rounded-full border-2 border-[#08110A] dark:border-white/20 hover:bg-[#FAF8F5] dark:hover:bg-white/10 flex items-center justify-center text-[#08110A] dark:text-white transition-colors cursor-pointer"
         >
-          <span className="material-symbols-outlined">close</span>
+          <span className="material-symbols-outlined text-[18px]">close</span>
         </button>
       </div>
 
       <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5">
         <div>
-          <label htmlFor="budget-category" className="block text-sm font-medium text-on-surface-variant mb-1">
+          <label htmlFor="budget-category" className="block font-mono text-[11px] font-black uppercase tracking-wider text-[#08110A] dark:text-[#F5EFE6] mb-1">
             {t("transactions_page.table.category")}
           </label>
           <select
@@ -149,7 +149,7 @@ export default function BudgetModal({
             value={resolvedCategoryId}
             onChange={(e) => setForm((f) => ({ ...f, categoryId: e.target.value }))}
             disabled={fetchingCats || !!budgetToEdit}
-            className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none appearance-none disabled:opacity-50"
+            className="w-full px-4 py-3 bg-white dark:bg-[#0D1910] border-2 border-[#08110A] dark:border-white/20 rounded-xl font-sans text-xs sm:text-sm font-bold text-[#08110A] dark:text-white focus:border-[#08110A] focus:ring-2 focus:ring-[#39E75F] focus:ring-offset-1 outline-none transition-all shadow-[2px_2px_0px_#08110A] appearance-none disabled:opacity-50"
           >
             {fetchingCats ? (
               <option>{t("common.loading")}</option>
@@ -164,11 +164,11 @@ export default function BudgetModal({
         </div>
 
         <div>
-          <label htmlFor="budget-limit" className="block text-sm font-medium text-on-surface-variant mb-1">
+          <label htmlFor="budget-limit" className="block font-mono text-[11px] font-black uppercase tracking-wider text-[#08110A] dark:text-[#F5EFE6] mb-1">
             {t("budget_page.limit_label")}
           </label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant font-medium">
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#08110A]/50 dark:text-[#F5EFE6]/50 font-mono font-bold text-sm">
               {currencySymbol}
             </span>
             <input
@@ -178,7 +178,7 @@ export default function BudgetModal({
               required
               value={form.displayAmount}
               onChange={handleAmountChange}
-              className="w-full pl-8 pr-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
+              className="w-full pl-10 pr-4 py-3 bg-white dark:bg-[#0D1910] border-2 border-[#08110A] dark:border-white/20 rounded-xl font-mono text-sm text-[#08110A] dark:text-white placeholder:text-[#08110A]/40 focus:border-[#08110A] focus:ring-2 focus:ring-[#39E75F] focus:ring-offset-1 outline-none transition-all shadow-[2px_2px_0px_#08110A]"
               placeholder="0"
             />
           </div>
@@ -188,10 +188,10 @@ export default function BudgetModal({
           <button
             type="submit"
             disabled={saveMutation.isPending}
-            className="w-full bg-primary text-on-primary font-medium py-3 rounded-xl hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-70 flex justify-center items-center cursor-pointer"
+            className="w-full min-h-[48px] bg-[#39E75F] hover:bg-[#2ed652] active:translate-y-0.5 text-[#08110A] font-display text-xs sm:text-sm font-black uppercase tracking-wider py-3.5 px-6 rounded-full border-2 border-[#08110A] shadow-[4px_4px_0px_#08110A] focus-visible:ring-2 focus-visible:ring-[#08110A] focus-visible:ring-offset-2 focus-visible:outline-none transition-all flex justify-center items-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saveMutation.isPending ? (
-              <span className="material-symbols-outlined animate-spin">
+              <span className="material-symbols-outlined animate-spin text-[18px]">
                 progress_activity
               </span>
             ) : budgetToEdit ? (

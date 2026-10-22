@@ -98,7 +98,7 @@ export default function Dialog({
     >
       <div
         ref={dialogRef}
-        className={`bg-surface w-full ${maxWidthClass} rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 border border-outline-variant/20`}
+        className={`bg-white dark:bg-[#08110A] text-[#08110A] dark:text-[#F5EFE6] w-full ${maxWidthClass} rounded-3xl shadow-[8px_8px_0px_#08110A] dark:shadow-[8px_8px_0px_#39E75F] overflow-hidden animate-in zoom-in-95 duration-200 border-2 border-[#08110A] dark:border-white/20`}
       >
         {children}
       </div>

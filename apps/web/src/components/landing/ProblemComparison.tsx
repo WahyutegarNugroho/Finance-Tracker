@@ -4,119 +4,135 @@ import React from "react";
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function ProblemComparison() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   return (
-    <section id="comparison" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      <div className="max-w-3xl mb-12">
-        <span className="text-xs font-mono uppercase tracking-wider text-primary font-bold block mb-2">
-          {t("landing.comparison_badge")}
-        </span>
-        <h2 className="font-headline-lg text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-on-surface mb-3">
-          {t("landing.comparison_heading")}
-        </h2>
-        <p className="font-body-lg text-sm sm:text-base text-on-surface-variant leading-relaxed">
-          {t("landing.comparison_sub")}
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
-        {/* Column 1: Manual Spreadsheets */}
-        <div className="rounded-2xl border border-outline-variant/30 bg-surface-container-low/40 p-6 sm:p-7 flex flex-col justify-between transition-all hover:border-outline-variant/60">
-          <div>
-            <div className="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-on-surface-variant mb-4 border border-outline-variant/20">
-              <span className="material-symbols-outlined text-[22px]">table_view</span>
-            </div>
-            <h3 className="font-headline-md text-lg font-bold text-on-surface mb-1">
-              {t("landing.col1_title")}
-            </h3>
-            <p className="text-xs text-on-surface-variant mb-6 pb-4 border-b border-outline-variant/20">
-              {t("landing.col1_sub")}
-            </p>
-
-            <ul className="space-y-3.5 text-xs sm:text-sm text-on-surface-variant">
-              <li className="flex items-start gap-2.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-outline-variant mt-2 shrink-0" />
-                <span>{t("landing.col1_p1")}</span>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-outline-variant mt-2 shrink-0" />
-                <span>{t("landing.col1_p2")}</span>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-outline-variant mt-2 shrink-0" />
-                <span>{t("landing.col1_p3")}</span>
-              </li>
-            </ul>
+    <section id="comparison" className="w-full bg-[#EAE3D2] text-[#08110A] border-b-2 border-[#08110A] py-20 sm:py-28 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Section Header */}
+        <div className="max-w-3xl mb-12">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border-2 border-[#08110A] bg-[#39E75F] text-[#08110A] font-mono font-bold text-xs uppercase mb-4 shadow-[2px_2px_0px_#08110A]">
+            <span className="material-symbols-outlined text-[15px]">balance</span>
+            <span>{t("landing.comparison_badge")}</span>
           </div>
-          <div className="mt-8 pt-4 border-t border-outline-variant/15 text-xs text-on-surface-variant/80 font-medium">
-            {t("landing.col1_result")}
-          </div>
+
+          <h2 className="font-display text-3xl sm:text-5xl font-black uppercase tracking-tight text-[#08110A] leading-none mb-8">
+            {t("landing.comparison_heading")}
+          </h2>
+
+          <p className="font-sans text-base sm:text-lg text-[#08110A]/80 leading-relaxed font-medium">
+            {t("landing.comparison_sub")}
+          </p>
         </div>
 
-        {/* Column 2: Common Bank & Fintech Apps */}
-        <div className="rounded-2xl border border-outline-variant/30 bg-surface-container-low/40 p-6 sm:p-7 flex flex-col justify-between transition-all hover:border-outline-variant/60">
-          <div>
-            <div className="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-on-surface-variant mb-4 border border-outline-variant/20">
-              <span className="material-symbols-outlined text-[22px]">account_balance</span>
+        {/* 3-Column Comparison Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
+          {/* Column 1: Manual Spreadsheets */}
+          <div className="bg-white border-2 border-[#08110A] rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-[6px_6px_0px_#08110A] transition-transform hover:-translate-y-1 duration-200">
+            <div>
+              <div className="w-12 h-12 rounded-lg bg-[#EAE3D2] border-2 border-[#08110A] flex items-center justify-center text-[#08110A] mb-5">
+                <span className="material-symbols-outlined text-[24px]">table_view</span>
+              </div>
+              <h3 className="font-display text-xl sm:text-2xl font-black uppercase tracking-tight text-[#08110A] mb-1.5 leading-tight">
+                {t("landing.col1_title")}
+              </h3>
+              <p className="text-xs sm:text-sm font-mono text-[#08110A]/70 uppercase mb-6 pb-4 border-b-2 border-[#08110A]/10">
+                {t("landing.col1_sub")}
+              </p>
+
+              <ul className="space-y-3.5 text-sm sm:text-base text-[#08110A]/85">
+                <li className="flex items-start gap-2.5">
+                  <span className="material-symbols-outlined text-amber-700 text-[18px] shrink-0 mt-0.5">remove_circle_outline</span>
+                  <span>{t("landing.col1_p1")}</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="material-symbols-outlined text-amber-700 text-[18px] shrink-0 mt-0.5">remove_circle_outline</span>
+                  <span>{t("landing.col1_p2")}</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="material-symbols-outlined text-amber-700 text-[18px] shrink-0 mt-0.5">remove_circle_outline</span>
+                  <span>{t("landing.col1_p3")}</span>
+                </li>
+              </ul>
             </div>
-            <h3 className="font-headline-md text-lg font-bold text-on-surface mb-1">
-              {t("landing.col2_title")}
-            </h3>
-            <p className="text-xs text-on-surface-variant mb-6 pb-4 border-b border-outline-variant/20">
-              {t("landing.col2_sub")}
-            </p>
 
-            <ul className="space-y-3.5 text-xs sm:text-sm text-on-surface-variant">
-              <li className="flex items-start gap-2.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-outline-variant mt-2 shrink-0" />
-                <span>{t("landing.col2_p1")}</span>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-outline-variant mt-2 shrink-0" />
-                <span>{t("landing.col2_p2")}</span>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-outline-variant mt-2 shrink-0" />
-                <span>{t("landing.col2_p3")}</span>
-              </li>
-            </ul>
-          </div>
-          <div className="mt-8 pt-4 border-t border-outline-variant/15 text-xs text-on-surface-variant/80 font-medium">
-            {t("landing.col2_result")}
-          </div>
-        </div>
-
-        {/* Column 3: FinTrack (Mindful Ledger) */}
-        <div className="rounded-2xl border border-primary/40 bg-surface p-6 sm:p-7 flex flex-col justify-between shadow-sm relative overflow-hidden">
-          <div>
-            <div className="w-10 h-10 rounded-xl bg-primary/15 text-primary flex items-center justify-center mb-4 border border-primary/30">
-              <span className="material-symbols-outlined text-[22px]">verified_user</span>
+            <div className="mt-8 pt-4 border-t-2 border-[#08110A]/10 text-xs sm:text-sm text-[#08110A]/75 font-semibold">
+              {t("landing.col1_result")}
             </div>
-            <h3 className="font-headline-md text-lg font-bold text-on-surface mb-1">
-              {t("landing.col3_title")}
-            </h3>
-            <p className="text-xs text-primary font-medium mb-6 pb-4 border-b border-primary/20">
-              {t("landing.col3_sub")}
-            </p>
-
-            <ul className="space-y-3.5 text-xs sm:text-sm text-on-surface">
-              <li className="flex items-start gap-2.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
-                <span className="font-medium">{t("landing.col3_p1")}</span>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
-                <span className="font-medium">{t("landing.col3_p2")}</span>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
-                <span className="font-medium">{t("landing.col3_p3")}</span>
-              </li>
-            </ul>
           </div>
-          <div className="mt-8 pt-4 border-t border-primary/20 text-xs text-primary font-semibold">
-            {t("landing.col3_result")}
+
+          {/* Column 2: Common Bank & Fintech Apps */}
+          <div className="bg-white border-2 border-[#08110A] rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-[6px_6px_0px_#08110A] transition-transform hover:-translate-y-1 duration-200">
+            <div>
+              <div className="w-12 h-12 rounded-lg bg-[#EAE3D2] border-2 border-[#08110A] flex items-center justify-center text-[#08110A] mb-5">
+                <span className="material-symbols-outlined text-[24px]">account_balance</span>
+              </div>
+              <h3 className="font-display text-xl sm:text-2xl font-black uppercase tracking-tight text-[#08110A] mb-1.5 leading-tight">
+                {t("landing.col2_title")}
+              </h3>
+              <p className="text-xs sm:text-sm font-mono text-[#08110A]/70 uppercase mb-6 pb-4 border-b-2 border-[#08110A]/10">
+                {t("landing.col2_sub")}
+              </p>
+
+              <ul className="space-y-3.5 text-sm sm:text-base text-[#08110A]/85">
+                <li className="flex items-start gap-2.5">
+                  <span className="material-symbols-outlined text-amber-700 text-[18px] shrink-0 mt-0.5">lock_open</span>
+                  <span>{t("landing.col2_p1")}</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="material-symbols-outlined text-amber-700 text-[18px] shrink-0 mt-0.5">campaign</span>
+                  <span>{t("landing.col2_p2")}</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="material-symbols-outlined text-amber-700 text-[18px] shrink-0 mt-0.5">visibility</span>
+                  <span>{t("landing.col2_p3")}</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="mt-8 pt-4 border-t-2 border-[#08110A]/10 text-xs sm:text-sm text-[#08110A]/75 font-semibold">
+              {t("landing.col2_result")}
+            </div>
+          </div>
+
+          {/* Column 3: FinTrack (Mindful Ledger) - Flagship Card */}
+          <div className="bg-[#08110A] text-[#F5EFE6] border-2 border-[#39E75F] rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-[8px_8px_0px_#39E75F] relative transition-transform hover:-translate-y-1 duration-200">
+            <div>
+              <div className="flex items-center justify-between mb-5">
+                <div className="w-12 h-12 rounded-lg bg-[#39E75F]/20 border-2 border-[#39E75F] flex items-center justify-center text-[#39E75F]">
+                  <span className="material-symbols-outlined text-[24px]">verified_user</span>
+                </div>
+                <span className="px-3 py-1 rounded-full border border-[#39E75F] bg-[#39E75F]/20 text-[#39E75F] text-xs font-mono font-bold uppercase tracking-wider">
+                  {language === "id" ? "Pilihan Sadar" : "Mindful Pick"}
+                </span>
+              </div>
+
+              <h3 className="font-display text-xl sm:text-2xl font-black uppercase tracking-tight text-white mb-1.5 leading-tight">
+                {t("landing.col3_title")}
+              </h3>
+              <p className="text-xs sm:text-sm font-mono text-[#39E75F] uppercase mb-6 pb-4 border-b-2 border-white/10">
+                {t("landing.col3_sub")}
+              </p>
+
+              <ul className="space-y-3.5 text-sm sm:text-base text-[#F5EFE6]/90">
+                <li className="flex items-start gap-2.5">
+                  <span className="material-symbols-outlined text-[#39E75F] text-[18px] shrink-0 mt-0.5">check_circle</span>
+                  <span className="font-medium">{t("landing.col3_p1")}</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="material-symbols-outlined text-[#39E75F] text-[18px] shrink-0 mt-0.5">check_circle</span>
+                  <span className="font-medium">{t("landing.col3_p2")}</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="material-symbols-outlined text-[#39E75F] text-[18px] shrink-0 mt-0.5">check_circle</span>
+                  <span className="font-medium">{t("landing.col3_p3")}</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="mt-8 pt-4 border-t-2 border-[#39E75F]/30 text-xs sm:text-sm text-[#39E75F] font-bold">
+              {t("landing.col3_result")}
+            </div>
           </div>
         </div>
       </div>
