@@ -9,8 +9,11 @@ overrides:
   "postcss": "8.5.26"
   "nanoid": "3.3.18"
   "ip-address": "10.5.0"
-  "sharp": "0.35.3"
-  "shell-quote": "1.10.0"
+  "sharp": "0.35.5"
+  "shell-quote": "1.12.0"
+  "proxy-addr": "2.0.8"
+  "@fastify/busboy": "3.2.4"
+  "source-map-js": "1.2.2"
 
 onlyBuiltDependencies:
   - "@firebase/util"
